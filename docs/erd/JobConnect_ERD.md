@@ -252,3 +252,81 @@ Giới hạn tối đa 5 CV mỗi hồ sơ do ứng dụng kiểm soát.
 | company\_id | BIGINT | NN, FK → companies | Công ty |
 | user\_id | BIGINT | NN, UQ, FK → users | Nhà tuyển dụng (mỗi người thuộc một công ty) |
 | member\_role | VARCHAR(20) | NN, mặc định MEMBER | OWNER hoặc MEMBER |
+
+### 4.4 Module M3
+
+**Bảng `notifications`**: quản lý thông báo.
+
+| Cột | Kiểu | Ràng buộc | Mô tả |
+| --- | --- | --- | --- |
+| user_id | BIGINT | NN, FK → users | Người nhận thông báo |
+| type | VARCHAR(50) | NN | Loại thông báo |
+| title | VARCHAR(200) | NN | Tiêu đề |
+| message | TEXT | NN | Nội dung thông báo |
+| action_url | VARCHAR(500) |  | Đường dẫn khi nhấn thông báo |
+| reference_type | VARCHAR(50) |  | Loại đối tượng liên quan |
+| reference_id | BIGINT |  | ID đối tượng liên quan |
+| is_read | BOOLEAN | NN, mặc định false | Trạng thái đã đọc |
+| read_at | TIMESTAMP |  | Thời điểm đọc |
+| email_status | VARCHAR(20) | NN, mặc định NOT_REQUESTED | Trạng thái gửi email |
+| email_sent_at | TIMESTAMP |  | Thời điểm gửi email thành công |
+
+**Bảng `conversations`**: quản lý cuộc hội thoại.
+
+| Cột | Kiểu | Ràng buộc | Mô tả |
+| --- | --- | --- | --- |
+| application_id | BIGINT | NN, UQ, FK → applications | Đơn ứng tuyển liên quan |
+| candidate_user_id | BIGINT | NN, FK → users | Tài khoản ứng viên |
+| employer_user_id | BIGINT | NN, FK → users | Tài khoản nhà tuyển dụng |
+| status | VARCHAR(20) | NN, mặc định ACTIVE | Trạng thái hội thoại |
+| last_message_at | TIMESTAMP |  | Thời điểm tin nhắn gần nhất |
+
+**Bảng `messages`**: quản lý tin nhắn.
+
+| Cột | Kiểu | Ràng buộc | Mô tả |
+| --- | --- | --- | --- |
+| conversation_id | BIGINT | NN, FK → conversations | Cuộc hội thoại |
+| sender_id | BIGINT | NN, FK → users | Người gửi |
+| content | TEXT | NN | Nội dung tin nhắn |
+| is_read | BOOLEAN | NN, mặc định false | Trạng thái đã đọc |
+| read_at | TIMESTAMP |  | Thời điểm đọc |
+
+**Bảng `company_reviews`**: quản lý đánh giá công ty.
+
+| Cột | Kiểu | Ràng buộc | Mô tả |
+| --- | --- | --- | --- |
+| company_id | BIGINT | NN, FK → companies | Công ty được đánh giá |
+| user_id | BIGINT | NN, FK → users | Người đánh giá |
+| rating | SMALLINT | NN, CHECK (1-5) | Điểm đánh giá |
+| title | VARCHAR(200) | NN | Tiêu đề đánh giá |
+| content | TEXT | NN | Nội dung nhận xét |
+| status | VARCHAR(20) | NN, mặc định PENDING | Trạng thái kiểm duyệt |
+| reviewed_by | BIGINT | FK → users | Admin kiểm duyệt |
+| reviewed_at | TIMESTAMP |  | Thời điểm kiểm duyệt |
+
+**Bảng `reports`**: quản lý báo cáo vi phạm.
+
+| Cột | Kiểu | Ràng buộc | Mô tả |
+| --- | --- | --- | --- |
+| reporter_id | BIGINT | NN, FK → users | Người gửi báo cáo |
+| target_type | VARCHAR(30) | NN | Loại đối tượng bị báo cáo |
+| target_id | BIGINT | NN | ID đối tượng bị báo cáo |
+| reason | VARCHAR(50) | NN | Loại vi phạm |
+| description | TEXT | NN | Mô tả chi tiết |
+| status | VARCHAR(20) | NN, mặc định PENDING | Trạng thái báo cáo |
+| reviewed_by | BIGINT | FK → users | Admin xử lý |
+| reviewed_at | TIMESTAMP |  | Thời điểm xử lý |
+| resolution_note | TEXT |  | Kết quả xử lý |
+
+**Bảng `audit_logs`**: quản lý nhật ký hoạt động.
+
+| Cột | Kiểu | Ràng buộc | Mô tả |
+| --- | --- | --- | --- |
+| user_id | BIGINT | FK → users | Người thực hiện |
+| action | VARCHAR(50) | NN | Hành động thực hiện |
+| entity_type | VARCHAR(50) | NN | Loại đối tượng bị tác động |
+| entity_id | BIGINT |  | ID đối tượng bị tác động |
+| old_values | JSON |  | Dữ liệu trước khi thay đổi |
+| new_values | JSON |  | Dữ liệu sau khi thay đổi |
+| ip_address | VARCHAR(45) |  | Địa chỉ IP |
+| user_agent | VARCHAR(500) |  | Thông tin trình duyệt, thiết bị |
