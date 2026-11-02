@@ -6,7 +6,7 @@ Tài liệu đặc tả yêu cầu phần mềm của dự án JobConnect.
 
 ## Nền tảng kết nối việc làm JobContact
 
-Phiên bản 1.0 | Ngày 01/11/2026 | Nhóm thực hiện: A, B, C, D
+Phiên bản 1.0 | Ngày 01/11/2026 | Nhóm thực hiện: Nhóm 1
 
 ## 1. Giới thiệu
 
