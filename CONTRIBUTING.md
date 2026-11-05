@@ -1,49 +1,62 @@
-1. Quy ước đặt tên nhánh (Branch Naming Convention)
-Cấu trúc chuẩn chung: loai-nhanh/ma-task-mo-ngan-gon
+# Quy ước làm việc trong dự án
 
-Các loại nhánh (Prefix):
+## 1. Quy ước đặt tên nhánh
 
-feature/: Dành cho việc phát triển tính năng mới (Ví dụ các task liên quan đến API, giao diện...).
+Mỗi nhánh nên tuân theo cấu trúc sau:
 
-bugfix/: Dành cho việc sửa lỗi (Fix bug).
+`loai-nhanh/ma-task-mo-ngan-gon`
 
-hotfix/: Dành cho việc sửa lỗi gấp trực tiếp trên production/nhánh chính.
+### Các prefix thường dùng
 
-docs/: Dành cho việc cập nhật tài liệu, README.
+- `feature/`: Dành cho việc phát triển tính năng mới
+  - Ví dụ: API, giao diện, logic nghiệp vụ
+- `bugfix/`: Dành cho việc sửa lỗi
+- `hotfix/`: Dành cho việc sửa lỗi khẩn cấp trên môi trường production hoặc nhánh chính
+- `docs/`: Dành cho việc cập nhật tài liệu, README, hướng dẫn
 
-Ví dụ thực tế cho nhóm bạn:
+### Ví dụ thực tế
 
-Nhánh làm tính năng đăng nhập (Task PB-010): feature/pb-010-login-api
+- Tạo tính năng đăng nhập cho task PB-010:
+  - `feature/pb-010-login-api`
+- Làm giao diện đăng ký cho task PB-012:
+  - `feature/pb-012-register-ui`
+- Sửa lỗi validate cho task PB-010:
+  - `bugfix/pb-010-fix-validation`
 
-Nhánh làm giao diện đăng ký (Task PB-012): feature/pb-012-register-ui
+---
 
-Nhánh sửa lỗi validate: bugfix/pb-010-fix-validation
+## 2. Quy ước commit
 
-2. Quy ước Commit (Commit Convention)
-Áp dụng chuẩn Conventional Commits để lịch sử git rõ ràng và dễ đọc, đồng thời hỗ trợ việc tự động hóa sau này:
+Áp dụng chuẩn Conventional Commits để lịch sử Git rõ ràng, dễ theo dõi và hỗ trợ tự động hóa trong tương lai.
 
-Cấu trúc: type(scope): message (hoặc đơn giản là type: message)
+### Cấu trúc
 
-Các loại Type phổ biến:
+`type(scope): message`
 
-feat: Thêm một tính năng mới (feature).
+Hoặc đơn giản:
 
-fix: Sửa một lỗi (bug fix).
+`type: message`
 
-docs: Cập nhật tài liệu (README, tài liệu API,...).
+### Các loại commit phổ biến
 
-style: Format code, thêm dấu chấm phẩy, không làm thay đổi logic code.
+- `feat`: Thêm một tính năng mới
+- `fix`: Sửa một lỗi
+- `docs`: Cập nhật tài liệu
+- `style`: Format code, chỉnh sửa kiểu dáng, không thay đổi logic
+- `refactor`: Tái cấu trúc code mà không sửa lỗi hoặc thêm tính năng mới
+- `chore`: Thay đổi cấu hình build, thêm thư viện, file cấu hình, v.v.
 
-refactor: Tái cấu trúc code (không sửa lỗi, không thêm tính năng).
+### Ví dụ thực tế
 
-chore: Thay đổi cấu hình build, thêm thư viện, file cấu hình (ví dụ: .env.example).
+- `feat(auth): add login api and password hashing`
+- `fix(ui): resolve responsive issue on mobile login form`
+- `docs: update readme with setup instructions`
+- `chore: initialize project folder structure`
 
-Ví dụ thực tế:
+---
 
-feat(auth): add login api and password hashing
+## 3. Lưu ý
 
-fix(ui): resolve responsive issue on mobile login form
-
-docs: update readme with setup instructions
-
-chore: initialize project folder structure
+- Nên đặt tên branch và commit ngắn gọn, rõ nghĩa.
+- Tránh đặt tên mơ hồ như `fix-1`, `update`, `test`.
+- Mỗi commit nên mô tả rõ mục đích thay đổi để dễ review và theo dõi.
