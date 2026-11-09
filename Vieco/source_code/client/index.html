@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JobContact - Tìm việc làm nhanh</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+    <header class="navbar">
+        <div class="container nav-content">
+            <h1 class="logo">Job<span>Contact</span></h1>
+            <nav>
+                <a href="index.html" class="nav-link active">Trang chủ</a>
+                <a href="pages/jobs.html" class="nav-link">Việc làm</a>
+                <a href="pages/login.html" class="btn btn-outline">Đăng nhập</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="hero-section">
+            <h2>Khám phá công việc phù hợp với bạn</h2>
+            <p>Hệ thống kết nối ứng viên và nhà tuyển dụng hàng đầu</p>
+            
+            <div class="search-box">
+                <input type="text" id="keyword-input" placeholder="Tiêu đề công việc, kỹ năng...">
+                <button class="btn btn-primary" onclick="handleSearch()">Tìm kiếm</button>
+            </div>
+        </section>
+
+        <section class="job-list-section">
+            <div class="section-header">
+                <h3>Tin tuyển dụng mới nhất</h3>
+                <span id="api-status" class="badge">Đang kiểm tra API...</span>
+            </div>
+            
+            <div class="job-grid" id="jobs-container">
+                <!-- Thẻ công việc mẫu -->
+                <div class="job-card">
+                    <h4 class="job-title">Lập trình viên Backend (Python)</h4>
+                    <p class="company-name">Công ty Cổ phần Công nghệ XYZ</p>
+                    <div class="job-tags">
+                        <span class="tag">Hà Nội / TP.HCM</span>
+                        <span class="tag">15 - 25 Triệu</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="assets/js/main.js"></script>
+</body>
+</html>
