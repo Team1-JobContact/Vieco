@@ -2,12 +2,8 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from src.config.database import engine, Base
 from src.config.settings import settings
-import src.models.user  # noqa: F401 - Đăng ký model để tạo bảng
-
-# Tự động tạo bảng nếu chưa có
-Base.metadata.create_all(bind=engine)
+import src.models  # noqa: F401 - Đăng ký model (schema do Alembic quản lý: alembic upgrade head)
 
 # Tạo thư mục upload nếu chưa tồn tại
 os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
