@@ -1,6 +1,7 @@
 """Import toàn bộ model để Base.metadata (Alembic) nhìn thấy đủ 27 bảng."""
 from src.models.catalog import Industry, Province, Skill, StaticPage, SystemSetting
 from src.models.user import EmailVerification, PasswordReset, Role, User
+from src.models.revoked_token import RevokedToken
 from src.models.profile import CV, CandidateProfile, CandidateSkill, Education, WorkExperience
 from src.models.company import Company, CompanyMember
 from src.models.recruitment import Application, ApplicationStatusHistory, Job, JobSkill, SavedJob

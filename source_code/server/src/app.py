@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from src.config.settings import settings
 import src.models  # noqa: F401 - Đăng ký model (schema do Alembic quản lý: alembic upgrade head)
+from src.routes.auth import router as auth_router
 
 # Tạo thư mục upload nếu chưa tồn tại
 os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
@@ -18,6 +19,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(auth_router)
 
 # Route kiểm tra kết nối API
 @app.get("/api/v1/health")

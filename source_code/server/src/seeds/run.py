@@ -63,12 +63,12 @@ def seed_admin(s):
         return "bỏ qua (chưa đặt ADMIN_EMAIL/ADMIN_PASSWORD)"
     if s.scalar(select(User.id).where(User.email == email)):
         return "đã tồn tại"
-    from passlib.context import CryptContext  # import muộn: chỉ cần khi tạo Admin
+    from src.utils.security import hash_password  # import muộn: chỉ cần khi tạo Admin
 
     role_id = s.scalar(select(Role.id).where(Role.name == "ADMIN"))
     s.add(User(
         email=email,
-        password_hash=CryptContext(schemes=["bcrypt"]).hash(password),
+        password_hash=hash_password(password),
         role_id=role_id,
         full_name=os.getenv("ADMIN_FULL_NAME", "Quản trị viên"),
         is_email_verified=True,
