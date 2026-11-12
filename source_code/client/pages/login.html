@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập - Vieco</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/auth.css">
+</head>
+<body class="auth-page">
+
+    <header class="navbar">
+        <div class="container nav-content">
+            <a href="../index.html" class="brand-link" aria-label="Vieco Trang chủ">
+                <span class="brand-badge" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                    </svg>
+                </span>
+                <span class="logo">Vie<span>co</span></span>
+            </a>
+
+            <button type="button" class="nav-toggle" id="nav-toggle" aria-label="Mở menu điều hướng" aria-expanded="false" aria-controls="nav-menu">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+            </button>
+
+            <div class="nav-menu" id="nav-menu">
+                <nav class="nav-links" aria-label="Điều hướng chính">
+                    <a href="../index.html" class="nav-link">Trang chủ</a>
+                    <a href="../index.html#jobs-container" class="nav-link">Việc làm</a>
+                </nav>
+                <div class="nav-actions">
+                    <a href="login.html" class="btn btn-outline" data-switch-mode="login">Đăng nhập</a>
+                    <a href="register.html" class="btn btn-primary" data-switch-mode="register">Đăng ký</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="auth-stage">
+        <div class="mobile-mode-switch" role="tablist" aria-label="Chọn đăng nhập hoặc đăng ký">
+            <button type="button" id="mobile-tab-login" class="mobile-mode-btn is-active" data-switch-mode="login" role="tab" aria-selected="true">Đăng nhập</button>
+            <button type="button" id="mobile-tab-register" class="mobile-mode-btn" data-switch-mode="register" role="tab" aria-selected="false">Đăng ký</button>
+        </div>
+
+        <section class="neumorphic-main" id="neumorphic-main" data-initial-mode="login" data-active-mode="login" aria-label="Xác thực tài khoản Vieco">
+            <!-- Overlay kiểm tra phiên / đã đăng nhập -->
+            <div id="session-overlay" class="session-overlay hidden">
+                <div id="session-checking-box" class="session-card hidden" role="status" aria-live="polite">
+                    <span class="spinner spinner--dark" aria-hidden="true"></span>
+                    <div>
+                        <h3>Đang kiểm tra phiên đăng nhập...</h3>
+                        <p class="field-hint">Vui lòng đợi trong giây lát</p>
+                    </div>
+                </div>
+
+                <div id="session-active-box" class="session-card hidden">
+                    <div class="session-avatar" aria-hidden="true">
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3>Bạn đang đăng nhập</h3>
+                        <p id="session-user-name" style="font-weight: 700; margin-top: 4px;"></p>
+                        <p id="session-user-meta" class="field-hint"></p>
+                    </div>
+                    <div class="session-actions">
+                        <a href="../index.html" class="btn btn-primary">Về trang chủ</a>
+                        <button type="button" id="session-logout-btn" class="btn btn-outline">Đăng xuất</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel Đăng ký (a-container) -->
+            <div class="form-container a-container" id="a-container" aria-hidden="true">
+                <form class="neu-form" id="register-form" novalidate>
+                    <h2 class="form__title">Tạo tài khoản</h2>
+
+                    <div class="form__icons" aria-hidden="true">
+                        <span class="form__icon-btn" title="Hồ sơ ứng viên">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                        </span>
+                        <span class="form__icon-btn form__icon-btn--gold" title="Kết nối Vieco">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                            </svg>
+                        </span>
+                        <span class="form__icon-btn" title="Bảo mật JWT">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                            </svg>
+                        </span>
+                    </div>
+
+                    <span class="form__span">hoặc dùng email để đăng ký tài khoản</span>
+
+                    <div id="register-alert" class="auth-alert hidden" role="alert" aria-live="assertive"></div>
+
+                    <div class="neu-role-group" role="radiogroup" aria-label="Vai trò tài khoản">
+                        <label class="neu-role-option is-selected">
+                            <input type="radio" name="role" value="CANDIDATE" checked>
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                            <span>Ứng viên</span>
+                        </label>
+                        <label class="neu-role-option">
+                            <input type="radio" name="role" value="EMPLOYER">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                <path d="M3 21h18"></path>
+                                <path d="M5 21V7l8-4v18"></path>
+                                <path d="M19 21V11l-6-4"></path>
+                            </svg>
+                            <span>Nhà tuyển dụng</span>
+                        </label>
+                    </div>
+
+                    <div class="neu-fields-grid">
+                        <div class="neu-field" data-field-group="full_name">
+                            <div class="neu-input-wrap">
+                                <span class="neu-input-icon" aria-hidden="true">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="12" cy="7" r="4"></circle>
+                                    </svg>
+                                </span>
+                                <input class="form__input" id="register-full-name" name="full_name" type="text" placeholder="Họ và tên *" autocomplete="name" required>
+                            </div>
+                            <span class="neu-field-error" data-field-error="full_name"></span>
+                        </div>
+
+                        <div class="neu-field" data-field-group="phone">
+                            <div class="neu-input-wrap">
+                                <span class="neu-input-icon" aria-hidden="true">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                                    </svg>
+                                </span>
+                                <input class="form__input" id="register-phone" name="phone" type="tel" placeholder="Số điện thoại (tùy chọn)" autocomplete="tel">
+                            </div>
+                            <span class="neu-field-error" data-field-error="phone"></span>
+                        </div>
+                    </div>
+
+                    <div class="neu-field" data-field-group="email">
+                        <div class="neu-input-wrap">
+                            <span class="neu-input-icon" aria-hidden="true">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                    <polyline points="22,6 12,13 2,6"></polyline>
+                                </svg>
+                            </span>
+                            <input class="form__input" id="register-email" name="email" type="email" placeholder="Email *" autocomplete="email" required>
+                        </div>
+                        <span class="neu-field-error" data-field-error="email"></span>
+                    </div>
+
+                    <div class="neu-fields-grid">
+                        <div class="neu-field" data-field-group="password">
+                            <div class="neu-input-wrap">
+                                <span class="neu-input-icon" aria-hidden="true">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                                    </svg>
+                                </span>
+                                <input class="form__input form__input--password" id="register-password" name="password" type="password" placeholder="Mật khẩu *" autocomplete="new-password" required>
+                                <button type="button" class="neu-eye-btn" data-toggle-password="register-password" aria-label="Hiện mật khẩu" aria-pressed="false"></button>
+                            </div>
+                            <span class="neu-field-error" data-field-error="password"></span>
+                        </div>
+
+                        <div class="neu-field" data-field-group="confirm_password">
+                            <div class="neu-input-wrap">
+                                <span class="neu-input-icon" aria-hidden="true">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                                    </svg>
+                                </span>
+                                <input class="form__input form__input--password" id="register-confirm-password" name="confirm_password" type="password" placeholder="Xác nhận mật khẩu *" autocomplete="new-password" required>
+                                <button type="button" class="neu-eye-btn" data-toggle-password="register-confirm-password" aria-label="Hiện mật khẩu" aria-pressed="false"></button>
+                            </div>
+                            <span class="neu-field-error" data-field-error="confirm_password"></span>
+                        </div>
+                    </div>
+
+                    <div class="neu-password-rules" aria-label="Điều kiện mật khẩu">
+                        <span class="password-rule" data-password-rule="minLength">
+                            <span class="password-rule-dot" aria-hidden="true">&#10003;</span>
+                            <span>Ít nhất 8 ký tự</span>
+                        </span>
+                        <span class="password-rule" data-password-rule="hasLetter">
+                            <span class="password-rule-dot" aria-hidden="true">&#10003;</span>
+                            <span>Có chữ cái (A–Z)</span>
+                        </span>
+                        <span class="password-rule" data-password-rule="hasDigit">
+                            <span class="password-rule-dot" aria-hidden="true">&#10003;</span>
+                            <span>Có chữ số (0–9)</span>
+                        </span>
+                        <span class="password-rule" data-password-rule="maxBytes">
+                            <span class="password-rule-dot" aria-hidden="true">&#10003;</span>
+                            <span>Tối đa 72 byte</span>
+                        </span>
+                    </div>
+
+                    <div class="neu-field" data-field-group="accept_terms" style="margin-bottom: 4px;">
+                        <label class="neu-checkbox">
+                            <input type="checkbox" name="accept_terms" required>
+                            <span>Tôi đồng ý với điều khoản sử dụng và cam kết thông tin chính xác.</span>
+                        </label>
+                        <span class="neu-field-error" data-field-error="accept_terms"></span>
+                    </div>
+
+                    <button type="submit" id="register-submit-btn" class="form__button">ĐĂNG KÝ</button>
+                </form>
+            </div>
+
+            <!-- Panel Đăng nhập (b-container) -->
+            <div class="form-container b-container" id="b-container" aria-hidden="false">
+                <form class="neu-form" id="login-form" novalidate>
+                    <h2 class="form__title">Đăng nhập Vieco</h2>
+
+                    <div class="form__icons" aria-hidden="true">
+                        <span class="form__icon-btn" title="Ứng viên">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                        </span>
+                        <span class="form__icon-btn form__icon-btn--gold" title="Vieco Career">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                            </svg>
+                        </span>
+                        <span class="form__icon-btn" title="Bảo mật">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                            </svg>
+                        </span>
+                    </div>
+
+                    <span class="form__span">hoặc sử dụng tài khoản email của bạn</span>
+
+                    <div id="login-alert" class="auth-alert hidden" role="alert" aria-live="assertive"></div>
+
+                    <div class="neu-field" data-field-group="email">
+                        <div class="neu-input-wrap">
+                            <span class="neu-input-icon" aria-hidden="true">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                    <polyline points="22,6 12,13 2,6"></polyline>
+                                </svg>
+                            </span>
+                            <input class="form__input" id="login-email" name="email" type="email" placeholder="Email *" autocomplete="email" required>
+                        </div>
+                        <span class="neu-field-error" data-field-error="email"></span>
+                    </div>
+
+                    <div class="neu-field" data-field-group="password">
+                        <div class="neu-input-wrap">
+                            <span class="neu-input-icon" aria-hidden="true">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                                </svg>
+                            </span>
+                            <input class="form__input form__input--password" id="login-password" name="password" type="password" placeholder="Mật khẩu *" autocomplete="current-password" required>
+                            <button type="button" class="neu-eye-btn" data-toggle-password="login-password" aria-label="Hiện mật khẩu" aria-pressed="false"></button>
+                        </div>
+                        <span class="neu-field-error" data-field-error="password"></span>
+                    </div>
+
+                    <div class="neu-options-row">
+                        <label class="neu-checkbox">
+                            <input type="checkbox" name="remember_me" checked>
+                            <span>Ghi nhớ phiên đăng nhập</span>
+                        </label>
+                        <span class="field-hint" style="font-size: 0.75rem; color: var(--text-muted);">Khóa tạm sau 5 lần sai</span>
+                    </div>
+
+                    <button type="submit" id="login-submit-btn" class="form__button">ĐĂNG NHẬP</button>
+                </form>
+            </div>
+
+            <!-- Panel trượt Neumorphic (switch) -->
+            <div class="switch" id="switch-cnt">
+                <div class="switch__circle"></div>
+                <div class="switch__circle switch__circle--t"></div>
+
+                <div class="switch__container" id="switch-c1">
+                    <h2 class="switch__title">Chào mừng trở lại!</h2>
+                    <p class="switch__description">
+                        Đã có tài khoản Vieco? Hãy đăng nhập để tiếp tục kết nối công việc và hồ sơ của bạn.
+                    </p>
+                    <button type="button" class="switch__button switch-btn" data-switch-mode="login">ĐĂNG NHẬP</button>
+                </div>
+
+                <div class="switch__container is-hidden" id="switch-c2">
+                    <h2 class="switch__title">Xin chào bạn mới!</h2>
+                    <p class="switch__description">
+                        Nhập thông tin cá nhân và bắt đầu hành trình sự nghiệp hoặc tuyển dụng cùng Vieco ngay hôm nay.
+                    </p>
+                    <button type="button" class="switch__button switch-btn" data-switch-mode="register">ĐĂNG KÝ</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container footer-content">
+            <div class="brand-link" style="font-size: 1rem;">
+                <span class="brand-badge" style="width: 24px; height: 24px; border-radius: 6px;" aria-hidden="true">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                        <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                    </svg>
+                </span>
+                <span>Vieco</span>
+            </div>
+            <div class="footer-links">
+                <span>&copy; 2026 Vieco</span>
+                <a href="../index.html">Trang chủ</a>
+                <a href="register.html" data-switch-mode="register">Đăng ký</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../assets/js/auth-api.js"></script>
+    <script src="../assets/js/auth-ui.js"></script>
+</body>
+</html>
