@@ -218,7 +218,7 @@
             if (submit) state.job = await client.submitJob(state.jobId);
             status("job-status", state.job, "Chưa lưu");
             notice("job-rejection", state.job.status === "REJECTED" ? "Lý do từ chối: " + (state.job.reject_reason || "Chưa có lý do.") : "", "warning");
-            notice("job-message", submit ? "Đã gửi tin đến Admin xét duyệt." : "Đã lưu nháp. Bạn có thể tiếp tục chỉnh sửa hoặc quay lại bằng liên kết trang này.", "success");
+            notice("job-message", submit ? "Đã gửi tin đến Admin xét duyệt." : (state.job.status === "REJECTED" ? "Đã lưu thay đổi. Tin vẫn ở trạng thái bị từ chối; bạn có thể gửi duyệt lại sau khi hoàn thiện." : "Đã lưu nháp. Bạn có thể tiếp tục chỉnh sửa hoặc quay lại bằng liên kết trang này."), "success");
         } catch (error) {
             if (saved) error.message = "Đã lưu nội dung tin nhưng chưa gửi duyệt. " + error.message;
             status("job-status", state.job, "Chưa lưu");

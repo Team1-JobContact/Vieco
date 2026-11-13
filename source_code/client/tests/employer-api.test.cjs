@@ -4,8 +4,8 @@ const Api = require('../assets/js/employer-api.js');
 
 const company = { name: ' Công ty Vieco ', industry_id: '1', province_id: '2', size: '51-200',
     address: ' 1 Nguyễn Trãi ', website: 'https://vieco.vn', description: '' };
-const job = { title: 'Backend Python', province_id: '2', work_address: 'Hà Nội', description: 'Phát triển API',
-    requirements: 'Python', employment_type: 'FULL_TIME', deadline: '2027-01-01' };
+const job = { title: 'Backend Python', industry_id: '1', province_id: '2', work_address: 'Hà Nội', description: 'Phát triển API',
+    requirements: 'Có kiến thức Python', experience_level: 'NONE', employment_type: 'FULL_TIME', deadline: '2027-01-01' };
 
 test('company validation trims values, converts IDs and leaves optional text null', () => {
     const r = Api.validateCompany(company);
@@ -24,9 +24,11 @@ test('company validation rejects required fields, invalid IDs, size and website'
 });
 
 test('draft only needs title; submit requires full fields and a real date', () => {
-    assert.equal(Api.validateJob({ title: 'Nháp' }, false, '2026-11-13').valid, true);
-    const r = Api.validateJob({ title: 'Nháp' }, true, '2026-11-13');
-    for (const field of ['description', 'requirements', 'province_id', 'work_address', 'employment_type', 'deadline']) assert.ok(r.errors[field]);
+    assert.equal(Api.validateJob({ title: 'Tin nháp' }, false, '2026-11-13').valid, true);
+    assert.ok(Api.validateJob({ title: 'Nháp' }, false, '2026-11-13').errors.title);
+    const r = Api.validateJob({ title: 'Tin nháp' }, true, '2026-11-13');
+    for (const field of ['industry_id', 'experience_level', 'description', 'requirements', 'province_id', 'work_address', 'employment_type', 'deadline']) assert.ok(r.errors[field]);
+    assert.ok(Api.validateJob({ ...job, description: 'Ngắn', requirements: 'Python' }, true, '2026-11-13').errors.requirements);
     assert.equal(Api.validateJob(job, true, '2026-11-13').valid, true);
     assert.ok(Api.validateJob({ ...job, deadline: '2027-02-30' }, true, '2026-11-13').errors.deadline);
 });
@@ -67,9 +69,11 @@ test('client uses bearer token and expected methods without allowing body-contro
     await client.submitJob(7);
     assert.deepEqual(calls.map(c => [c.method, c.url.replace('http://test/api/v1', '')]), [
         ['POST', '/employer/company'], ['PATCH', '/employer/company'], ['GET', '/employer/jobs/7'],
-        ['POST', '/jobs'], ['PATCH', '/jobs/7'], ['POST', '/jobs/7/submit']
+        ['POST', '/employer/jobs'], ['PATCH', '/employer/jobs/7'], ['POST', '/employer/jobs/7/submit']
     ]);
     assert.ok(calls.every(c => c.headers.Authorization === 'Bearer test-token'));
+    assert.equal(JSON.parse(calls[3].body).action, 'draft');
+    assert.equal('action' in JSON.parse(calls[4].body), false);
 });
 
 test('HTTP and network failures never report save success', async () => {

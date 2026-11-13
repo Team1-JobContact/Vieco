@@ -58,7 +58,7 @@
                 errors.website = "Website phải bắt đầu bằng http:// hoặc https:// và không có khoảng trắng.";
             }
         } else {
-            required("title", "tiêu đề tin"); length("title", 200);
+            required("title", "tiêu đề tin"); length("title", 200, 5);
             length("work_address", 255);
             ["description", "requirements", "benefits"].forEach(function (key) { length(key, 10000); });
             integer("salary_min", 0); integer("salary_max", 0); integer("positions", 1);
@@ -73,7 +73,9 @@
                 errors.experience_level = "Vui lòng chọn kinh nghiệm hợp lệ.";
             }
             if (submit) {
+                required("industry_id", "ngành nghề"); required("experience_level", "yêu cầu kinh nghiệm");
                 required("description", "mô tả công việc"); required("requirements", "yêu cầu ứng viên");
+                length("description", 10000, 10); length("requirements", 10000, 10);
                 required("province_id", "tỉnh/thành"); required("work_address", "địa điểm làm việc");
                 required("employment_type", "hình thức làm việc"); required("deadline", "hạn nộp hồ sơ");
             }
@@ -149,8 +151,8 @@
             resubmitCompany: function () { return request("/employer/company/resubmit", "POST"); },
             // PB-014 integration contract is documented in docs/PB-015.md.
             job: function (id) { return jobRequest("/employer/jobs/" + encodeURIComponent(id)); },
-            saveJob: function (id, body) { return jobRequest(id ? "/jobs/" + encodeURIComponent(id) : "/jobs", id ? "PATCH" : "POST", body); },
-            submitJob: function (id) { return jobRequest("/jobs/" + encodeURIComponent(id) + "/submit", "POST"); },
+            saveJob: function (id, body) { return jobRequest(id ? "/employer/jobs/" + encodeURIComponent(id) : "/employer/jobs", id ? "PATCH" : "POST", id ? body : Object.assign({}, body, { action: "draft" })); },
+            submitJob: function (id) { return jobRequest("/employer/jobs/" + encodeURIComponent(id) + "/submit", "POST"); },
         };
     }
 

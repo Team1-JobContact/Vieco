@@ -12,7 +12,7 @@ const companyRecord = { id: 4, name: 'Vieco', industry_id: 1, province_id: 2, si
 const jobRecord = { id: 42, company_id: 4, title: 'Backend Python', industry_id: 1, province_id: 2,
     work_address: 'Hà Nội', employment_type: 'FULL_TIME', experience_level: 'FROM_1_TO_3', positions: 2,
     salary_min: 0, salary_max: 20000000, salary_currency: 'VND', deadline: '2099-01-01',
-    description: 'Phát triển API', requirements: 'Python', benefits: 'Đào tạo', status: 'DRAFT' };
+    description: 'Phát triển API', requirements: 'Có kiến thức Python', benefits: 'Đào tạo', status: 'DRAFT' };
 const tick = () => new Promise(resolve => setImmediate(resolve));
 
 async function setup(t, options = {}) {
@@ -40,9 +40,9 @@ async function setup(t, options = {}) {
             if (currentCompany) data = currentCompany;
             else { code = 404; data = { detail: 'Chưa có hồ sơ' }; }
         } else if (endpoint === '/employer/company/resubmit') data = currentCompany = { ...currentCompany, status: 'PENDING', reject_reason: null };
-        else if (endpoint === '/employer/jobs/42') data = { ...jobRecord, ...options.job };
-        else if (endpoint === '/jobs' || endpoint === '/jobs/42') data = { ...jobRecord, ...body };
-        else if (endpoint === '/jobs/42/submit') {
+        else if (endpoint === '/employer/jobs/42' && request.method === 'GET') data = { ...jobRecord, ...options.job };
+        else if (endpoint === '/employer/jobs' || endpoint === '/employer/jobs/42') data = { ...jobRecord, ...body };
+        else if (endpoint === '/employer/jobs/42/submit') {
             if (submitFailures-- > 0) { code = 500; data = { detail: 'Thử lại' }; }
             else data = { ...jobRecord, status: 'PENDING' };
         } else { code = 404; data = { detail: 'Not Found' }; }
@@ -137,7 +137,7 @@ test('draft save only needs title, duplicate submissions are blocked while busy'
     const first = submit('job-form', 'save-draft');
     const second = submit('job-form', 'save-draft');
     await Promise.all([first, second]);
-    assert.equal(calls.filter(c => c.endpoint === '/jobs' && c.method === 'POST').length, 1);
+    assert.equal(calls.filter(c => c.endpoint === '/employer/jobs' && c.method === 'POST').length, 1);
     assert.equal($('job-status').textContent, 'Nháp');
     assert.equal($('job-fields').disabled, false);
 });
@@ -157,14 +157,14 @@ test('retry after submit failure PATCHes saved ID instead of creating another jo
     assert.match($('job-message').textContent, /Đã lưu nội dung tin nhưng chưa gửi duyệt/);
     assert.equal(w.location.search, '?job_id=42');
     await submit('job-form', 'submit-job');
-    assert.equal(calls.filter(c => c.endpoint === '/jobs' && c.method === 'POST').length, 1);
-    assert.equal(calls.filter(c => c.endpoint === '/jobs/42' && c.method === 'PATCH').length, 1);
+    assert.equal(calls.filter(c => c.endpoint === '/employer/jobs' && c.method === 'POST').length, 1);
+    assert.equal(calls.filter(c => c.endpoint === '/employer/jobs/42' && c.method === 'PATCH').length, 1);
     assert.equal($('job-status').textContent, 'Chờ duyệt');
     assert.equal($('job-fields').disabled, true);
 });
 
 test('missing PB-014 endpoint keeps input and does not claim successful save', async t => {
-    const { $, fill, submit } = await setup(t, { url: '#job', respond: p => p === '/jobs' ? { code: 404, data: { detail: 'Not Found' } } : null });
+    const { $, fill, submit } = await setup(t, { url: '#job', respond: p => p === '/employer/jobs' ? { code: 404, data: { detail: 'Not Found' } } : null });
     fill('job-form', { title: 'Dữ liệu chưa lưu' });
     await submit('job-form', 'save-draft');
     assert.equal($('job-title').value, 'Dữ liệu chưa lưu');
