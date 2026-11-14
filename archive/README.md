@@ -7,7 +7,7 @@ Thư mục này giữ nguyên nội dung các file khung và artefact được c
 | `source_code/server/server.js` | `archive/source_code/server/server.js` | File khung khởi chạy máy chủ JavaScript, chỉ có comment. |
 | `source_code/server/src/app.js` | `archive/source_code/server/src/app.js` | File khung Express, chỉ có comment. |
 | `source_code/server/prisma/.gitkeep` | `archive/source_code/server/prisma/.gitkeep` | Placeholder Prisma; backend hiện dùng SQLAlchemy và Alembic. |
-| `source_code/server/src/controllers/.gitkeep` | `archive/source_code/server/src/controllers/.gitkeep` | Placeholder controllers; backend hiện dùng routes và services. |
+| `source_code/server/src/controllers/.gitkeep` | `archive/source_code/server/src/controllers/.gitkeep` | Placeholder controllers cũ; backend hiện có controller thực tế trong source_code/server/src/controllers. |
 | `source_code/New Text Document.txt` | `archive/source_code/New Text Document.txt` | File văn bản rỗng. |
 | `package-lock.json` | `archive/package-lock.json` | Lockfile gốc rỗng, không có package.json tương ứng. |
 

@@ -38,7 +38,7 @@ source_code/
         └── seeds/                # Dữ liệu ban đầu; chỉ chạy chủ động
 ```
 
-Các thư mục trống cũ có thể còn trên máy; cây trên chỉ mô tả phần có mã đang chạy. Không tạo component/layout/route React giả chỉ để cây thư mục giống hình minh họa.
+Các thư mục trống cũ có thể còn trên máy; cây trên chỉ mô tả phần có mã đang chạy. Các thư mục components/layouts/routes dành riêng cho React chưa được sử dụng vì frontend hiện là các trang HTML tĩnh.
 
 ## Tương ứng với bản thiết kế
 
@@ -55,7 +55,9 @@ Các thư mục trống cũ có thể còn trên máy; cây trên chỉ mô tả
 | server/prisma | server/migrations + alembic.ini | SQLAlchemy/Alembic đang quản lý MySQL |
 | Multer, Nodemailer | UploadFile + cv_service, smtplib + email_service | Công cụ tương ứng trong Python |
 
-## Di chuyển trong đợt này
+## Di chuyển trong đợt chỉnh kiến trúc
+
+Bảng này dùng đường dẫn trước bước chỉnh kiến trúc, sau một giai đoạn gom JS trung gian. Thành viên cập nhật trực tiếp từ main xem bảng đường dẫn main → nhánh bàn giao tại [TEAM_CHANGE_REPORT](TEAM_CHANGE_REPORT.md#3-đường-dẫn-cần-dùng-khi-phát-triển-tiếp).
 
 | Trước | Sau |
 | --- | --- |

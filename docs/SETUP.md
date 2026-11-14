@@ -1,5 +1,7 @@
 # Cài đặt và chạy Vieco
 
+Bản bàn giao hiện tại và các việc cần làm khi cập nhật từ main xem [TEAM_CHANGE_REPORT](TEAM_CHANGE_REPORT.md).
+
 ## Yêu cầu
 
 Git, Python và pip, MySQL, Node.js/npm để chạy test frontend. Phiên bản thư viện backend nằm trong `source_code/server/requirements.txt`; dependency frontend nằm trong package.json và package-lock.json tại client. Repository chưa chốt phiên bản Python/Node tối thiểu; cần dùng phiên bản tương thích các dependency đó.
@@ -76,7 +78,7 @@ $env:DEBUG='False'
 
 DEBUG ở đây chỉ áp dụng tiến trình terminal, không sửa .env. Test backend dùng SQLite cô lập; test tích hợp cần Node trong PATH để gọi `client/tests/job-contract.cjs`. Nếu thiếu Node, test tích hợp có thể bị skip: phải đọc kết quả thay vì coi là đã xác minh.
 
-Kết quả đã ghi nhận trong các bước refactoring: 44 test backend pass trước/sau đổi import auth; 19 test frontend pass trước/sau di chuyển JS; test tích hợp pass sau di chuyển JS. Chưa xác minh MySQL/migration thực tế và giao diện trực quan trên trình duyệt trong phiên này.
+Kết quả mã nguồn mới nhất đã ghi nhận: 52 test backend và 21 test frontend đạt. Backend dùng SQLite, UI dùng jsdom và email dùng SMTP giả lập. Các con số 44 backend/19 frontend trong báo cáo cũ thuộc bước refactor trung gian. Chưa xác minh MySQL/migration thực tế, SMTP thật và giao diện trực quan trên trình duyệt bằng bộ kiểm thử này.
 
 Xem thêm [hướng dẫn Windows](HUONG_DAN_CHAY_DU_AN.md), [checklist](TEST_CHECKLIST.md) và [PB-015](PB-015.md). Không commit .env, token, mật khẩu hoặc dữ liệu uploads.
 

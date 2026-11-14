@@ -4,6 +4,10 @@ Vieco kết nối ứng viên và nhà tuyển dụng. Dự án dùng frontend H
 
 Kiến trúc được đối chiếu với tài liệu thiết kế JobContact ngày 15/11/2026. Đã bổ sung đủ 24 đường dẫn API cốt lõi trong tài liệu. Công nghệ được giữ theo mã nguồn đang phát triển, vì vậy dự án **chưa trùng hoàn toàn tech stack React/Vite/Tailwind + Express/Prisma trong bản Word**. Xem [bảng đối chiếu](docs/ARCHITECTURE_REVIEW.md) để biết phạm vi và giới hạn kiểm chứng.
 
+## Bàn giao cho nhóm
+
+Xem [báo cáo thay đổi trước merge main](docs/TEAM_CHANGE_REPORT.md) để biết phạm vi tích hợp, tác động đến từng phần việc và checklist kiểm tra. [Thông báo ngắn](docs/TEAM_ANNOUNCEMENT.md) có thể dùng để chia sẻ trong nhóm. Nhánh cập nhật hiện là `feat/architecture-api-alignment`; chưa merge vào main tại thời điểm lập báo cáo 15/11/2026.
+
 ## Cấu trúc
 
 ```text

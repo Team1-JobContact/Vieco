@@ -1,12 +1,16 @@
 # Đối chiếu thiết kế hệ thống JobContact
 
-Ngày rà soát: 15/11/2026. Nguồn: [bản thiết kế Word](JobContact_System_Architecture_and_APIs.docx), trùng SHA-256 với file người dùng cung cấp trong Downloads.
+Ngày rà soát: 15/11/2026. Trạng thái: đã đẩy mã nguồn lên nhánh `feat/architecture-api-alignment`, chưa merge vào `main`.
+
+Báo cáo này tập trung vào đợt chỉnh kiến trúc từ nền mã trước refactor; phạm vi toàn bộ nhánh so với main, tác động đến từng phần việc và checklist bàn giao xem [TEAM_CHANGE_REPORT](TEAM_CHANGE_REPORT.md).
+
+Nguồn: [bản thiết kế Word](JobContact_System_Architecture_and_APIs.docx), đã được đối chiếu SHA-256 trùng với bản thiết kế tham chiếu khi rà soát.
 
 ## Kết luận và quyết định
 
 Dự án ban đầu chưa khớp bản thiết kế: frontend dùng HTML/CSS/JavaScript thay React/Vite/Tailwind; backend dùng FastAPI/SQLAlchemy/Alembic thay Express/Prisma; chỉ 3 trong 24 endpoint cốt lõi có đúng method và đường dẫn. Một số nghiệp vụ đã tồn tại tại API employer/candidate, nhưng chưa có đường dẫn chuẩn trong bản Word.
 
-Theo yêu cầu chọn phương án phù hợp cho dự án, đợt này giữ nền tảng hiện có để tận dụng nghiệp vụ và kiểm thử đã xây dựng. Đã tổ chức lại phân lớp và bổ sung đủ đường dẫn API cốt lõi. **Chưa khớp 100% công nghệ và cây thư mục React/Express trong Word.** Nếu tài liệu này là tiêu chí nghiệm thu bắt buộc về framework, cần một đợt chuyển đổi riêng hoặc thống nhất cập nhật tài liệu thiết kế với nhóm.
+Phương án triển khai trong đợt này giữ nền tảng hiện có để tận dụng nghiệp vụ và kiểm thử đã xây dựng. Đã tổ chức lại phân lớp và bổ sung đủ đường dẫn API cốt lõi. **Chưa khớp 100% công nghệ và cây thư mục React/Express trong Word.** Nếu tài liệu này là tiêu chí nghiệm thu bắt buộc về framework, cần một đợt chuyển đổi riêng hoặc thống nhất cập nhật tài liệu thiết kế với nhóm.
 
 ## Công nghệ và kiến trúc
 
@@ -87,4 +91,4 @@ Kiểm thử gồm API cũ, các luồng mới và UI jsdom; SQLite không chứ
 | Nguồn thiết kế | SHA-256 bản Word trong repo trùng file người dùng cung cấp |
 | Git whitespace | `git diff --check` đạt |
 
-Kiểm thử SMTP dùng transport giả lập; backend dùng SQLite. Kết quả này không thay thế kiểm tra MySQL, SMTP thật hoặc giao diện trong trình duyệt thật. Không commit/push các thay đổi trong đợt này.
+Kiểm thử SMTP dùng transport giả lập; backend dùng SQLite. Kết quả này không thay thế kiểm tra MySQL, SMTP thật hoặc giao diện trong trình duyệt thật. Mã nguồn đã được commit và push lên `feat/architecture-api-alignment` tại `177d5f1`; chưa merge vào main. Kết quả test trên là lần chạy mã nguồn đã ghi nhận trước khi cập nhật tài liệu bàn giao, không phải một lần chạy mới chỉ để sửa báo cáo.
