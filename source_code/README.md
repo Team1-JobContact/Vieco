@@ -1,13 +1,12 @@
-# Vieco
+# Mã nguồn Vieco
 
-Cấu trúc dự án Vieco gồm `client/` (Frontend) và `server/` (Backend).
-<!-- 
-Cần lưu ý: Phần phân quyền - PB10(B)
+- `client/`: frontend HTML/CSS/JavaScript thuần. Trang HTML trong `pages/`; JS chia theo `assets/js/auth/`, `assets/js/employer/`, `assets/js/home/`. Chạy HTTP server từ client, kiểm thử bằng `npm test` sau khi cài dependency tại client.
+- `server/`: backend FastAPI. Chạy `python run.py` từ server bằng Python của môi trường ảo. Nghiệp vụ trong `src/services/`, HTTP trong `src/routes/`, xác thực/phân quyền dùng `src/dependencies/auth.py`.
 
-Chạy migration và seed. Trước khi dùng thật, bạn cần chạy alembic upgrade head và python -m src.seeds.run. Nếu chưa seed bảng roles, đăng ký sẽ báo lỗi.
-Đã sửa seeds/run.py. Phần tạo admin giờ dùng hash_password, vì passlib không chạy được với bcrypt 5.
-Đã sửa requirements.txt. Mình bỏ passlib và cors, thêm pydantic[email], pytest và httpx, và nới các phiên bản để chạy được trên Python 3.14. Bạn nên báo team biết.
-Chưa chạy migration 0002 trên MySQL thật. Nó mới chỉ được viết dựa trên migration 0001.
-Đổi SECRET_KEY trong .env trước khi triển khai.
+Xem [SETUP](../docs/SETUP.md), [cấu trúc dự án](../docs/PROJECT_STRUCTURE.md) và [hướng dẫn migration/seed](server/migrations/README.md).
 
-Chạy test bằng lệnh: cd source_code\server; python -m pytest tests. -->
+Schema do Alembic quản lý. Đăng ký cần dữ liệu roles; seed chỉ tạo Admin khi có ADMIN_EMAIL và ADMIN_PASSWORD trong môi trường. Đặt SECRET_KEY riêng trong .env; không đưa thông tin bí mật vào Git.
+
+Chạy test backend tại server bằng `python -m pytest tests -q`. Test dùng SQLite, không chứng minh migration tương thích MySQL thực tế. Migration/seed không được tự động thực hiện khi chạy test hoặc frontend.
+
+Các file khung Express/Prisma đã được chuyển vào [archive](../archive/README.md); chúng không thuộc luồng chạy hiện tại.

@@ -1,6 +1,6 @@
 // Emit requests from the real PB-015 client for the FastAPI integration test.
 const fs = require('node:fs');
-const Api = require('../assets/js/employer-api.js');
+const Api = require('../assets/js/employer/employer-api.js');
 const input = JSON.parse(fs.readFileSync(0, 'utf8'));
 const validation = Api.validateJob(input.fields, Boolean(input.submitValidation));
 if (!validation.valid) throw new Error(JSON.stringify(validation.errors));

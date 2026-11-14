@@ -3,7 +3,7 @@ from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
 from src.config.database import get_db
-from src.middlewares.auth import require_roles
+from src.dependencies.auth import require_roles
 from src.models.user import User
 from src.schemas.candidate import (
     CVListResponse, CVResponse, ProfileCreate, ProfileResponse, ProfileUpdate,

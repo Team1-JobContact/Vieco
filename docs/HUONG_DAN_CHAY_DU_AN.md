@@ -11,7 +11,7 @@ Tài liệu hướng dẫn chạy giao diện, API Python và cơ sở dữ li�
 - Backend có `requirements.txt`, `.env.example`, `alembic.ini` và thư mục `migrations`.
 - `package.json` của client hiện chỉ có script kiểm thử `test`; không có script `start` hoặc `dev`.
 
-**Giới hạn xác minh:** Tài liệu được lập từ cấu trúc và thông báo lỗi đã quan sát. Nội dung `.env.example`, cấu hình Alembic, các route API và README chưa được kiểm tra trực tiếp. Những mục phụ thuộc các file này được ghi rõ bên dưới; không tự thay tên biến hoặc chạy migration khi chưa đối chiếu.
+**Cập nhật sau tổ chức mã nguồn:** Xem [SETUP](SETUP.md) và [cấu trúc dự án](PROJECT_STRUCTURE.md) cho đường dẫn và lệnh hiện tại. Đã đối chiếu route, cấu hình Alembic và tên biến môi trường; chưa xác minh MySQL/migration thực tế hoặc giao diện trực quan trên browser.
 
 ## 2. Chuẩn bị
 
@@ -123,7 +123,7 @@ Nếu dự án dùng một chuỗi kết nối SQLAlchemy cho PyMySQL, dạng th
 mysql+pymysql://USER:PASSWORD@127.0.0.1:3306/DATABASE
 ```
 
-Đây chỉ là ví dụ định dạng, không phải tên biến hoặc thông tin đăng nhập đã xác minh của Vieco. Nếu mật khẩu có ký tự đặc biệt và được đưa vào URL, cần mã hóa thành phần mật khẩu đúng định dạng URL hoặc dùng cơ chế cấu hình mà dự án cung cấp.
+Đây là định dạng của biến `DATABASE_URL`; thay USER, PASSWORD, host, port và database bằng cấu hình phát triển của bạn. Nếu mật khẩu có ký tự đặc biệt và được đưa vào URL, cần mã hóa thành phần mật khẩu đúng định dạng URL hoặc dùng cơ chế cấu hình mà dự án cung cấp.
 
 Không công khai `.env`, mật khẩu hoặc khóa bí mật.
 
@@ -137,15 +137,15 @@ Nếu cần tạo database thủ công, có thể dùng MySQL Workbench hoặc c
 CREATE DATABASE ten_database_du_an CHARACTER SET utf8mb4;
 ```
 
-Nếu README xác nhận dự án quản lý schema bằng Alembic, chạy tại `source_code/server` sau khi cấu hình database:
+Dự án quản lý schema bằng Alembic. Khi chủ động khởi tạo database phát triển, chạy tại `source_code/server` sau khi cấu hình database:
 
 ```powershell
 ..\..\.venv\Scripts\python.exe -m alembic upgrade head
 ```
 
-Lệnh này thay đổi cấu trúc database. Chỉ chạy sau khi xác nhận database đích là database phát triển của bạn và cấu hình Alembic đã đúng. Nếu dự án yêu cầu import SQL hoặc cơ chế khởi tạo khác, làm theo hướng dẫn đó. Sự hiện diện của thư mục `prisma` không đủ để kết luận phải chạy Prisma song song với Alembic.
+Lệnh này thay đổi cấu trúc database. Chỉ chạy sau khi xác nhận database đích là database phát triển của bạn và cấu hình Alembic đã đúng. File khung Prisma đã nằm trong `archive/source_code/server/prisma`; không chạy Prisma cho backend hiện tại.
 
-Nếu có bước seed dữ liệu hoặc tạo tài khoản mẫu, dùng lệnh được ghi trong README. Không giả định đã có tài khoản mẫu hoặc tự đoán mật khẩu.
+Để nạp roles và danh mục vào database phát triển đã chuẩn bị, chạy `..\..\.venv\Scripts\python.exe -m src.seeds.run` tại server. Seed ghi dữ liệu; chỉ tạo Admin khi có ADMIN_EMAIL và ADMIN_PASSWORD. Không giả định có tài khoản mẫu.
 
 ## 7. Chạy API
 
@@ -181,7 +181,7 @@ Trong VS Code, dùng `Ctrl + Shift + F`, giới hạn tìm trong `source_code/cl
 - `API_BASE_URL`
 - `fetch(`
 
-Xác định nơi khai báo địa chỉ backend và đối chiếu với `http://127.0.0.1:8000`. Giữ đúng tiền tố đường dẫn của dự án, chẳng hạn `/api` nếu mã nguồn có sử dụng; không tự thêm hoặc bỏ tiền tố.
+Địa chỉ mặc định nằm trong `assets/js/auth/auth-api.js`: `http://127.0.0.1:8000/api/v1`. Có thể cấu hình bằng `window.VIECO_API_BASE_URL` trước khi nạp script hoặc `localStorage.vieco_api_base_url`. Giữ đúng tiền tố đường dẫn của dự án, chẳng hạn `/api` nếu mã nguồn có sử dụng; không tự thêm hoặc bỏ tiền tố.
 
 Nếu mã nguồn gọi đường dẫn tương đối như `/api/...`, kiểm tra README xem có cần proxy hoặc phục vụ frontend qua backend hay không. Live Server không tự chuyển các yêu cầu đó đến cổng 8000.
 
