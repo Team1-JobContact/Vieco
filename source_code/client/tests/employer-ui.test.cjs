@@ -5,8 +5,8 @@ const path = require('node:path');
 const { JSDOM } = require('jsdom');
 const root = path.join(__dirname, '..');
 const html = fs.readFileSync(path.join(root, 'pages/employer.html'), 'utf8');
-const apiSource = fs.readFileSync(path.join(root, 'assets/js/employer/employer-api.js'), 'utf8');
-const uiSource = fs.readFileSync(path.join(root, 'assets/js/employer/employer-ui.js'), 'utf8');
+const apiSource = fs.readFileSync(path.join(root, 'src/services/employer-api.js'), 'utf8');
+const uiSource = fs.readFileSync(path.join(root, 'src/features/employer/employer-ui.js'), 'utf8');
 const companyRecord = { id: 4, name: 'Vieco', industry_id: 1, province_id: 2, size: '51-200',
     address: 'Hà Nội', website: null, description: null, status: 'APPROVED', member_role: 'OWNER' };
 const jobRecord = { id: 42, company_id: 4, title: 'Backend Python', industry_id: 1, province_id: 2,

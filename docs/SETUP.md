@@ -56,7 +56,7 @@ cd source_code/client
 
 Mở http://localhost:5500, đăng nhập tại /pages/login.html hoặc mở /pages/employer.html. Dùng HTTP thay vì mở file HTML trực tiếp. Frontend không có script build/start/dev.
 
-API mặc định là http://127.0.0.1:8000/api/v1, khai báo tại `assets/js/auth/auth-api.js`. Có thể dùng `window.VIECO_API_BASE_URL` trước khi nạp script, hoặc `localStorage.vieco_api_base_url` của frontend. Giữ tiền tố /api/v1. Không đổi CORS hoặc cấu hình bảo mật chỉ để tổ chức thư mục.
+API mặc định là http://127.0.0.1:8000/api/v1, khai báo tại `src/services/auth-api.js`. Có thể dùng `window.VIECO_API_BASE_URL` trước khi nạp script, hoặc `localStorage.vieco_api_base_url` của frontend. Giữ tiền tố /api/v1. Không đổi CORS hoặc cấu hình bảo mật chỉ để tổ chức thư mục.
 
 ## Kiểm thử
 
@@ -79,3 +79,11 @@ DEBUG ở đây chỉ áp dụng tiến trình terminal, không sửa .env. Test
 Kết quả đã ghi nhận trong các bước refactoring: 44 test backend pass trước/sau đổi import auth; 19 test frontend pass trước/sau di chuyển JS; test tích hợp pass sau di chuyển JS. Chưa xác minh MySQL/migration thực tế và giao diện trực quan trên trình duyệt trong phiên này.
 
 Xem thêm [hướng dẫn Windows](HUONG_DAN_CHAY_DU_AN.md), [checklist](TEST_CHECKLIST.md) và [PB-015](PB-015.md). Không commit .env, token, mật khẩu hoặc dữ liệu uploads.
+
+## Cập nhật kiến trúc ngày 15/11/2026
+
+Xem [cấu trúc](PROJECT_STRUCTURE.md) và [bảng đối chiếu Word](ARCHITECTURE_REVIEW.md). Dự án giữ FastAPI/SQLAlchemy và frontend tĩnh; không cần cài Express/Prisma/React để chạy mã hiện tại. Không có migration mới trong đợt này.
+
+Để bật email, thêm SMTP_HOST, SMTP_PORT, SMTP_USERNAME, SMTP_PASSWORD, SMTP_FROM, SMTP_STARTTLS, SMTP_SSL và FRONTEND_URL theo `source_code/server/.env.example`. Dùng STARTTLS với cổng 587 hoặc SSL với 465 theo máy chủ email. FRONTEND_URL phải trỏ tới HTTP server frontend thật, ví dụ http://localhost:5500. Mở lại backend sau khi sửa cấu hình. Không ghi đè `.env` đã có bằng file mẫu nếu chưa giữ lại giá trị kết nối/secret của mình.
+
+Swagger tại http://127.0.0.1:8000/docs có cả API chuẩn theo thiết kế và API cũ để tương thích. GET /api/v1/health chỉ kiểm tra tiến trình API, không xác nhận kết nối MySQL.

@@ -1,6 +1,6 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const Api = require('../assets/js/employer/employer-api.js');
+const Api = require('../src/services/employer-api.js');
 
 const company = { name: ' Công ty Vieco ', industry_id: '1', province_id: '2', size: '51-200',
     address: ' 1 Nguyễn Trãi ', website: 'https://vieco.vn', description: '' };

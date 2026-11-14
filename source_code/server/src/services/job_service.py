@@ -323,6 +323,8 @@ def update_job(db: Session, user: User, job_id: int, data: JobUpdate) -> JobResp
         {"title": job.title, "status": job.status, "major_edited": is_major_edited},
     )
     db.commit()
+    from src.services.notification_service import send_for_reference
+    send_for_reference(db,"JOB",job.id)
     db.refresh(job)
     return to_job_response(db, job)
 
@@ -522,6 +524,8 @@ def approve_job(db: Session, admin: User, job_id: int) -> JobResponse:
     )
     _audit(db, admin, "APPROVE_JOB", job, {"status": old_status}, {"status": job.status, "reviewed_by": admin.id})
     db.commit()
+    from src.services.notification_service import send_for_reference
+    send_for_reference(db,"JOB",job.id)
     db.refresh(job)
     return to_job_response(db, job)
 
@@ -556,6 +560,8 @@ def reject_job(db: Session, admin: User, job_id: int, reason: str) -> JobRespons
         {"status": job.status, "reject_reason": reason, "reviewed_by": admin.id},
     )
     db.commit()
+    from src.services.notification_service import send_for_reference
+    send_for_reference(db,"JOB",job.id)
     db.refresh(job)
     return to_job_response(db, job)
 
@@ -585,5 +591,7 @@ def remove_job(db: Session, admin: User, job_id: int, reason: str) -> JobRespons
         {"status": job.status, "removal_reason": reason, "removed_by": admin.id},
     )
     db.commit()
+    from src.services.notification_service import send_for_reference
+    send_for_reference(db,"JOB",job.id)
     db.refresh(job)
     return to_job_response(db, job)

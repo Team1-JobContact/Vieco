@@ -1,12 +1,10 @@
 # Mã nguồn Vieco
 
-- `client/`: frontend HTML/CSS/JavaScript thuần. Trang HTML trong `pages/`; JS chia theo `assets/js/auth/`, `assets/js/employer/`, `assets/js/home/`. Chạy HTTP server từ client, kiểm thử bằng `npm test` sau khi cài dependency tại client.
-- `server/`: backend FastAPI. Chạy `python run.py` từ server bằng Python của môi trường ảo. Nghiệp vụ trong `src/services/`, HTTP trong `src/routes/`, xác thực/phân quyền dùng `src/dependencies/auth.py`.
+- `client/`: HTML/CSS/JavaScript; trang trong `pages/`, UI theo chức năng trong `src/features/`, HTTP client trong `src/services/`, CSS trong `src/assets/`. Chạy HTTP server từ client; kiểm thử bằng `npm test`.
+- `server/`: FastAPI; `routes/` khai báo URL và response, `controllers/` nhận dữ liệu HTTP và dependency, `services/` xử lý nghiệp vụ, `models/` ánh xạ SQLAlchemy. `middlewares/auth.py` kiểm tra JWT và RBAC. `dependencies/auth.py` giữ import tương thích.
 
-Xem [SETUP](../docs/SETUP.md), [cấu trúc dự án](../docs/PROJECT_STRUCTURE.md) và [hướng dẫn migration/seed](server/migrations/README.md).
+Xem [SETUP](../docs/SETUP.md), [cấu trúc](../docs/PROJECT_STRUCTURE.md), [đối chiếu thiết kế](../docs/ARCHITECTURE_REVIEW.md) và [migration/seed](server/migrations/README.md).
 
-Schema do Alembic quản lý. Đăng ký cần dữ liệu roles; seed chỉ tạo Admin khi có ADMIN_EMAIL và ADMIN_PASSWORD trong môi trường. Đặt SECRET_KEY riêng trong .env; không đưa thông tin bí mật vào Git.
+MySQL schema vẫn do Alembic quản lý. Không dùng thư mục `prisma/` rỗng làm bằng chứng dự án đã tích hợp Prisma. Bộ khung Express cũ trong archive không thuộc runtime.
 
-Chạy test backend tại server bằng `python -m pytest tests -q`. Test dùng SQLite, không chứng minh migration tương thích MySQL thực tế. Migration/seed không được tự động thực hiện khi chạy test hoặc frontend.
-
-Các file khung Express/Prisma đã được chuyển vào [archive](../archive/README.md); chúng không thuộc luồng chạy hiện tại.
+Chạy backend tại server bằng `python run.py`; chạy test bằng `python -m pytest tests -q`. Đặt `SECRET_KEY` riêng trong `.env`. Seed Admin chỉ chạy khi có `ADMIN_EMAIL` và `ADMIN_PASSWORD`. File `.env.example` liệt kê biến cấu hình, bao gồm SMTP tùy chọn; không chứa thông tin đăng nhập thật.

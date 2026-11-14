@@ -14,6 +14,7 @@ def test_employer_form_catalog_returns_only_active_database_options(client, db_s
     response = client.get("/api/v1/categories")
     assert response.status_code == 200
     assert response.json() == {
+        "skills": [],
         "industries": [{"id": industry.id, "name": "Công nghệ"}],
         "provinces": [{"id": province.id, "name": "Hà Nội"}],
     }

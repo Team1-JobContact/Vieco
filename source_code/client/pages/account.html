@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>Khôi phục tài khoản Vieco</title>
+  <link rel="stylesheet" href="../src/assets/css/style.css">
+</head>
+<body>
+  <main class="container">
+    <section class="hero-section">
+      <h1 id="account-title">Khôi phục tài khoản</h1>
+      <p id="account-message" role="status" aria-live="polite"></p>
+      <form id="account-form">
+        <p id="email-field"><label>Email <input name="email" type="email" autocomplete="email" required></label></p>
+        <p id="password-field" hidden><label>Mật khẩu mới <input name="password" type="password" autocomplete="new-password" minlength="8" disabled></label></p>
+        <button type="submit" class="btn btn-primary" id="account-submit">Gửi email</button>
+      </form>
+      <p><a href="login.html">Về trang đăng nhập</a></p>
+    </section>
+  </main>
+  <script src="../src/services/auth-api.js"></script>
+  <script src="../src/services/account-api.js"></script>
+  <script src="../src/features/auth/account-ui.js"></script>
+</body>
+</html>

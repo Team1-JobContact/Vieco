@@ -221,3 +221,7 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Runtime uploads
+/source_code/server/uploads/*
+!/source_code/server/uploads/.gitkeep

@@ -231,6 +231,8 @@ def _review(db: Session, admin: User, company_id: int, new_status: str,
                         "Vui lòng cập nhật thông tin và gửi duyệt lại.")
         _audit(db, admin, "COMPANY_REJECT", company, old, {"status": new_status, "reason": reason})
     db.commit()
+    from src.services.notification_service import send_for_reference
+    send_for_reference(db,"COMPANY",company.id)
     db.refresh(company)
     return _to_admin(company, owner)
 

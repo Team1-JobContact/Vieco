@@ -181,7 +181,7 @@ Trong VS Code, dùng `Ctrl + Shift + F`, giới hạn tìm trong `source_code/cl
 - `API_BASE_URL`
 - `fetch(`
 
-Địa chỉ mặc định nằm trong `assets/js/auth/auth-api.js`: `http://127.0.0.1:8000/api/v1`. Có thể cấu hình bằng `window.VIECO_API_BASE_URL` trước khi nạp script hoặc `localStorage.vieco_api_base_url`. Giữ đúng tiền tố đường dẫn của dự án, chẳng hạn `/api` nếu mã nguồn có sử dụng; không tự thêm hoặc bỏ tiền tố.
+Địa chỉ mặc định nằm trong `src/services/auth-api.js`: `http://127.0.0.1:8000/api/v1`. Có thể cấu hình bằng `window.VIECO_API_BASE_URL` trước khi nạp script hoặc `localStorage.vieco_api_base_url`. Giữ đúng tiền tố đường dẫn của dự án, chẳng hạn `/api` nếu mã nguồn có sử dụng; không tự thêm hoặc bỏ tiền tố.
 
 Nếu mã nguồn gọi đường dẫn tương đối như `/api/...`, kiểm tra README xem có cần proxy hoặc phục vụ frontend qua backend hay không. Live Server không tự chuyển các yêu cầu đó đến cổng 8000.
 
