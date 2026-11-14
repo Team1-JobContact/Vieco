@@ -46,6 +46,13 @@ function renderLoggedInNav(container, user, token) {
     });
 
     container.appendChild(pill);
+    if (user.role === "EMPLOYER") {
+        var employerLink = document.createElement("a");
+        employerLink.href = "pages/employer.html";
+        employerLink.className = "btn btn-primary";
+        employerLink.textContent = "Không gian tuyển dụng";
+        container.appendChild(employerLink);
+    }
     container.appendChild(logoutBtn);
 }
 

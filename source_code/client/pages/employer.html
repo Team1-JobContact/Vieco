@@ -1,0 +1,544 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Không gian nhà tuyển dụng | Vieco</title>
+    <link rel="stylesheet" href="../assets/css/style.css" />
+    <link rel="stylesheet" href="../assets/css/employer.css" />
+  </head>
+  <body class="employer-page">
+    <header class="navbar">
+      <div class="container nav-content">
+        <a href="../index.html" class="brand-link"
+          ><span class="brand-badge" aria-hidden="true"
+            ><svg
+              width="19"
+              height="19"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.6"
+            >
+              <rect x="3" y="7" width="18" height="14" rx="3" />
+              <path
+                d="M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3M9 7v14M15 7v14"
+              /></svg></span
+          >Vieco</a
+        >
+        <a class="nav-link" href="../index.html">Về trang chủ</a>
+        <div class="employer-account">
+          <span id="account-name"></span
+          ><button type="button" id="logout" class="btn btn-outline" hidden>
+            Đăng xuất
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="container employer-main">
+      <div class="page-heading">
+        <div class="hero-copy">
+          <p class="eyebrow">KHÔNG GIAN NHÀ TUYỂN DỤNG</p>
+          <h1>Đội ngũ xuất sắc.<br /><span>Khởi đầu từ bạn.</span></h1>
+          <p class="hero-description">
+            Kể câu chuyện doanh nghiệp, mở ra cơ hội mới.<br />
+            Kết nối với những người cùng bạn tạo nên khác biệt.
+          </p>
+          <p class="hero-caption">Một hồ sơ chỉn chu. Nhiều cơ hội kết nối.</p>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <div class="hero-emblem">
+            <svg
+              viewBox="0 0 64 64"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.3"
+            >
+              <rect x="13" y="22" width="38" height="30" rx="6" />
+              <path
+                d="M24 22v-8a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v8M25 22v30M39 22v30M13 33h38"
+              />
+            </svg>
+          </div>
+          <span>GROW TOGETHER, GO FURTHER</span>
+        </div>
+      </div>
+
+      <div id="page-message" class="notice" role="status" aria-live="polite">
+        Đang kiểm tra tài khoản…
+      </div>
+      <div id="page-recovery" class="actions" hidden>
+        <button type="button" id="retry-load" class="btn btn-outline">
+          Thử tải lại
+        </button>
+        <a
+          id="login-link"
+          href="login.html?redirect=employer.html"
+          class="btn btn-primary"
+          hidden
+          >Đăng nhập lại</a
+        >
+      </div>
+
+      <div id="workspace" hidden>
+        <nav class="workspace-tabs" aria-label="Không gian nhà tuyển dụng">
+          <a id="company-tab" class="workspace-tab" href="#company"
+            >01 <span>Hồ sơ công ty</span></a
+          >
+          <a id="job-tab" class="workspace-tab" href="#job"
+            >02 <span>Tin tuyển dụng</span></a
+          >
+        </nav>
+
+        <section id="company-panel" aria-labelledby="company-heading">
+          <div class="workspace-grid">
+            <div class="form-card">
+              <div class="card-heading">
+                <div>
+                  <h2 id="company-heading">Hồ sơ công ty</h2>
+                  <p>
+                    Thông tin rõ ràng giúp ứng viên hiểu hơn về doanh nghiệp.
+                  </p>
+                </div>
+                <span id="company-status" class="status-pill"
+                  >Chưa tạo hồ sơ</span
+                >
+              </div>
+              <p id="company-rejection" class="notice warning" hidden></p>
+              <p id="company-permission" class="notice warning" hidden>
+                Chỉ chủ sở hữu công ty có thể chỉnh sửa hồ sơ.
+              </p>
+              <div
+                id="company-message"
+                class="notice"
+                role="status"
+                aria-live="polite"
+                hidden
+              ></div>
+              <form id="company-form" novalidate>
+                <fieldset id="company-fields" disabled>
+                  <legend class="sr-only">Thông tin công ty</legend>
+                  <div class="field">
+                    <label for="company-name"
+                      >Tên công ty <span aria-hidden="true">*</span></label
+                    ><input
+                      id="company-name"
+                      name="name"
+                      maxlength="200"
+                      required
+                      autocomplete="organization"
+                    /><small
+                      id="company-name-error"
+                      class="field-error"
+                    ></small>
+                  </div>
+                  <div class="field-row">
+                    <div class="field">
+                      <label for="company-industry"
+                        >Ngành nghề <span aria-hidden="true">*</span></label
+                      ><select
+                        id="company-industry"
+                        name="industry_id"
+                        data-catalog="industries"
+                        required
+                      >
+                        <option value="">Chọn ngành nghề</option></select
+                      ><small
+                        id="company-industry-error"
+                        class="field-error"
+                      ></small>
+                    </div>
+                    <div class="field">
+                      <label for="company-size"
+                        >Quy mô <span aria-hidden="true">*</span></label
+                      ><select id="company-size" name="size" required>
+                        <option value="">Chọn quy mô</option>
+                        <option value="1-50">1–50 nhân viên</option>
+                        <option value="51-200">51–200 nhân viên</option>
+                        <option value="201-500">201–500 nhân viên</option>
+                        <option value="501-1000">501–1000 nhân viên</option>
+                        <option value="1000+">
+                          Trên 1000 nhân viên
+                        </option></select
+                      ><small
+                        id="company-size-error"
+                        class="field-error"
+                      ></small>
+                    </div>
+                  </div>
+                  <div class="field-row">
+                    <div class="field">
+                      <label for="company-province"
+                        >Tỉnh / thành phố
+                        <span aria-hidden="true">*</span></label
+                      ><select
+                        id="company-province"
+                        name="province_id"
+                        data-catalog="provinces"
+                        required
+                      >
+                        <option value="">Chọn tỉnh / thành phố</option></select
+                      ><small
+                        id="company-province-error"
+                        class="field-error"
+                      ></small>
+                    </div>
+                    <div class="field">
+                      <label for="company-website">Website</label
+                      ><input
+                        id="company-website"
+                        name="website"
+                        type="url"
+                        maxlength="255"
+                        placeholder="https://congty.vn"
+                        autocomplete="url"
+                      /><small
+                        id="company-website-error"
+                        class="field-error"
+                      ></small>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label for="company-address"
+                      >Địa chỉ <span aria-hidden="true">*</span></label
+                    ><input
+                      id="company-address"
+                      name="address"
+                      maxlength="255"
+                      required
+                      autocomplete="street-address"
+                    /><small
+                      id="company-address-error"
+                      class="field-error"
+                    ></small>
+                  </div>
+                  <div class="field">
+                    <label for="company-description">Giới thiệu công ty</label
+                    ><textarea
+                      id="company-description"
+                      name="description"
+                      rows="6"
+                      maxlength="10000"
+                      placeholder="Lĩnh vực hoạt động, văn hóa và điều khiến công ty của bạn khác biệt…"
+                    ></textarea
+                    ><small
+                      id="company-description-error"
+                      class="field-error"
+                    ></small>
+                  </div>
+                  <p class="form-hint">
+                    * Thông tin bắt buộc. Hồ sơ mới sẽ được gửi đến Admin để xét
+                    duyệt.
+                  </p>
+                  <div class="form-actions">
+                    <button
+                      type="submit"
+                      id="save-company"
+                      class="btn btn-primary"
+                    >
+                      Tạo hồ sơ và gửi duyệt</button
+                    ><button
+                      type="button"
+                      id="resubmit-company"
+                      class="btn btn-outline"
+                      hidden
+                    >
+                      Lưu và gửi duyệt lại
+                    </button>
+                  </div>
+                </fieldset>
+              </form>
+            </div>
+            <aside class="guide-card">
+              <span class="step-marker">01</span>
+              <h3>Sẵn sàng trước khi đăng tin</h3>
+              <ol>
+                <li>Điền thông tin công ty.</li>
+                <li>Chờ Admin xét duyệt hồ sơ.</li>
+                <li>Tạo tin và gửi duyệt để tiếp cận ứng viên.</li>
+              </ol>
+              <p>Bị từ chối? Xem lý do, cập nhật hồ sơ rồi gửi duyệt lại.</p>
+              <button
+                id="refresh-company"
+                type="button"
+                class="btn btn-outline"
+              >
+                Cập nhật trạng thái
+              </button>
+            </aside>
+          </div>
+        </section>
+
+        <section id="job-panel" aria-labelledby="job-heading" hidden>
+          <div id="job-gate" class="notice warning" role="status" hidden></div>
+          <div class="workspace-grid">
+            <div class="form-card">
+              <div class="card-heading">
+                <div>
+                  <h2 id="job-heading">Tạo tin tuyển dụng</h2>
+                  <p>Một mô tả cụ thể giúp bạn tìm đúng người.</p>
+                </div>
+                <span id="job-status" class="status-pill">Chưa lưu</span>
+              </div>
+              <p id="job-rejection" class="notice warning" hidden></p>
+              <div
+                id="job-message"
+                class="notice"
+                role="status"
+                aria-live="polite"
+                hidden
+              ></div>
+              <button
+                type="button"
+                id="retry-job"
+                class="btn btn-outline"
+                hidden
+              >
+                Thử tải lại tin
+              </button>
+              <form id="job-form" novalidate>
+                <fieldset id="job-fields" disabled>
+                  <legend class="sr-only">Nội dung tin tuyển dụng</legend>
+                  <div class="field">
+                    <label for="job-title"
+                      >Tiêu đề tuyển dụng
+                      <span aria-hidden="true">*</span></label
+                    ><input
+                      id="job-title"
+                      name="title"
+                      maxlength="200"
+                      required
+                      placeholder="Ví dụ: Lập trình viên Backend Python"
+                    /><small id="job-title-error" class="field-error"></small>
+                  </div>
+                  <div class="field-row">
+                    <div class="field">
+                      <label for="job-industry">Ngành nghề <span aria-hidden="true">*</span></label
+                      ><select
+                        id="job-industry"
+                        name="industry_id"
+                        data-catalog="industries"
+                      >
+                        <option value="">Chọn ngành nghề</option></select
+                      ><small
+                        id="job-industry-error"
+                        class="field-error"
+                      ></small>
+                    </div>
+                    <div class="field">
+                      <label for="job-positions">Số lượng tuyển</label
+                      ><input
+                        id="job-positions"
+                        name="positions"
+                        type="number"
+                        min="1"
+                        step="1"
+                        value="1"
+                      /><small
+                        id="job-positions-error"
+                        class="field-error"
+                      ></small>
+                    </div>
+                  </div>
+                  <div class="field-row">
+                    <div class="field">
+                      <label for="job-province"
+                        >Tỉnh / thành phố
+                        <span aria-hidden="true">*</span></label
+                      ><select
+                        id="job-province"
+                        name="province_id"
+                        data-catalog="provinces"
+                      >
+                        <option value="">Chọn tỉnh / thành phố</option></select
+                      ><small
+                        id="job-province-error"
+                        class="field-error"
+                      ></small>
+                    </div>
+                    <div class="field">
+                      <label for="job-address"
+                        >Địa điểm làm việc
+                        <span aria-hidden="true">*</span></label
+                      ><input
+                        id="job-address"
+                        name="work_address"
+                        maxlength="255"
+                        placeholder="Địa chỉ làm việc cụ thể"
+                      /><small
+                        id="job-address-error"
+                        class="field-error"
+                      ></small>
+                    </div>
+                  </div>
+                  <div class="field-row">
+                    <div class="field">
+                      <label for="job-employment"
+                        >Hình thức làm việc
+                        <span aria-hidden="true">*</span></label
+                      ><select id="job-employment" name="employment_type">
+                        <option value="">Chọn hình thức</option>
+                        <option value="FULL_TIME">Toàn thời gian</option>
+                        <option value="PART_TIME">Bán thời gian</option>
+                        <option value="INTERNSHIP">Thực tập</option>
+                        <option value="CONTRACT">Hợp đồng</option>
+                        <option value="FREELANCE">Tự do</option></select
+                      ><small
+                        id="job-employment-error"
+                        class="field-error"
+                      ></small>
+                    </div>
+                    <div class="field">
+                      <label for="job-experience">Kinh nghiệm <span aria-hidden="true">*</span></label
+                      ><select id="job-experience" name="experience_level">
+                        <option value="">Chọn mức kinh nghiệm</option>
+                        <option value="NONE">Chưa có kinh nghiệm</option>
+                        <option value="UNDER_1">Dưới 1 năm</option>
+                        <option value="FROM_1_TO_3">1–3 năm</option>
+                        <option value="FROM_3_TO_5">3–5 năm</option>
+                        <option value="OVER_5">Trên 5 năm</option></select
+                      ><small
+                        id="job-experience-error"
+                        class="field-error"
+                      ></small>
+                    </div>
+                  </div>
+                  <div class="field-row">
+                    <div class="field">
+                      <label for="job-salary-min"
+                        >Lương tối thiểu (VND / tháng)</label
+                      ><input
+                        id="job-salary-min"
+                        name="salary_min"
+                        type="number"
+                        min="0"
+                        step="1"
+                        placeholder="Để trống nếu thỏa thuận"
+                      /><small
+                        id="job-salary-min-error"
+                        class="field-error"
+                      ></small>
+                    </div>
+                    <div class="field">
+                      <label for="job-salary-max"
+                        >Lương tối đa (VND / tháng)</label
+                      ><input
+                        id="job-salary-max"
+                        name="salary_max"
+                        type="number"
+                        min="0"
+                        step="1"
+                        placeholder="Để trống nếu thỏa thuận"
+                      /><small
+                        id="job-salary-max-error"
+                        class="field-error"
+                      ></small>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label for="job-deadline"
+                      >Hạn nộp hồ sơ <span aria-hidden="true">*</span></label
+                    ><input
+                      id="job-deadline"
+                      name="deadline"
+                      type="date"
+                    /><small
+                      id="job-deadline-error"
+                      class="field-error"
+                    ></small>
+                  </div>
+                  <div class="field">
+                    <label for="job-description"
+                      >Mô tả công việc <span aria-hidden="true">*</span></label
+                    ><textarea
+                      id="job-description"
+                      name="description"
+                      rows="6"
+                      maxlength="10000"
+                      placeholder="Các nhiệm vụ và trách nhiệm chính…"
+                    ></textarea
+                    ><small
+                      id="job-description-error"
+                      class="field-error"
+                    ></small>
+                  </div>
+                  <div class="field">
+                    <label for="job-requirements"
+                      >Yêu cầu ứng viên <span aria-hidden="true">*</span></label
+                    ><textarea
+                      id="job-requirements"
+                      name="requirements"
+                      rows="5"
+                      maxlength="10000"
+                      placeholder="Kỹ năng, kiến thức và kinh nghiệm cần có…"
+                    ></textarea
+                    ><small
+                      id="job-requirements-error"
+                      class="field-error"
+                    ></small>
+                  </div>
+                  <div class="field">
+                    <label for="job-benefits">Quyền lợi</label
+                    ><textarea
+                      id="job-benefits"
+                      name="benefits"
+                      rows="4"
+                      maxlength="10000"
+                      placeholder="Phúc lợi, cơ hội phát triển và môi trường làm việc…"
+                    ></textarea
+                    ><small id="job-benefits-error" class="field-error"></small>
+                  </div>
+                  <p class="form-hint">
+                    Lưu nháp cần tiêu đề từ 5–200 ký tự. Mô tả và yêu cầu tối thiểu 10 ký tự khi gửi duyệt. Các mục * cần hoàn thiện khi gửi
+                    duyệt. Tin chỉ công khai sau khi được Admin duyệt.
+                  </p>
+                  <div class="form-actions">
+                    <button
+                      type="submit"
+                      id="save-draft"
+                      class="btn btn-outline"
+                      name="intent"
+                      value="draft"
+                    >
+                      Lưu nháp</button
+                    ><button
+                      type="submit"
+                      id="submit-job"
+                      class="btn btn-primary"
+                      name="intent"
+                      value="submit"
+                    >
+                      Gửi duyệt
+                    </button>
+                  </div>
+                </fieldset>
+              </form>
+            </div>
+            <aside class="guide-card">
+              <span class="step-marker">02</span>
+              <h3>Viết tin dễ tìm đúng người</h3>
+              <p>
+                Đặt tiêu đề rõ vị trí. Tách nhiệm vụ, yêu cầu và quyền lợi thành
+                các ý ngắn, cụ thể.
+              </p>
+              <p>Chưa sẵn sàng? Lưu nháp và quay lại hoàn thiện sau.</p>
+              <a class="btn btn-outline" href="employer.html#job"
+                >Tạo tin mới</a
+              >
+            </aside>
+          </div>
+        </section>
+      </div>
+    </main>
+    <footer class="site-footer">
+      <div class="container footer-content">
+        <span>Vieco · Kết nối cơ hội, phát triển đội ngũ</span
+        ><a class="nav-link" href="../index.html">Trang chủ</a>
+      </div>
+    </footer>
+    <script src="../assets/js/auth-api.js"></script>
+    <script src="../assets/js/employer-api.js"></script>
+    <script src="../assets/js/employer-ui.js"></script>
+  </body>
+</html>
