@@ -1,11 +1,12 @@
 import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 from src.config.settings import settings
 import src.models  # noqa: F401 - Đăng ký model (schema do Alembic quản lý: alembic upgrade head)
+from src.routes.core import router as core_router
 from src.routes.auth import router as auth_router
 from src.routes.candidate import router as candidate_router
+from src.routes.catalog import router as catalog_router
 from src.routes.company import admin_router as admin_company_router
 from src.routes.company import employer_router as employer_company_router
 from src.routes.job import admin_router as admin_job_router
@@ -25,8 +26,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(core_router)
 app.include_router(auth_router)
 app.include_router(candidate_router)
+app.include_router(catalog_router)
 app.include_router(employer_company_router)
 app.include_router(admin_company_router)
 app.include_router(employer_job_router)
@@ -38,7 +41,7 @@ def health_check():
     return {
         "status": "success",
         "message": "JobContact Python Backend is active and running!",
-        "database": "MySQL Connected"
+        "database": "Not checked by this liveness endpoint"
     }
 
 # Chạy trực tiếp: python src/app.py

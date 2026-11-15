@@ -4,7 +4,8 @@ from sqlalchemy.orm import Session
 
 from src.config.database import get_db
 from src.models.revoked_token import RevokedToken
-from src.models.user import Role, User
+from datetime import datetime, timezone
+from src.models.user import PasswordReset, Role, User
 from src.utils.security import decode_access_token
 
 bearer_scheme = HTTPBearer(auto_error=False)
@@ -43,6 +44,11 @@ def get_current_user(
     if row is None or row[0].status != "ACTIVE":
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Tài khoản không tồn tại hoặc đã bị khóa")
     user, role_name = row
+    reset = db.query(PasswordReset.used_at).filter(
+        PasswordReset.user_id == user.id, PasswordReset.used_at.is_not(None)
+    ).order_by(PasswordReset.used_at.desc()).first()
+    if reset and datetime.fromtimestamp(payload.get("iat", 0), timezone.utc).replace(tzinfo=None) <= reset[0]:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Mật khẩu đã đổi, vui lòng đăng nhập lại")
     user.role_name = role_name
     return user
 

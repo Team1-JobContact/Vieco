@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vieco - Tìm việc làm nhanh</title>
-    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="src/assets/css/style.css">
 </head>
 <body>
 
@@ -58,17 +58,8 @@
                 <span id="api-status" class="badge">Đang kiểm tra API...</span>
             </div>
 
-            <div class="job-grid" id="jobs-container">
-                <!-- Thẻ công việc mẫu -->
-                <div class="job-card">
-                    <h4 class="job-title">Lập trình viên Backend (Python)</h4>
-                    <p class="company-name">Công ty Cổ phần Công nghệ XYZ</p>
-                    <div class="job-tags">
-                        <span class="tag">Hà Nội / TP.HCM</span>
-                        <span class="tag">15 - 25 Triệu</span>
-                    </div>
-                </div>
-            </div>
+            <div class="job-grid" id="jobs-container" aria-live="polite"></div>
+            <nav id="jobs-pagination" aria-label="Phân trang việc làm"></nav>
         </section>
     </main>
 
@@ -91,7 +82,8 @@
         </div>
     </footer>
 
-    <script src="assets/js/auth-api.js"></script>
-    <script src="assets/js/main.js"></script>
+    <script src="src/services/auth-api.js"></script>
+    <script src="src/services/jobs-api.js"></script>
+    <script src="src/features/jobs/home-ui.js"></script>
 </body>
 </html>

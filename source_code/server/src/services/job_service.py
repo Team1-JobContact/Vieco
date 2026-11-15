@@ -271,9 +271,13 @@ def update_job(db: Session, user: User, job_id: int, data: JobUpdate) -> JobResp
         "deadline": str(job.deadline) if job.deadline else None,
     }
 
-    # Kiểm tra salary_min vs salary_max
-    new_smin = data.salary_min if data.salary_min is not None else job.salary_min
-    new_smax = data.salary_max if data.salary_max is not None else job.salary_max
+    # PATCH: omitted fields stay unchanged; explicit null clears optional values.
+    changes = data.model_dump(exclude_unset=True)
+    for field in ("title", "positions", "salary_currency"):
+        if field in changes and changes[field] is None:
+            raise HTTPException(HTTP_422, f"Trường {field} không được để trống")
+    new_smin = changes.get("salary_min", job.salary_min)
+    new_smax = changes.get("salary_max", job.salary_max)
     if new_smin is not None and new_smax is not None and new_smin > new_smax:
         raise HTTPException(HTTP_422,
                             "Mức lương tối thiểu không được lớn hơn mức lương tối đa")
@@ -286,12 +290,14 @@ def update_job(db: Session, user: User, job_id: int, data: JobUpdate) -> JobResp
     ]
     is_major_edited = False
     for field in major_fields:
-        val = getattr(data, field)
-        if val is not None and val != getattr(job, field):
+        if field not in changes:
+            continue
+        val = changes[field]
+        if val != getattr(job, field):
             is_major_edited = True
             setattr(job, field, val)
 
-    if data.skill_ids is not None:
+    if "skill_ids" in changes:
         current_skills = {s[0] for s in db.query(JobSkill.skill_id).filter(JobSkill.job_id == job.id).all()}
         new_skills = set(data.skill_ids)
         if current_skills != new_skills:
@@ -317,6 +323,8 @@ def update_job(db: Session, user: User, job_id: int, data: JobUpdate) -> JobResp
         {"title": job.title, "status": job.status, "major_edited": is_major_edited},
     )
     db.commit()
+    from src.services.notification_service import send_for_reference
+    send_for_reference(db,"JOB",job.id)
     db.refresh(job)
     return to_job_response(db, job)
 
@@ -516,6 +524,8 @@ def approve_job(db: Session, admin: User, job_id: int) -> JobResponse:
     )
     _audit(db, admin, "APPROVE_JOB", job, {"status": old_status}, {"status": job.status, "reviewed_by": admin.id})
     db.commit()
+    from src.services.notification_service import send_for_reference
+    send_for_reference(db,"JOB",job.id)
     db.refresh(job)
     return to_job_response(db, job)
 
@@ -550,6 +560,8 @@ def reject_job(db: Session, admin: User, job_id: int, reason: str) -> JobRespons
         {"status": job.status, "reject_reason": reason, "reviewed_by": admin.id},
     )
     db.commit()
+    from src.services.notification_service import send_for_reference
+    send_for_reference(db,"JOB",job.id)
     db.refresh(job)
     return to_job_response(db, job)
 
@@ -579,5 +591,7 @@ def remove_job(db: Session, admin: User, job_id: int, reason: str) -> JobRespons
         {"status": job.status, "removal_reason": reason, "removed_by": admin.id},
     )
     db.commit()
+    from src.services.notification_service import send_for_reference
+    send_for_reference(db,"JOB",job.id)
     db.refresh(job)
     return to_job_response(db, job)

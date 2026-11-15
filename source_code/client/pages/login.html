@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đăng nhập - Vieco</title>
-    <link rel="stylesheet" href="../assets/css/style.css">
-    <link rel="stylesheet" href="../assets/css/auth.css">
+    <link rel="stylesheet" href="../src/assets/css/style.css">
+    <link rel="stylesheet" href="../src/assets/css/auth.css">
 </head>
 <body class="auth-page">
 
@@ -292,6 +292,7 @@
                         <span class="field-hint" style="font-size: 0.75rem; color: var(--text-muted);">Khóa tạm sau 5 lần sai</span>
                     </div>
 
+                    <a href="account.html" class="form__link">Quên mật khẩu?</a>
                     <button type="submit" id="login-submit-btn" class="form__button">ĐĂNG NHẬP</button>
                 </form>
             </div>
@@ -339,7 +340,7 @@
         </div>
     </footer>
 
-    <script src="../assets/js/auth-api.js"></script>
-    <script src="../assets/js/auth-ui.js"></script>
+    <script src="../src/services/auth-api.js"></script>
+    <script src="../src/features/auth/auth-ui.js"></script>
 </body>
 </html>

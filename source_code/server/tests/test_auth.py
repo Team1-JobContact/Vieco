@@ -1,7 +1,7 @@
 from fastapi import Depends
 
 from src.app import app
-from src.middlewares.auth import require_roles
+from src.dependencies.auth import require_roles
 from src.models import User
 from src.utils.security import verify_password
 

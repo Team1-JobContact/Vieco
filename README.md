@@ -1,29 +1,44 @@
-# Vieco – Nền tảng kết nối việc làm
+# Vieco — Nền tảng kết nối việc làm
 
-## 1. Giới thiệu
-Vieco là website kết nối ứng viên và nhà tuyển dụng, hỗ trợ tìm kiếm việc làm, đăng tin tuyển dụng và quản lý hồ sơ ứng tuyển.
+Vieco kết nối ứng viên và nhà tuyển dụng. Dự án dùng frontend HTML/CSS/JavaScript, backend FastAPI, MySQL qua SQLAlchemy và Alembic. Xác thực dùng JWT Bearer và bcrypt; CV được lưu cục bộ và kiểm tra quyền khi tải; email dùng SMTP.
 
-## 2. Thành viên
-Nhóm gồm 4 thành viên, phụ trách các module M0, M1, M2, M3.
+Kiến trúc được đối chiếu với tài liệu thiết kế JobContact ngày 15/11/2026. Đã bổ sung đủ 24 đường dẫn API cốt lõi trong tài liệu. Công nghệ được giữ theo mã nguồn đang phát triển, vì vậy dự án **chưa trùng hoàn toàn tech stack React/Vite/Tailwind + Express/Prisma trong bản Word**. Xem [bảng đối chiếu](docs/ARCHITECTURE_REVIEW.md) để biết phạm vi và giới hạn kiểm chứng.
 
-## 3. Chức năng chính
-- M0: Danh mục và cấu hình
-- M1: Tài khoản và hồ sơ
-- M2: Tuyển dụng và ứng tuyển
-- M3: Thông báo và thống kê
+## Bàn giao cho nhóm
 
-## 4. Công nghệ
-Đang chờ nhóm thống nhất công nghệ và kiến trúc triển khai.
+Xem [báo cáo thay đổi trước merge main](docs/TEAM_CHANGE_REPORT.md) để biết phạm vi tích hợp, tác động đến từng phần việc và checklist kiểm tra. [Thông báo ngắn](docs/TEAM_ANNOUNCEMENT.md) có thể dùng để chia sẻ trong nhóm. Nhánh cập nhật hiện là `feat/architecture-api-alignment`; chưa merge vào main tại thời điểm lập báo cáo 15/11/2026.
 
-## 5. Cài đặt và chạy dự án
-Xem tài liệu [SETUP.md](docs/SETUP.md).
-Hiện repository chưa có source code để chạy.
+## Cấu trúc
 
-## 6. Kiểm thử
-Xem [TEST_CHECKLIST.md](docs/TEST_CHECKLIST.md).
+```text
+Vieco/
+├── docs/                  # Thiết kế, đối chiếu và hướng dẫn
+├── source_code/
+│   ├── client/            # pages; src/features, src/services, src/assets
+│   └── server/            # routes → controllers → services → models
+└── archive/               # Artefact lịch sử, không dùng để chạy
+```
 
-## 7. Tiến độ
-Xem [WEEK1_REVIEW.md](docs/WEEK1_REVIEW.md).
+Xem [cấu trúc chi tiết](docs/PROJECT_STRUCTURE.md), [cài đặt](docs/SETUP.md) và [hướng dẫn Windows](docs/HUONG_DAN_CHAY_DU_AN.md).
 
-## 8. Tài liệu yêu cầu
-Dự án được xây dựng dựa trên tài liệu SRS Vieco phiên bản 1.0, ngày 01/11/2026.
+## Chạy dự án
+
+Sau khi cài dependency, cấu hình `.env`, chạy migration và seed theo SETUP, mở hai terminal từ gốc repository:
+
+```powershell
+cd source_code/server
+python run.py
+```
+
+```powershell
+cd source_code/client
+python -m http.server 5500
+```
+
+Frontend: http://localhost:5500. API/Swagger: http://127.0.0.1:8000/docs. Frontend không cần npm build. Thiết lập SMTP theo `.env.example` để gửi xác thực email, đặt lại mật khẩu và thông báo sự kiện. Các giá trị trong `.env` hiện có không bị thay đổi bởi đợt chỉnh sửa kiến trúc.
+
+## Kiểm thử
+
+Backend: chạy `python -m pytest tests -q` tại `source_code/server` bằng Python của môi trường ảo. Frontend: chạy `npm ci` rồi `npm test` tại `source_code/client`. Kiểm thử backend dùng SQLite cô lập, không chạy migration/seed lên MySQL thật.
+
+Không commit `.env`, mật khẩu hay dữ liệu uploads. Các báo cáo tuần 1 trong docs là lịch sử, không phản ánh trạng thái hiện hành.

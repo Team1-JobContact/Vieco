@@ -1,13 +1,10 @@
-# Vieco
+# Mã nguồn Vieco
 
-Cấu trúc dự án Vieco gồm `client/` (Frontend) và `server/` (Backend).
-<!-- 
-Cần lưu ý: Phần phân quyền - PB10(B)
+- `client/`: HTML/CSS/JavaScript; trang trong `pages/`, UI theo chức năng trong `src/features/`, HTTP client trong `src/services/`, CSS trong `src/assets/`. Chạy HTTP server từ client; kiểm thử bằng `npm test`.
+- `server/`: FastAPI; `routes/` khai báo URL và response, `controllers/` nhận dữ liệu HTTP và dependency, `services/` xử lý nghiệp vụ, `models/` ánh xạ SQLAlchemy. `middlewares/auth.py` kiểm tra JWT và RBAC. `dependencies/auth.py` giữ import tương thích.
 
-Chạy migration và seed. Trước khi dùng thật, bạn cần chạy alembic upgrade head và python -m src.seeds.run. Nếu chưa seed bảng roles, đăng ký sẽ báo lỗi.
-Đã sửa seeds/run.py. Phần tạo admin giờ dùng hash_password, vì passlib không chạy được với bcrypt 5.
-Đã sửa requirements.txt. Mình bỏ passlib và cors, thêm pydantic[email], pytest và httpx, và nới các phiên bản để chạy được trên Python 3.14. Bạn nên báo team biết.
-Chưa chạy migration 0002 trên MySQL thật. Nó mới chỉ được viết dựa trên migration 0001.
-Đổi SECRET_KEY trong .env trước khi triển khai.
+Xem [SETUP](../docs/SETUP.md), [cấu trúc](../docs/PROJECT_STRUCTURE.md), [đối chiếu thiết kế](../docs/ARCHITECTURE_REVIEW.md) và [migration/seed](server/migrations/README.md).
 
-Chạy test bằng lệnh: cd source_code\server; python -m pytest tests. -->
+MySQL schema vẫn do Alembic quản lý. Không dùng thư mục `prisma/` rỗng làm bằng chứng dự án đã tích hợp Prisma. Bộ khung Express cũ trong archive không thuộc runtime.
+
+Chạy backend tại server bằng `python run.py`; chạy test bằng `python -m pytest tests -q`. Đặt `SECRET_KEY` riêng trong `.env`. Seed Admin chỉ chạy khi có `ADMIN_EMAIL` và `ADMIN_PASSWORD`. File `.env.example` liệt kê biến cấu hình, bao gồm SMTP tùy chọn; không chứa thông tin đăng nhập thật.

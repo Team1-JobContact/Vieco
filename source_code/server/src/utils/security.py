@@ -24,6 +24,7 @@ def create_access_token(user_id: int, role: str) -> str:
         "sub": str(user_id),
         "role": role,
         "jti": uuid.uuid4().hex,
+        "iat": datetime.now(timezone.utc).timestamp(),
         "exp": expire,
     }
     return jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.ALGORITHM)

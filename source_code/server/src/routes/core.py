@@ -1,0 +1,26 @@
+from fastapi import APIRouter
+from src.controllers import core_controller as controller
+
+router = APIRouter(prefix="/api/v1", tags=["Core design API"])
+
+router.add_api_route("/auth/verify-email", controller.verify_email, methods=["POST"])
+router.add_api_route("/auth/forgot-password", controller.forgot_password, methods=["POST"])
+router.add_api_route("/auth/reset-password", controller.reset_password, methods=["POST"])
+router.add_api_route("/users/profile", controller.get_profile, methods=["GET"])
+router.add_api_route("/users/profile", controller.update_profile, methods=["PUT"])
+router.add_api_route("/admin/categories", controller.create_category, methods=["POST"], status_code=201)
+router.add_api_route("/companies", controller.create_company, methods=["POST"], status_code=201)
+router.add_api_route("/companies/{company_id}", controller.get_company, methods=["GET"])
+router.add_api_route("/admin/companies/{company_id}/approval", controller.approve_company, methods=["PATCH"])
+router.add_api_route("/jobs", controller.list_jobs, methods=["GET"])
+router.add_api_route("/jobs/{job_id}", controller.get_job, methods=["GET"])
+router.add_api_route("/jobs", controller.create_job, methods=["POST"], status_code=201)
+router.add_api_route("/jobs/{job_id}", controller.update_job, methods=["PATCH"])
+router.add_api_route("/admin/jobs/{job_id}/approval", controller.approve_job, methods=["PATCH"])
+router.add_api_route("/applications", controller.create_application, methods=["POST"], status_code=201)
+router.add_api_route("/applications/my-applications", controller.my_applications, methods=["GET"])
+router.add_api_route("/applications/{application_id}/withdraw", controller.withdraw_application, methods=["PATCH"])
+router.add_api_route("/employer/jobs/{job_id}/applications", controller.employer_applications, methods=["GET"])
+router.add_api_route("/applications/{application_id}/status", controller.update_application_status, methods=["PATCH"])
+router.add_api_route("/notifications", controller.list_notifications, methods=["GET"])
+router.add_api_route("/notifications/{notification_id}/read", controller.read_notification, methods=["PATCH"])
