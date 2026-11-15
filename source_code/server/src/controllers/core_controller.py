@@ -1,4 +1,6 @@
+from typing import Literal
 from fastapi import Depends, Query
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 from src.config.database import get_db
 from src.middlewares.auth import get_current_user, require_roles
@@ -11,7 +13,9 @@ from src.schemas.job import JobCreate, JobUpdate, EmploymentType, ExperienceLeve
 from src.services import (public_service, catalog_service, company_service, job_service,
     application_service, notification_service, email_service)
 
+ApplicationStatus = Literal["NEW","VIEWED","INTERVIEW","ACCEPTED","REJECTED","WITHDRAWN"]
 candidate = require_roles("CANDIDATE")
+applicant_or_employer = require_roles("CANDIDATE","EMPLOYER")
 employer = require_roles("EMPLOYER")
 admin = require_roles("ADMIN")
 
@@ -48,8 +52,9 @@ def list_jobs(q: str | None = Query(None,max_length=100), industry_id: int | Non
               province_id: int | None = Query(None,gt=0), skill_id: int | None = Query(None,gt=0),
               employment_type: EmploymentType | None = None, experience_level: ExperienceLevel | None = None,
               salary_min: int | None = Query(None,ge=0), salary_max: int | None = Query(None,ge=0),
+              company_id: int | None = Query(None,gt=0), sort: Literal["newest","salary","deadline"] = "newest",
               page: int = Query(1,ge=1), page_size: int = Query(20,ge=1,le=100), db: Session = Depends(get_db)):
-    return public_service.list_jobs(db,q,industry_id,province_id,skill_id,employment_type,experience_level,salary_min,salary_max,page,page_size)
+    return public_service.list_jobs(db,q,industry_id,province_id,skill_id,employment_type,experience_level,salary_min,salary_max,page,page_size,company_id,sort)
 
 def get_job(job_id: int, db: Session = Depends(get_db)):
     return public_service.get_job(db,job_id)
@@ -68,16 +73,17 @@ def approve_job(job_id: int, data: ApprovalRequest, user: User = Depends(admin),
 def create_application(data: ApplicationCreate, user: User = Depends(candidate), db: Session = Depends(get_db)):
     return application_service.create_application(db,user,data)
 
-def my_applications(page: int = Query(1,ge=1), page_size: int = Query(20,ge=1,le=100),
+def my_applications(status: ApplicationStatus | None = None, page: int = Query(1,ge=1), page_size: int = Query(20,ge=1,le=100),
                     user: User = Depends(candidate), db: Session = Depends(get_db)):
-    return application_service.my_applications(db,user,page,page_size)
+    return application_service.my_applications(db,user,page,page_size,status)
 
 def withdraw_application(application_id: int, user: User = Depends(candidate), db: Session = Depends(get_db)):
     return application_service.withdraw(db,user,application_id)
 
-def employer_applications(job_id: int, page: int = Query(1,ge=1), page_size: int = Query(20,ge=1,le=100),
+def employer_applications(job_id: int, status: ApplicationStatus | None = None,
+                          page: int = Query(1,ge=1), page_size: int = Query(20,ge=1,le=100),
                           user: User = Depends(employer), db: Session = Depends(get_db)):
-    return application_service.employer_applications(db,user,job_id,page,page_size)
+    return application_service.employer_applications(db,user,job_id,page,page_size,status)
 
 def update_application_status(application_id: int, data: ApplicationStatusUpdate,
                               user: User = Depends(employer), db: Session = Depends(get_db)):
@@ -89,3 +95,30 @@ def list_notifications(page: int = Query(1,ge=1), page_size: int = Query(20,ge=1
 
 def read_notification(notification_id: int, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     return notification_service.mark_read(db,user,notification_id)
+
+
+# ---------- Bổ sung cho giao diện (PB-017 đến PB-024) ----------
+
+def list_companies(q: str | None = Query(None,max_length=100), industry_id: int | None = Query(None,gt=0),
+                   province_id: int | None = Query(None,gt=0), page: int = Query(1,ge=1),
+                   page_size: int = Query(12,ge=1,le=100), db: Session = Depends(get_db)):
+    return public_service.list_companies(db,q,industry_id,province_id,page,page_size)
+
+def get_application(application_id: int, user: User = Depends(applicant_or_employer), db: Session = Depends(get_db)):
+    return application_service.get_application(db,user,application_id)
+
+def download_application_cv(application_id: int, user: User = Depends(applicant_or_employer), db: Session = Depends(get_db)):
+    path, media_type, file_name = application_service.application_cv(db,user,application_id)
+    return FileResponse(path, media_type=media_type, filename=file_name)
+
+def list_saved_jobs(user: User = Depends(candidate), db: Session = Depends(get_db)):
+    return public_service.list_saved_jobs(db,user)
+
+def save_job(job_id: int, user: User = Depends(candidate), db: Session = Depends(get_db)):
+    return public_service.save_job(db,user,job_id)
+
+def unsave_job(job_id: int, user: User = Depends(candidate), db: Session = Depends(get_db)):
+    return public_service.unsave_job(db,user,job_id)
+
+def read_all_notifications(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    return notification_service.mark_all_read(db,user)

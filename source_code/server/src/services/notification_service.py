@@ -9,7 +9,14 @@ def list_notifications(db,user,page,page_size):
     query = db.query(Notification).filter(Notification.user_id == user.id)
     total = query.count()
     rows = query.order_by(Notification.created_at.desc(), Notification.id.desc()).offset((page-1)*page_size).limit(page_size).all()
-    return dict(items=[fields(r) for r in rows], total=total, page=page, page_size=page_size)
+    unread = query.filter(Notification.is_read.is_(False)).count()
+    return dict(items=[fields(r) for r in rows], total=total, unread_count=unread, page=page, page_size=page_size)
+
+def mark_all_read(db,user):
+    updated = db.query(Notification).filter(Notification.user_id == user.id, Notification.is_read.is_(False)).update(
+        {Notification.is_read: True, Notification.read_at: _utcnow()}, synchronize_session=False)
+    db.commit()
+    return {"updated": updated}
 
 def mark_read(db,user,notification_id):
     row = db.query(Notification).filter(Notification.id == notification_id,Notification.user_id == user.id).first()
