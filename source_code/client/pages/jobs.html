@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="data:,">
+    <title>Việc làm | Vieco</title>
+    <link rel="stylesheet" href="../src/assets/css/vieco.css">
+</head>
+<body class="v-page" data-root="../">
+    <div id="v-header"></div>
+    <main>
+        <section class="v-page-head">
+            <div class="v-wrap">
+                <nav class="v-crumbs" aria-label="Đường dẫn"><a href="../index.html">Trang chủ</a><span>/</span><span aria-current="page">Việc làm</span></nav>
+                <p class="v-eyebrow">Đón đầu xu hướng sự nghiệp</p>
+                <h1 class="v-h1">Tìm việc làm phù hợp với bạn</h1>
+                <p class="v-lead">Một bước ứng tuyển. Mở thêm nhiều khả năng.</p>
+                <div id="jobs-search"></div>
+            </div>
+        </section>
+        <section class="v-section">
+            <div class="v-wrap v-layout-filter">
+                <form class="v-filter" id="jobs-filter-form" aria-label="Bộ lọc việc làm">
+                    <div class="v-filter-head"><h2>Bộ lọc</h2><button type="reset" class="v-link">Xóa tất cả</button></div>
+                    <fieldset><legend>Ngành nghề</legend><div id="filter-industry"></div></fieldset>
+                    <fieldset><legend>Địa điểm</legend><div id="filter-province"></div></fieldset>
+                    <fieldset><legend>Mức lương (triệu/tháng)</legend>
+                        <div class="v-range">
+                            <input class="v-input" type="number" name="salary_min" min="0" max="999" step="1" placeholder="Từ" aria-label="Lương từ (triệu)">
+                            <span>–</span>
+                            <input class="v-input" type="number" name="salary_max" min="0" max="999" step="1" placeholder="Đến" aria-label="Lương đến (triệu)">
+                        </div>
+                    </fieldset>
+                    <fieldset><legend>Kinh nghiệm</legend><div id="filter-experience"></div></fieldset>
+                    <fieldset><legend>Hình thức</legend><div id="filter-employment"></div></fieldset>
+                    <button type="submit" class="v-btn v-btn-primary v-btn-sm v-btn-block v-mt-3">Áp dụng bộ lọc</button>
+                </form>
+                <div>
+                    <div class="v-results-head">
+                        <p class="v-results-count" aria-live="polite"><strong id="jobs-total">0</strong>việc làm phù hợp</p>
+                        <label class="v-select-inline">Sắp xếp:
+                            <select id="jobs-sort"><option value="newest">Mới nhất</option><option value="salary">Lương cao nhất</option><option value="deadline">Sắp hết hạn</option></select>
+                        </label>
+                    </div>
+                    <div class="v-chips v-mb-2" id="jobs-active"></div>
+                    <div id="jobs-container" aria-live="polite"></div>
+                    <nav class="v-pagination" id="jobs-pagination" aria-label="Phân trang"></nav>
+                </div>
+            </div>
+        </section>
+    </main>
+    <div id="v-footer"></div>
+    <script src="../src/services/auth-api.js"></script>
+    <script src="../src/shared/layout.js"></script>
+    <script src="../src/features/jobs/jobs-ui.js"></script>
+</body>
+</html>
