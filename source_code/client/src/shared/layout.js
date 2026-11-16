@@ -101,7 +101,8 @@
         try {
             response = await fetch(Auth.getApiBaseUrl() + path + query, { method: options.method || "GET", headers: headers, body: body });
         } catch (_) {
-            throw new Error("Không kết nối được máy chủ. Hãy kiểm tra backend đang chạy ở cổng 8000.");
+            // Trình duyệt cũng báo lỗi mạng khi backend trả lỗi 500 ở chế độ DEBUG (thiếu header CORS).
+            throw new Error("Không nhận được phản hồi từ máy chủ. Kiểm tra backend đang chạy ở cổng 8000; nếu đang chạy, xem lỗi trong terminal backend (thường do chưa chạy alembic upgrade head).");
         }
         if (options.blob && response.ok) return response.blob();
         var data = null;
