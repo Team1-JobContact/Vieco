@@ -7,6 +7,9 @@ Chỉ nhận JPG, PNG, WEBP (không nhận SVG vì có thể chứa mã script) 
 import os
 import re
 import uuid
+import warnings
+
+from PIL import Image, UnidentifiedImageError
 
 from fastapi import HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
@@ -88,6 +91,15 @@ def _store(file: UploadFile, max_mb: int) -> str:
         kind = _detect(head)
         if kind is None or kind != claimed:
             raise HTTPException(status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, "Nội dung tệp không phải ảnh JPG, PNG hoặc WEBP hợp lệ")
+        try:
+            with warnings.catch_warnings():
+                warnings.simplefilter("error", Image.DecompressionBombWarning)
+                with Image.open(temp_path) as image:
+                    image.verify()
+                with Image.open(temp_path) as image:
+                    image.load()
+        except (UnidentifiedImageError, OSError, ValueError, Image.DecompressionBombError, Image.DecompressionBombWarning):
+            raise HTTPException(415, "Tệp ảnh bị hỏng hoặc không thể giải mã")
         name = f"{uuid.uuid4().hex}.{kind}"
         os.replace(temp_path, os.path.join(_folder(), name))
     except BaseException:
@@ -103,7 +115,7 @@ def _owned_company(db: Session, user: User) -> Company:
     company, member = company_service.get_membership_or_404(db, user)
     if member.member_role != "OWNER":
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Chỉ chủ sở hữu công ty mới được thay đổi hình ảnh")
-    return company
+    return db.query(Company).filter(Company.id == company.id).populate_existing().with_for_update().one()
 
 
 def list_images(db: Session, company: Company) -> list[dict]:
@@ -151,7 +163,8 @@ def delete_cover(db: Session, user: User) -> dict:
 
 def add_image(db: Session, user: User, file: UploadFile) -> dict:
     company = _owned_company(db, user)
-    if db.query(CompanyImage.id).filter(CompanyImage.company_id == company.id).count() >= MAX_GALLERY_IMAGES:
+    images = db.query(CompanyImage.id).filter(CompanyImage.company_id == company.id).with_for_update().all()
+    if len(images) >= MAX_GALLERY_IMAGES:
         raise HTTPException(status.HTTP_409_CONFLICT,
                             f"Tối đa {MAX_GALLERY_IMAGES} ảnh không gian làm việc, hãy xóa bớt ảnh cũ")
     url = _store(file, PHOTO_MAX_MB)

@@ -23,7 +23,14 @@ def get_token_payload(
     if credentials is None:
         raise unauthorized
     payload = decode_access_token(credentials.credentials)
-    if not payload or "sub" not in payload or "jti" not in payload:
+    if not payload or not isinstance(payload.get("jti"), str) or not payload["jti"]:
+        raise unauthorized
+    try:
+        if int(payload["sub"]) <= 0:
+            raise ValueError
+        datetime.fromtimestamp(payload["exp"], timezone.utc)
+        datetime.fromtimestamp(payload["iat"], timezone.utc)
+    except (KeyError, ValueError, TypeError, OverflowError, OSError):
         raise unauthorized
     if db.query(RevokedToken).filter(RevokedToken.jti == payload["jti"]).first():
         raise unauthorized

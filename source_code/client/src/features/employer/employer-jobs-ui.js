@@ -39,7 +39,7 @@
         }
         function extend(job) {
             V.modal(function (close) {
-                var input = h("input", { type: "date", required: true, min: new Date().toISOString().slice(0, 10), value: job.deadline || "" });
+                var input = h("input", { type: "date", required: true, min: window.ViecoEmployerApi.localDate(), value: job.deadline || "" });
                 var error = h("div", {});
                 var form = h("form", {}, h("p", { class: "v-eyebrow", text: "Gia hạn tin" }), h("h2", { text: job.title }),
                     h("p", { class: "v-modal-sub", text: "Hạn nộp hiện tại: " + V.date(job.deadline) }), error,
@@ -68,8 +68,8 @@
                 editable && h("a", { class: "v-btn v-btn-outline v-btn-xs", href: V.url("pages/employer.html") + "?job_id=" + job.id + "#job", text: "Sửa" }),
                 editable && btn("Gửi duyệt", function () { act(job, "/submit", null, { done: "Đã gửi tin cho Admin duyệt." }); }),
                 job.status === "APPROVED" && btn("Đóng tin", function () { act(job, "/close", ["Đóng tin tuyển dụng?", "Tin sẽ ngừng hiển thị và không nhận đơn mới. Các đơn đã nộp vẫn được giữ.", "Đóng tin"]); }),
-                job.status === "CLOSED" && btn("Mở lại", function () { act(job, "/reopen", null, { done: "Đã mở lại tin tuyển dụng." }); }),
-                (job.status === "APPROVED" || job.status === "EXPIRED" || job.status === "CLOSED") && btn("Gia hạn", function () { extend(job); }),
+                job.status === "CLOSED" && !job.removed_at && btn("Mở lại", function () { act(job, "/reopen", null, { done: "Đã gửi tin để Admin duyệt mở lại." }); }),
+                !job.removed_at && (job.status === "APPROVED" || job.status === "EXPIRED" || job.status === "CLOSED") && btn("Gia hạn", function () { extend(job); }),
                 job.status === "DRAFT" && btn("Xóa", function () { act(job, "", ["Xóa tin nháp?", "Tin nháp “" + job.title + "” sẽ bị xóa vĩnh viễn.", "Xóa tin"], { method: "DELETE", danger: true, done: "Đã xóa tin nháp." }); }, "v-btn-danger"));
         }
         async function load() {
@@ -157,6 +157,17 @@
             } catch (_) { /* vẫn hiển thị hồ sơ nếu không đổi được trạng thái */ }
         }
         var p = detail.candidate_profile || {};
+        var profileHistory = detail.profile_history || {};
+        function historySection(kind, title) {
+            var rows = profileHistory[kind] || [];
+            if (!rows.length) return null;
+            return h("section", { class: "v-card v-mb-3" }, h("h3", { class: "v-card-title", text: title }), rows.map(function (entry) {
+                return h("div", { class: "v-mb-2" }, h("strong", { text: entry.school_name || entry.company_name || entry.name }),
+                    h("p", { class: "v-small", text: [entry.major, entry.degree, entry.position].filter(Boolean).join(" · ") }),
+                    entry.start_date && h("p", { class: "v-small v-muted", text: V.date(entry.start_date) + " – " + (entry.end_date ? V.date(entry.end_date) : "Hiện tại") }),
+                    entry.description && h("p", { class: "v-small", style: "white-space:pre-wrap", text: entry.description }));
+            }));
+        }
         function kv(label, value) { return h("div", { class: "v-kv" }, h("dt", { text: label }), h("dd", { text: value || "—" })); }
         V.modal(function (close) {
             var error = h("div", {});
@@ -188,6 +199,7 @@
                     kv("Email", detail.candidate_email), kv("Số điện thoại", detail.candidate_phone),
                     kv("Ngày sinh", p.date_of_birth ? V.date(p.date_of_birth) : null), kv("Nơi ở", [p.address, p.province_name].filter(Boolean).join(", "))),
                 p.summary && h("div", { class: "v-card v-mb-3" }, h("h3", { class: "v-card-title", text: "Giới thiệu bản thân" }), h("p", { class: "v-small", style: "white-space:pre-wrap", text: p.summary })),
+                historySection("educations", "Học vấn"), historySection("experiences", "Kinh nghiệm làm việc"), historySection("skills", "Kỹ năng"),
                 detail.cover_letter && h("div", { class: "v-card v-mb-3" }, h("h3", { class: "v-card-title", text: "Thư giới thiệu" }), h("p", { class: "v-small", style: "white-space:pre-wrap", text: detail.cover_letter })),
                 h("h3", { class: "v-card-title v-mt-3", text: "Lịch sử xử lý" }),
                 h("ol", { class: "v-timeline" }, detail.history.map(function (step) {

@@ -154,6 +154,8 @@
         }
         var letter = h("textarea", { name: "cover_letter", maxlength: 5000, rows: 4, placeholder: "Viết đôi lời giới thiệu bản thân và lý do bạn phù hợp với vị trí này..." });
         var submit = h("button", { type: "submit", class: "v-btn v-btn-primary v-btn-sm" }, "Gửi hồ sơ", V.icon("out"));
+        var uploadedCv = null;
+        file.addEventListener("change", function () { uploadedCv = null; });
 
         V.modal(function (close) {
             var form = h("form", { novalidate: true },
@@ -175,6 +177,7 @@
 
             form.addEventListener("submit", async function (event) {
                 event.preventDefault();
+                if (submit.disabled) return;
                 var fullName = name.value.trim(), phoneValue = phone.value.trim();
                 var choice = (form.querySelector('input[name="cv"]:checked') || {}).value;
                 if (fullName.length < 2) return V.note(message, "Vui lòng nhập họ và tên (ít nhất 2 ký tự).", "error");
@@ -194,11 +197,13 @@
                     }
                     var cvId = choice, cvName;
                     if (choice === "upload") {
-                        var data = new FormData();
-                        data.append("file", file.files[0]);
-                        var uploaded = await V.api("/candidates/me/cvs", { method: "POST", formData: data });
-                        cvId = uploaded.id;
-                        cvName = uploaded.file_name;
+                        if (!uploadedCv) {
+                            var data = new FormData();
+                            data.append("file", file.files[0]);
+                            uploadedCv = await V.api("/candidates/me/cvs", { method: "POST", formData: data });
+                        }
+                        cvId = uploadedCv.id;
+                        cvName = uploadedCv.file_name;
                     }
                     var result = await V.api("/applications", { method: "POST", body: {
                         job_id: job.id, cv_id: Number(cvId), cover_letter: letter.value.trim() || null } });
@@ -255,5 +260,5 @@
         render();
         if (window.location.hash === "#apply" && !applied) startApply();
     }
-    init();
+    init().catch(function (error) { V.note(app, error.message, "error"); });
 }());

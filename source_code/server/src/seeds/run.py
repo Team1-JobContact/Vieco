@@ -65,7 +65,12 @@ def seed_admin(s):
     email, password = os.getenv("ADMIN_EMAIL"), os.getenv("ADMIN_PASSWORD")
     if not email or not password:
         return "bỏ qua (chưa đặt ADMIN_EMAIL/ADMIN_PASSWORD)"
-    if s.scalar(select(User.id).where(User.email == email)):
+    email = email.strip().lower()
+    existing = s.scalar(select(User).where(User.email == email))
+    if existing:
+        role_name = s.scalar(select(Role.name).where(Role.id == existing.role_id))
+        if role_name != "ADMIN":
+            return "bỏ qua (email đã thuộc tài khoản không phải ADMIN)"
         return "đã tồn tại"
     from src.utils.security import hash_password  # import muộn: chỉ cần khi tạo Admin
 

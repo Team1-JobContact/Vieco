@@ -59,8 +59,9 @@ def create_application(db, user, data):
     job = public_jobs_query(db).filter(Job.id == data.job_id).with_for_update().first()
     if job is None:
         raise HTTPException(409, "Tin không còn nhận ứng tuyển")
+    db.query(CandidateProfile).filter(CandidateProfile.id == profile.id).with_for_update().one()
     cv = db.query(CV).filter(CV.id == data.cv_id, CV.candidate_profile_id == profile.id,
-                             CV.deleted_at.is_(None)).first()
+                             CV.deleted_at.is_(None)).with_for_update().first()
     if cv is None:
         raise HTTPException(404, "Không tìm thấy CV của bạn")
     row = Application(job_id=job.id, candidate_profile_id=profile.id, cv_id=cv.id,
@@ -134,6 +135,8 @@ def get_application(db, user, application_id):
         date_of_birth=profile.date_of_birth, gender=profile.gender, address=profile.address,
         province_name=province.name if province else None, summary=profile.summary,
     ) if profile else None
+    from src.services.profile_history_service import profile_history
+    data["profile_history"] = profile_history(db, profile)
     rows = (db.query(ApplicationStatusHistory, User.full_name)
             .outerjoin(User, User.id == ApplicationStatusHistory.changed_by)
             .filter(ApplicationStatusHistory.application_id == row.id)

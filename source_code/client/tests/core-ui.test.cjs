@@ -72,6 +72,7 @@ test('reset password validates before sending, strips URL secret and reports suc
     let calls=0,cleared=false,fail=true;
     w.eval(source('src/services/auth-api.js'));
     w.ViecoAuthApi.clearAuthSession=()=>{cleared=true;};
+    w.eval(source('src/shared/layout.js'));
     w.ViecoAccountApi={submit:async(action,payload)=>{
         calls++;
         assert.equal(action,'reset-password');
