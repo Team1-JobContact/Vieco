@@ -3,23 +3,37 @@
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="referrer" content="no-referrer">
-  <title>Khôi phục tài khoản Vieco</title>
-  <link rel="stylesheet" href="../src/assets/css/style.css">
+  <link rel="icon" href="data:,">
+  <title>Khôi phục tài khoản | Vieco</title>
+  <link rel="stylesheet" href="../src/assets/css/vieco.css">
 </head>
-<body>
-  <main class="container">
-    <section class="hero-section">
-      <h1 id="account-title">Khôi phục tài khoản</h1>
-      <p id="account-message" role="status" aria-live="polite"></p>
-      <form id="account-form">
-        <p id="email-field"><label>Email <input name="email" type="email" autocomplete="email" required></label></p>
-        <p id="password-field" hidden><label>Mật khẩu mới <input name="password" type="password" autocomplete="new-password" minlength="8" disabled></label></p>
-        <button type="submit" class="btn btn-primary" id="account-submit">Gửi email</button>
-      </form>
-      <p><a href="login.html">Về trang đăng nhập</a></p>
+<body class="v-page" data-root="../">
+  <div id="v-header"></div>
+  <main>
+    <section class="v-page-head">
+      <div class="v-wrap">
+        <nav class="v-crumbs" aria-label="Đường dẫn"><a href="../index.html">Trang chủ</a><span>/</span><a href="login.html">Đăng nhập</a><span>/</span><span aria-current="page">Khôi phục tài khoản</span></nav>
+        <p class="v-eyebrow">Tài khoản Vieco</p>
+        <h1 class="v-h1" id="account-title">Khôi phục tài khoản</h1>
+      </div>
+    </section>
+    <section class="v-section">
+      <div class="v-wrap">
+        <div class="v-card" style="max-width:520px;padding:32px">
+          <p class="v-note" id="account-message" role="status" aria-live="polite"></p>
+          <form id="account-form">
+            <label class="v-field" id="email-field"><span>Email</span><input name="email" type="email" autocomplete="email" required></label>
+            <label class="v-field" id="password-field" hidden><span>Mật khẩu mới</span><input name="password" type="password" autocomplete="new-password" minlength="8" disabled></label>
+            <button type="submit" class="v-btn v-btn-primary v-btn-sm v-btn-block" id="account-submit">Gửi email</button>
+          </form>
+          <p class="v-mt-3"><a class="v-link" href="login.html">← Về trang đăng nhập</a></p>
+        </div>
+      </div>
     </section>
   </main>
+  <div id="v-footer"></div>
   <script src="../src/services/auth-api.js"></script>
+  <script src="../src/shared/layout.js"></script>
   <script src="../src/services/account-api.js"></script>
   <script src="../src/features/auth/account-ui.js"></script>
 </body>

@@ -1,0 +1,157 @@
+/* Đồng bộ giao diện các trang có sẵn (đăng nhập, đăng ký, khôi phục tài khoản, hồ sơ công ty và tin tuyển dụng)
+   với hệ thống thiết kế Vieco trong vieco.css. Tệp này nạp SAU style.css, auth.css, employer.css và vieco.css;
+   chỉ đổi màu sắc và hình khối, không đổi cấu trúc HTML mà mã JavaScript và test đang dùng. */
+
+/* ---------- Biến màu dùng chung của các trang cũ ---------- */
+:root, body.auth-page, .employer-page {
+    --vieco-primary: var(--v-blue);
+    --vieco-primary-hover: var(--v-blue-hover);
+    --vieco-primary-soft: #e9eef0;
+    --vieco-primary-border: #b9cbd6;
+    --vieco-navy: var(--v-blue);
+    --vieco-navy-deep: var(--v-blue-deep);
+    --vieco-bg: var(--v-bg);
+    --vieco-surface: var(--v-white);
+    --vieco-text: var(--v-ink);
+    --vieco-text-body: #3d4651;
+    --vieco-text-muted: var(--v-muted);
+    --vieco-text-placeholder: #8a959b;
+    --vieco-border: var(--v-line);
+    --vieco-border-input: var(--v-line-input);
+    --vieco-danger: var(--v-danger);
+    --vieco-danger-bg: var(--v-danger-bg);
+    --vieco-danger-border: #ecc5c7;
+    --vieco-success: var(--v-success);
+    --vieco-success-bg: var(--v-success-bg);
+    --vieco-success-border: #bcd6c8;
+    --vieco-warning: var(--v-gold-ink);
+    --vieco-warning-bg: #f6ecd6;
+    --vieco-warning-border: var(--v-sand);
+    --vieco-radius-sm: 2px;
+    --vieco-radius-md: 2px;
+    --vieco-radius-lg: 2px;
+    --vieco-radius-xl: 2px;
+    --vieco-shadow-sm: none;
+    --vieco-shadow-md: none;
+    /* auth.css */
+    --bg-base: var(--v-white);
+    --shadow-dark: transparent;
+    --shadow-light: transparent;
+    --text-dark: var(--v-ink);
+    --text-muted: var(--v-muted);
+    --luxury-navy: var(--v-blue);
+    --luxury-navy-hover: var(--v-blue-hover);
+    --luxury-gold: var(--v-gold);
+    --luxury-gold-soft: rgba(228, 190, 114, .22);
+    /* employer.css */
+    --employer-gold: var(--v-gold);
+    --employer-gold-ink: var(--v-gold-ink);
+    --employer-shadow: transparent;
+}
+
+/* Header và footer cũ được thay bằng khung trang dùng chung (#v-header, #v-footer). */
+.v-sync > .navbar, .v-sync > .site-footer { display: none !important; }
+body.v-sync { background: var(--v-bg); color: var(--v-ink); font-size: 15px; }
+
+/* Góc vuông và không đổ bóng như các trang còn lại. */
+.v-sync main *, .v-sync main *::before, .v-sync main *::after { border-radius: 2px !important; box-shadow: none !important; }
+.v-sync main .spinner, .v-sync main .password-rule-dot, .v-sync main .session-avatar,
+.v-sync main .status-pill::before, .v-sync main .hero-caption::before, .v-sync main input[type="radio"] { border-radius: 50% !important; }
+.v-sync main :focus-visible { outline: 2px solid var(--v-blue); outline-offset: 2px; }
+
+/* ---------- Đăng nhập / Đăng ký ---------- */
+body.auth-page.v-sync { background: var(--v-cream); }
+.v-sync .auth-stage { padding: 56px 20px 72px; }
+.v-sync .neumorphic-main { background: var(--v-white); border: 1px solid var(--v-line-card); }
+.v-sync .form-container { background: var(--v-white); }
+.v-sync .form__title { font-size: 30px; font-weight: 500; letter-spacing: 0; margin-bottom: 22px; }
+.v-sync .form__icons, .v-sync .form__span, .v-sync .switch__circle { display: none; }
+.v-sync .form__input { height: 48px; background: var(--v-white); border: 1px solid var(--v-line-input); font-size: 15px; }
+.v-sync .form__input:focus { border-color: var(--v-blue); outline: 1px solid var(--v-blue); }
+.v-sync .neu-field.has-error .form__input { border-color: var(--v-danger); }
+.v-sync .neu-field-error { color: var(--v-danger); }
+.v-sync .neu-input-icon, .v-sync .neu-eye-btn { color: var(--v-muted); }
+.v-sync .neu-eye-btn:hover { color: var(--v-blue); }
+.v-sync .neu-role-option { background: var(--v-white); border: 1px solid var(--v-line-input); color: var(--v-muted); font-weight: 500; }
+.v-sync .neu-role-option.is-selected { border: 2px solid var(--v-blue); background: var(--v-cream); color: var(--v-blue); }
+.v-sync .neu-checkbox input, .v-sync main input[type="checkbox"], .v-sync main input[type="radio"] { accent-color: var(--v-blue); }
+.v-sync .form__link { color: var(--v-blue); border-color: transparent; font-weight: 500; }
+.v-sync .form__link:hover { text-decoration: underline; }
+.v-sync .form__button { height: 54px; min-width: 220px; background: var(--v-blue); color: var(--v-bg); font-size: 14px; font-weight: 500; letter-spacing: 0; text-transform: none; }
+.v-sync .form__button:hover:not(:disabled) { background: var(--v-blue-hover); transform: none; }
+.v-sync .password-rule.is-valid { color: var(--v-success); }
+.v-sync .password-rule.is-valid .password-rule-dot { background: var(--v-success); }
+.v-sync .switch { background: var(--v-blue); }
+.v-sync .switch__title { color: var(--v-bg); font-weight: 500; font-size: 30px; }
+.v-sync .switch__description { color: #d5e2e9; }
+.v-sync .switch__button { height: 54px; background: var(--v-gold); color: var(--v-ink); border: 0; font-size: 14px; font-weight: 600; letter-spacing: 0; text-transform: none; }
+.v-sync .switch__button:hover { background: #dcb361; transform: none; }
+.v-sync .mobile-mode-switch { background: var(--v-chip); padding: 4px; }
+.v-sync .mobile-mode-btn { color: var(--v-muted); background: transparent; }
+.v-sync .mobile-mode-btn.is-active { background: var(--v-blue); color: var(--v-bg); }
+.v-sync .session-overlay { background: var(--v-white); }
+.v-sync .session-card { background: var(--v-white); border: 1px solid var(--v-line-card); }
+.v-sync .session-avatar { background: var(--v-blue); color: var(--v-gold); }
+.v-sync .auth-alert { border-left: 3px solid var(--v-blue); background: var(--v-chip); color: var(--v-ink); }
+.v-sync .auth-alert--error { border-left-color: var(--v-danger); background: var(--v-danger-bg); color: #8a2228; }
+.v-sync .auth-alert--success { border-left-color: var(--v-success); background: var(--v-success-bg); color: #24523c; }
+.v-sync .auth-alert--warning { border-left-color: var(--v-gold-ink); background: #f6ecd6; color: #5f4a22; }
+.v-sync .auth-alert--info { border-left-color: var(--v-blue); background: #e9eef0; color: var(--v-blue-deep); }
+.v-sync .auth-alert-action { color: var(--v-blue); }
+
+/* ---------- Nút dùng chung của các trang cũ ---------- */
+.v-sync main .btn { height: 44px; padding: 0 20px; font-size: 13px; font-weight: 500; border: 1px solid transparent; display: inline-flex; align-items: center; justify-content: center; transform: none; }
+.v-sync main .btn-primary { background: var(--v-blue); color: var(--v-bg); border-color: var(--v-blue); }
+.v-sync main .btn-primary:hover:not(:disabled) { background: var(--v-blue-hover); }
+.v-sync main .btn-outline { background: transparent; color: var(--v-blue); border-color: var(--v-blue); }
+.v-sync main .btn-outline:hover:not(:disabled) { background: rgba(26, 82, 118, .06); color: var(--v-blue); }
+.v-sync main .btn:disabled { opacity: .55; }
+
+/* ---------- Không gian nhà tuyển dụng: hồ sơ công ty và tin tuyển dụng ---------- */
+.v-sync .employer-main { max-width: 1440px; padding: 0 var(--v-gutter) 72px; }
+.v-sync .page-heading { display: block; margin: 0 calc(-1 * var(--v-gutter)) 40px; padding: 48px var(--v-gutter) 52px; background: var(--v-cream); border: 0; }
+.v-sync .hero-art { display: none; }
+.v-sync .eyebrow { font-size: 11px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; color: var(--v-gold-ink); margin-bottom: 10px; }
+.v-sync .eyebrow::before { display: none; }
+.v-sync .page-heading h1 { font-size: clamp(30px, 3.1vw, 44px); font-weight: 500; letter-spacing: 0; line-height: 1.2; color: var(--v-ink); }
+.v-sync .page-heading h1 > span { font: inherit; color: var(--v-blue); padding: 0; }
+.v-sync .page-heading h1 > span::after { display: none; }
+.v-sync .hero-description { font-size: 15px; line-height: 1.6; color: var(--v-muted); margin-top: 12px; }
+.v-sync .hero-caption { font-size: 12px; color: var(--v-muted); margin-top: 16px; }
+.v-sync .hero-caption::before { background: var(--v-gold); }
+.v-sync .workspace-tabs { display: flex; gap: 40px; padding: 0; background: none; border: 0; border-bottom: 1px solid var(--v-line); width: 100%; margin-bottom: 32px; }
+.v-sync .workspace-tab { padding: 14px 0 16px; background: none; border: 0; border-bottom: 2px solid transparent; margin-bottom: -1px; font-size: 14px; font-weight: 400; color: var(--v-muted); }
+.v-sync .workspace-tab[aria-current="page"] { background: none; color: var(--v-blue); font-weight: 500; border-bottom-color: var(--v-blue); }
+.v-sync .form-card { background: var(--v-white); border: 1px solid var(--v-line-card); }
+.v-sync .card-heading h2 { font-size: 22px; font-weight: 500; letter-spacing: 0; color: var(--v-ink); }
+.v-sync .field label { font-size: 13px; font-weight: 500; color: var(--v-ink); }
+.v-sync .field label span { color: var(--v-danger); }
+.v-sync .field input, .v-sync .field select, .v-sync .field textarea { background-color: var(--v-white); border: 1px solid var(--v-line-input); color: var(--v-ink); font-size: 15px; }
+.v-sync .field input, .v-sync .field select { min-height: 48px; }
+.v-sync .field input:focus, .v-sync .field select:focus, .v-sync .field textarea:focus { border-color: var(--v-blue); outline: 1px solid var(--v-blue); background-color: var(--v-white); }
+.v-sync fieldset:disabled input, .v-sync fieldset:disabled select, .v-sync fieldset:disabled textarea { background-color: var(--v-bg); color: var(--v-muted); }
+.v-sync .field-error { color: var(--v-danger); }
+.v-sync .form-hint { color: var(--v-muted); }
+.v-sync .status-pill { background: var(--v-chip); color: var(--v-muted); border: 0; font-weight: 400; }
+.v-sync .status-pill::before { background: currentColor; }
+.v-sync .status-pill[data-status="PENDING"] { background: var(--v-sand); color: #5f4a22; }
+.v-sync .status-pill[data-status="APPROVED"] { background: var(--v-success-bg); color: var(--v-success); }
+.v-sync .status-pill[data-status="REJECTED"] { background: var(--v-danger-bg); color: var(--v-danger); }
+.v-sync .notice { background: var(--v-chip); border: 0; border-left: 3px solid var(--v-blue); color: var(--v-ink); }
+.v-sync .notice.error { background: var(--v-danger-bg); border-left-color: var(--v-danger); color: #8a2228; }
+.v-sync .notice.warning { background: #f6ecd6; border-left-color: var(--v-gold-ink); color: #5f4a22; }
+.v-sync .notice.success { background: var(--v-success-bg); border-left-color: var(--v-success); color: #24523c; }
+.v-sync .guide-card { background: var(--v-blue); border: 0; color: #d5e2e9; }
+.v-sync .guide-card::after { display: none; }
+.v-sync .guide-card h3 { font-family: inherit; font-size: 22px; font-weight: 500; color: var(--v-bg); }
+.v-sync .guide-card p, .v-sync .guide-card ol { color: #d5e2e9; }
+.v-sync .guide-card li::marker { color: var(--v-gold); }
+.v-sync .step-marker { color: var(--v-gold); border-color: rgba(228, 190, 114, .6); background: transparent; }
+.v-sync.employer-page main .guide-card .btn-outline { color: var(--v-bg); border-color: rgba(243, 246, 244, .65); background: transparent; }
+.v-sync.employer-page main .guide-card .btn-outline:hover:not(:disabled) { background: rgba(243, 246, 244, .1); color: var(--v-bg); }
+.v-sync .form-actions { border-color: var(--v-line); }
+
+@media (max-width: 900px) {
+    .v-sync .auth-stage { padding: 28px 16px 48px; }
+    .v-sync .workspace-tabs { gap: 24px; }
+}

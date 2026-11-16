@@ -78,5 +78,5 @@ Test giao diện chạy bằng Node.js và jsdom.
 - Hình ảnh công ty do nhà tuyển dụng tự tải lên (JPG, PNG, WEBP; logo tối đa 2 MB, ảnh bìa và ảnh không gian làm việc tối đa 5 MB, tối đa 6 ảnh). Công ty chưa tải ảnh thì hiển thị tên viết tắt, không dùng ảnh mặc định. Thay ảnh không yêu cầu Admin duyệt lại.
 - Liên kết website dài hơn 32 ký tự chỉ hiển thị chữ "Fanpage" (mạng xã hội) hoặc "Website", bấm vào mở liên kết ở thẻ mới.
 - Chưa có theo dõi công ty, đánh giá công ty và lịch hẹn phỏng vấn như trong bản thiết kế.
-- Trang đăng nhập, đăng ký và form hồ sơ công ty/tin tuyển dụng giữ giao diện cũ, chưa dựng lại theo Figma.
+- Trang đăng nhập, đăng ký, khôi phục tài khoản và form hồ sơ công ty/tin tuyển dụng dùng chung header, footer, bảng màu và kiểu khối với các trang khác qua `src/assets/css/vieco-sync.css`. Bố cục bên trong các trang này giữ nguyên vì thiết kế Figma không có màn hình tương ứng.
 - Thiết kế Figma chỉ có bản desktop; bản di động do nhóm tự co giãn bố cục.

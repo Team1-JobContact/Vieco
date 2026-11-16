@@ -477,6 +477,11 @@ body.v-page {
 @media (max-width: 640px) {
     :root { --v-gutter: 20px; }
     .v-section { padding: 44px 0; }
+    .v-hide-sm, .v-mark { display: none !important; }
+    .v-header-inner { padding: 0 16px; }
+    .v-header-right { gap: 14px; }
+    .v-wordmark { font-size: 22px; letter-spacing: 3px; padding-left: 3px; }
+    .v-login-btn { padding: 0 12px; font-size: 13px; }
     .v-grid-3, .v-grid-4, .v-field-row, .v-field-row-3, .v-options, .v-footer-cols { grid-template-columns: 1fr; }
     .v-media-block { grid-template-columns: 1fr; }
     .v-media-grid, .v-gallery { grid-template-columns: 1fr 1fr; }
@@ -495,3 +500,5 @@ body.v-page {
     .v-notif time { grid-column: 2; }
     .v-tabs { gap: 24px; }
 }
+
+.v-note:empty { display: none; }

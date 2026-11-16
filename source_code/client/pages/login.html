@@ -3,11 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="data:,">
     <title>Đăng nhập - Vieco</title>
     <link rel="stylesheet" href="../src/assets/css/style.css">
     <link rel="stylesheet" href="../src/assets/css/auth.css">
+    <link rel="stylesheet" href="../src/assets/css/vieco.css">
+    <link rel="stylesheet" href="../src/assets/css/vieco-sync.css">
 </head>
-<body class="auth-page">
+<body class="auth-page v-page v-sync" data-root="../">
+    <div id="v-header"></div>
 
     <header class="navbar">
         <div class="container nav-content">
@@ -340,7 +344,9 @@
         </div>
     </footer>
 
+    <div id="v-footer"></div>
     <script src="../src/services/auth-api.js"></script>
+    <script src="../src/shared/layout.js"></script>
     <script src="../src/features/auth/auth-ui.js"></script>
 </body>
 </html>

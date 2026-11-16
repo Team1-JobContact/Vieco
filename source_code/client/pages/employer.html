@@ -7,8 +7,11 @@
     <title>Không gian nhà tuyển dụng | Vieco</title>
     <link rel="stylesheet" href="../src/assets/css/style.css" />
     <link rel="stylesheet" href="../src/assets/css/employer.css" />
+    <link rel="stylesheet" href="../src/assets/css/vieco.css">
+    <link rel="stylesheet" href="../src/assets/css/vieco-sync.css">
   </head>
-  <body class="employer-page">
+  <body class="employer-page v-page v-sync" data-root="../">
+    <div id="v-header"></div>
     <header class="navbar">
       <div class="container nav-content">
         <a href="../index.html" class="brand-link"
@@ -540,7 +543,9 @@
         ><a class="nav-link" href="../index.html">Trang chủ</a>
       </div>
     </footer>
+    <div id="v-footer"></div>
     <script src="../src/services/auth-api.js"></script>
+    <script src="../src/shared/layout.js"></script>
     <script src="../src/services/employer-api.js"></script>
     <script src="../src/features/employer/employer-ui.js"></script>
   </body>
