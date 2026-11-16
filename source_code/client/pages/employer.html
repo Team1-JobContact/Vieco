@@ -3,11 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="data:,">
     <title>Không gian nhà tuyển dụng | Vieco</title>
     <link rel="stylesheet" href="../src/assets/css/style.css" />
     <link rel="stylesheet" href="../src/assets/css/employer.css" />
+    <link rel="stylesheet" href="../src/assets/css/vieco.css">
+    <link rel="stylesheet" href="../src/assets/css/vieco-sync.css">
   </head>
-  <body class="employer-page">
+  <body class="employer-page v-page v-sync" data-root="../">
+    <div id="v-header"></div>
     <header class="navbar">
       <div class="container nav-content">
         <a href="../index.html" class="brand-link"
@@ -27,6 +31,8 @@
           >Vieco</a
         >
         <a class="nav-link" href="../index.html">Về trang chủ</a>
+        <a class="nav-link" href="employer-jobs.html">Quản lý tin và ứng viên</a>
+        <a class="nav-link" href="company-media.html">Hình ảnh công ty</a>
         <div class="employer-account">
           <span id="account-name"></span
           ><button type="button" id="logout" class="btn btn-outline" hidden>
@@ -537,7 +543,9 @@
         ><a class="nav-link" href="../index.html">Trang chủ</a>
       </div>
     </footer>
+    <div id="v-footer"></div>
     <script src="../src/services/auth-api.js"></script>
+    <script src="../src/shared/layout.js"></script>
     <script src="../src/services/employer-api.js"></script>
     <script src="../src/features/employer/employer-ui.js"></script>
   </body>

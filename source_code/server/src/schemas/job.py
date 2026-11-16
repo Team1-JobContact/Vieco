@@ -134,6 +134,7 @@ class JobResponse(BaseModel):
     id: int
     company_id: int
     company_name: str | None = None
+    company_logo_url: str | None = None
     created_by: int
     title: str
     industry_id: int | None = None
@@ -161,6 +162,7 @@ class JobResponse(BaseModel):
     removed_at: datetime | None = None
     removal_reason: str | None = None
     view_count: int
+    application_count: int = 0
     created_at: datetime
     updated_at: datetime
     skills: list[SkillItem] = Field(default_factory=list)

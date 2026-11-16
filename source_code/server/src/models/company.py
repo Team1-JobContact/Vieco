@@ -10,7 +10,8 @@ class Company(BaseModel):
 
     name = Column(String(200), nullable=False)
     slug = Column(String(220), nullable=False, unique=True)
-    logo_url = Column(String(500))
+    logo_url = Column(String(500))   # /media/company/<tệp> do nhà tuyển dụng tải lên
+    cover_url = Column(String(500))  # ảnh bìa (banner)
     description = Column(Text)
     industry_id = fk("industries.id", nullable=True)
     size = Column(String(30))  # ví dụ 1-50, 51-200
@@ -30,3 +31,11 @@ class CompanyMember(BaseModel):
     company_id = fk("companies.id")
     user_id = fk("users.id", unique=True)  # mỗi nhà tuyển dụng thuộc một công ty
     member_role = Column(String(20), nullable=False, default="MEMBER", server_default="MEMBER")
+
+
+class CompanyImage(BaseModel):
+    """Ảnh không gian làm việc của công ty (tối đa do tầng ứng dụng kiểm soát)."""
+    __tablename__ = "company_images"
+
+    company_id = fk("companies.id", ondelete="CASCADE", index=True)
+    file_url = Column(String(500), nullable=False)

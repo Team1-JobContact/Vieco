@@ -37,6 +37,10 @@ python -m http.server 5500
 
 Frontend: http://localhost:5500. API/Swagger: http://127.0.0.1:8000/docs. Frontend không cần npm build. Thiết lập SMTP theo `.env.example` để gửi xác thực email, đặt lại mật khẩu và thông báo sự kiện. Các giá trị trong `.env` hiện có không bị thay đổi bởi đợt chỉnh sửa kiến trúc.
 
+## Giao diện và demo
+
+Giao diện dựng theo thiết kế Figma, dùng chung `src/assets/css/vieco.css` và `src/shared/layout.js`. Danh sách trang, kịch bản demo theo từng vai trò và các giới hạn hiện tại nằm trong [hướng dẫn demo](docs/HUONG_DAN_DEMO.md).
+
 ## Kiểm thử
 
 Backend: chạy `python -m pytest tests -q` tại `source_code/server` bằng Python của môi trường ảo. Frontend: chạy `npm ci` rồi `npm test` tại `source_code/client`. Kiểm thử backend dùng SQLite cô lập, không chạy migration/seed lên MySQL thật.

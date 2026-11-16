@@ -9,6 +9,7 @@ from src.routes.candidate import router as candidate_router
 from src.routes.catalog import router as catalog_router
 from src.routes.company import admin_router as admin_company_router
 from src.routes.company import employer_router as employer_company_router
+from src.routes.company import media_router
 from src.routes.job import admin_router as admin_job_router
 from src.routes.job import employer_router as employer_job_router
 
@@ -32,6 +33,7 @@ app.include_router(candidate_router)
 app.include_router(catalog_router)
 app.include_router(employer_company_router)
 app.include_router(admin_company_router)
+app.include_router(media_router)
 app.include_router(employer_job_router)
 app.include_router(admin_job_router)
 

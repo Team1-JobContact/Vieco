@@ -9,7 +9,7 @@ HTTP_422 = getattr(status, "HTTP_422_UNPROCESSABLE_CONTENT", status.HTTP_422_UNP
 from src.models.catalog import Industry, Province, Skill
 from src.models.company import Company, CompanyMember
 from src.models.engagement import AuditLog, Notification
-from src.models.recruitment import Job, JobSkill
+from src.models.recruitment import Application, Job, JobSkill
 from src.models.user import User
 from src.schemas.job import (
     JobCreate, JobExtendRequest, JobListResponse, JobResponse, JobUpdate, SkillItem,
@@ -122,6 +122,7 @@ def to_job_response(db: Session, job: Job) -> JobResponse:
         id=job.id,
         company_id=job.company_id,
         company_name=company.name if company else None,
+        company_logo_url=company.logo_url if company else None,
         created_by=job.created_by,
         title=job.title,
         industry_id=job.industry_id,
@@ -149,6 +150,7 @@ def to_job_response(db: Session, job: Job) -> JobResponse:
         removed_at=job.removed_at,
         removal_reason=job.removal_reason,
         view_count=job.view_count,
+        application_count=db.query(Application.id).filter(Application.job_id == job.id).count(),
         created_at=job.created_at,
         updated_at=job.updated_at,
         skills=skills,
