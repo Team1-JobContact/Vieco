@@ -101,6 +101,7 @@ class CompanyResponse(BaseModel):
     name: str
     slug: str
     logo_url: str | None = None
+    cover_url: str | None = None
     description: str | None = None
     industry_id: int | None = None
     size: str | None = None

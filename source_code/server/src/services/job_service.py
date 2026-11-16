@@ -122,6 +122,7 @@ def to_job_response(db: Session, job: Job) -> JobResponse:
         id=job.id,
         company_id=job.company_id,
         company_name=company.name if company else None,
+        company_logo_url=company.logo_url if company else None,
         created_by=job.created_by,
         title=job.title,
         industry_id=job.industry_id,

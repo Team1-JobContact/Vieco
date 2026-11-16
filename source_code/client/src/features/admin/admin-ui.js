@@ -71,7 +71,7 @@
                     company.status === "REJECTED" && h("div", { class: "v-note v-note-error", text: "Lý do từ chối: " + (company.reject_reason || "") }),
                     h("dl", { class: "v-summary", style: "margin-top:0" },
                         kv("Chủ sở hữu", company.owner_name), kv("Email", company.owner_email), kv("Quy mô", company.size),
-                        kv("Website", company.website), kv("Địa chỉ", company.address), kv("Ngày tạo", V.date(company.created_at)),
+                        h("div", { class: "v-kv" }, h("dt", { text: "Website / Fanpage" }), h("dd", {}, V.externalLink(company.website) || "—")), kv("Địa chỉ", company.address), kv("Ngày tạo", V.date(company.created_at)),
                         kv("Ngày xét duyệt", company.reviewed_at ? V.date(company.reviewed_at) : null)),
                     h("h3", { class: "v-card-title", text: "Giới thiệu" }),
                     h("p", { class: "v-small", style: "white-space:pre-wrap", text: company.description || "Chưa có mô tả." }),

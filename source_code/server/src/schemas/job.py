@@ -134,6 +134,7 @@ class JobResponse(BaseModel):
     id: int
     company_id: int
     company_name: str | None = None
+    company_logo_url: str | None = None
     created_by: int
     title: str
     industry_id: int | None = None

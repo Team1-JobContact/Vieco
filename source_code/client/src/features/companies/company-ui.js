@@ -8,10 +8,9 @@
     function stat(iconName, label, value) {
         return h("div", { class: "v-stat" }, V.icon(iconName, "v-icon-lg"), h("div", {}, h("small", { text: label }), h("strong", { text: value || "—" })));
     }
-    function contact(iconName, label, value, href) {
+    function contact(iconName, label, value) {
         return h("div", { class: "v-kv", style: "justify-content:flex-start;align-items:flex-start" }, V.icon(iconName),
-            h("div", {}, h("dt", { class: "v-small", text: label }),
-                h("dd", { style: "text-align:left" }, href ? h("a", { class: "v-link", href: href, target: "_blank", rel: "noopener noreferrer", text: value }) : value)));
+            h("div", { style: "min-width:0" }, h("dt", { class: "v-small", text: label }), h("dd", { style: "text-align:left" }, value)));
     }
     function fail(title, text) {
         var wrap = h("div", { class: "v-wrap v-section" });
@@ -29,18 +28,20 @@
             return fail(error.status === 404 ? "Công ty không tồn tại hoặc chưa được duyệt" : "Không tải được thông tin công ty", error.status === 404 ? "" : error.message);
         }
         document.title = company.name + " | Vieco";
-        var website = company.website && /^https?:\/\//i.test(company.website) ? company.website : null;
+        var link = V.linkInfo(company.website);
+        var coverSrc = V.media(company.cover_url);
+        var photos = (company.images || []).map(function (image) { return V.media(image.url); }).filter(Boolean);
         var jobsId = "company-jobs";
 
         V.clear(app);
-        app.appendChild(h("img", { class: "v-cover", src: V.companyPhoto(company.id), alt: "" }));
+        if (coverSrc) app.appendChild(h("img", { class: "v-cover", src: coverSrc, alt: "Ảnh bìa " + company.name }));
         app.appendChild(h("section", { class: "v-page-head", style: "background:var(--v-bg);padding-bottom:0" }, h("div", { class: "v-wrap" },
             h("nav", { class: "v-crumbs", "aria-label": "Đường dẫn" },
                 h("a", { href: V.url("index.html"), text: "Trang chủ" }), h("span", { text: "/" }),
                 h("a", { href: V.url("pages/companies.html"), text: "Công ty" }), h("span", { text: "/" }),
                 h("span", { "aria-current": "page", text: company.name })),
             h("div", { class: "v-title-row" },
-                V.logo(company.name),
+                V.logo(company.name, "", company.logo_url),
                 h("div", { class: "grow" },
                     h("p", { class: "v-eyebrow", text: company.industry_name || "Doanh nghiệp" }),
                     h("h1", { text: company.name }),
@@ -59,15 +60,15 @@
                 h("section", { class: "v-block" }, h("h2", { text: "Về " + company.name }),
                     company.description ? h("div", { class: "v-prose" }, V.lines(company.description).map(function (l) { return h("p", { text: l }); }))
                         : h("p", { class: "v-muted", text: "Công ty chưa cập nhật phần giới thiệu." })),
-                h("section", { class: "v-block" }, h("h2", { text: "Không gian làm việc" }),
-                    h("div", { class: "v-grid-3" }, [0, 1, 2].map(function (i) {
-                        return h("img", { src: V.companyPhoto(company.id + i), alt: "", loading: "lazy", style: "aspect-ratio:4/3;object-fit:cover;width:100%" });
-                    })),
-                    h("p", { class: "v-small v-muted v-mt-2", text: "Hình ảnh minh họa." }))),
+                photos.length ? h("section", { class: "v-block" }, h("h2", { text: "Không gian làm việc" }),
+                    h("div", { class: "v-gallery" }, photos.map(function (src, index) {
+                        return h("a", { href: src, target: "_blank", rel: "noopener noreferrer", "aria-label": "Mở ảnh không gian làm việc " + (index + 1) },
+                            h("img", { src: src, alt: "Không gian làm việc tại " + company.name + " (" + (index + 1) + ")", loading: "lazy" }));
+                    }))) : null),
             h("aside", {},
                 h("div", { class: "v-card" }, h("h2", { class: "v-card-title", text: "Thông tin liên hệ" }),
                     h("dl", {},
-                        contact("globe", "Website", website ? website.replace(/^https?:\/\//i, "") : "Chưa cập nhật", website),
+                        contact("globe", link ? link.kind : "Website", link ? V.externalLink(company.website) : "Chưa cập nhật"),
                         contact("pin", "Trụ sở chính", [company.address, company.province_name].filter(Boolean).join(", ") || "Chưa cập nhật"))),
                 h("div", { class: "v-banner", style: "display:block;margin-top:24px" },
                     h("h3", { text: "Đừng bỏ lỡ cơ hội mới" }),

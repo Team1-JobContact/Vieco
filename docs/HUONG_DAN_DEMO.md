@@ -5,7 +5,7 @@ Tài liệu này dùng cho buổi demo và cho thành viên muốn tự kiểm t
 ## 1. Chuẩn bị
 
 1. Chạy backend ở cổng 8000 và frontend ở cổng 5500 theo README.
-2. Đã chạy `alembic upgrade head` và `python -m src.seeds.run`. Tài khoản Admin lấy từ `ADMIN_EMAIL` và `ADMIN_PASSWORD` trong `.env`.
+2. Đã chạy `alembic upgrade head` và `python -m src.seeds.run`. Sau khi cập nhật mã nguồn có migration mới (ví dụ `0003` cho hình ảnh công ty), chạy lại `alembic upgrade head`. Tài khoản Admin lấy từ `ADMIN_EMAIL` và `ADMIN_PASSWORD` trong `.env`.
 3. Chuẩn bị một tệp CV thật dạng PDF, DOC hoặc DOCX nhỏ hơn 5 MB.
 4. Mở ba cửa sổ trình duyệt riêng (ví dụ một cửa sổ thường, một cửa sổ ẩn danh và một trình duyệt khác) để đăng nhập ba vai trò cùng lúc.
 
@@ -22,6 +22,7 @@ Giao diện dựng theo thiết kế Figma "Vieco • Desktop". Mọi trang dùn
 | Hồ sơ của tôi | `pages/profile.html` | Ứng viên |
 | Hồ sơ công ty và form tin | `pages/employer.html` | Nhà tuyển dụng |
 | Quản lý tin và ứng viên | `pages/employer-jobs.html` | Nhà tuyển dụng |
+| Hình ảnh công ty (logo, ảnh bìa, không gian làm việc) | `pages/company-media.html` | Nhà tuyển dụng |
 | Trang quản trị | `pages/admin.html` | Admin |
 | Thông báo | `pages/notifications.html` | Người đã đăng nhập |
 | Giới thiệu cho nhà tuyển dụng, Thư viện CV, Liên hệ | `pages/for-employers.html`, `pages/cv-library.html`, `pages/contact.html` | Mọi người |
@@ -35,6 +36,7 @@ Giao diện dựng theo thiết kế Figma "Vieco • Desktop". Mọi trang dùn
 | 3 | Admin | Đăng nhập, mở `pages/admin.html`, bấm Từ chối và nhập lý do | Không nhập đủ 10 ký tự thì không gửi được; công ty chuyển Bị từ chối |
 | 4 | Nhà tuyển dụng | Xem lý do từ chối, sửa hồ sơ, gửi duyệt lại | Công ty trở lại Chờ duyệt |
 | 5 | Admin | Bấm Duyệt công ty | Công ty Đã duyệt và xuất hiện ở trang Công ty |
+| 5a | Nhà tuyển dụng | Mở `pages/company-media.html`, tải logo, ảnh bìa và ảnh không gian làm việc | Ảnh hiển thị ở trang công ty, thẻ công ty và tin tuyển dụng; tệp không phải JPG/PNG/WEBP bị từ chối |
 | 6 | Nhà tuyển dụng | Tạo tin tại `pages/employer.html#job`, lưu nháp rồi gửi duyệt | Tin ở trạng thái Chờ duyệt, chưa hiển thị công khai |
 | 7 | Admin | Mở tab Duyệt tin tuyển dụng, bấm Duyệt | Tin xuất hiện ở trang chủ và trang Việc làm |
 | 8 | Khách | Tìm theo tên vị trí, tên công ty hoặc kỹ năng; lọc và sắp xếp | Số kết quả và danh sách thay đổi theo bộ lọc |
@@ -73,7 +75,8 @@ Test giao diện chạy bằng Node.js và jsdom.
 
 - Chưa có trình tạo CV trực tuyến; trang Thư viện CV chỉ hiển thị mẫu tham khảo, ứng viên tải tệp CV của mình lên.
 - Form Liên hệ chưa có API tiếp nhận; trang mở ứng dụng email của người dùng với nội dung đã điền.
-- Ảnh công ty là ảnh minh họa dùng chung; chưa có chức năng tải logo và ảnh bìa.
+- Hình ảnh công ty do nhà tuyển dụng tự tải lên (JPG, PNG, WEBP; logo tối đa 2 MB, ảnh bìa và ảnh không gian làm việc tối đa 5 MB, tối đa 6 ảnh). Công ty chưa tải ảnh thì hiển thị tên viết tắt, không dùng ảnh mặc định. Thay ảnh không yêu cầu Admin duyệt lại.
+- Liên kết website dài hơn 32 ký tự chỉ hiển thị chữ "Fanpage" (mạng xã hội) hoặc "Website", bấm vào mở liên kết ở thẻ mới.
 - Chưa có theo dõi công ty, đánh giá công ty và lịch hẹn phỏng vấn như trong bản thiết kế.
 - Trang đăng nhập, đăng ký và form hồ sơ công ty/tin tuyển dụng giữ giao diện cũ, chưa dựng lại theo Figma.
 - Thiết kế Figma chỉ có bản desktop; bản di động do nhóm tự co giãn bố cục.

@@ -227,3 +227,87 @@ def test_role_matrix_blocks_cross_role_access(client, db_session, recruitment):
         assert client.get(API + path, headers=headers).status_code == 403, path
     assert client.get(f"{API}/admin/companies", headers=admin).status_code == 200
     assert client.get(f"{API}/admin/jobs", headers=admin).status_code == 200
+
+
+# ---------- Hình ảnh công ty do nhà tuyển dụng tự tải lên ----------
+
+PNG = b"\x89PNG\r\n\x1a\n" + b"x" * 200
+JPG = b"\xff\xd8\xff\xe0" + b"x" * 200
+WEBP = b"RIFF\x00\x00\x00\x00WEBPVP8 " + b"x" * 200
+EMP = f"{API}/employer/company"
+
+
+def upload_image(client, headers, path, name="logo.png", content=PNG):
+    return client.post(f"{EMP}/{path}", headers=headers, files={"file": (name, content, "application/octet-stream")})
+
+
+def test_company_logo_cover_and_gallery_upload(client, db_session, recruitment, tmp_upload_dir):
+    r = recruitment
+    cid = r["job"].company_id
+    media = client.get(f"{EMP}/media", headers=r["eh"]).json()
+    assert media["logo_url"] is None and media["images"] == [] and media["can_edit"] is True
+    assert media["limits"]["max_images"] == 6
+
+    logo = upload_image(client, r["eh"], "logo").json()["logo_url"]
+    assert logo.startswith("/media/company/") and logo.endswith(".png")
+    served = client.get(API + logo)  # công khai, không cần đăng nhập
+    assert served.status_code == 200 and served.content == PNG
+    assert served.headers["content-type"] == "image/png" and served.headers["x-content-type-options"] == "nosniff"
+
+    # Thay logo: tệp cũ bị xóa, chỉ còn tệp mới
+    logo2 = upload_image(client, r["eh"], "logo", "new.jpg", JPG).json()["logo_url"]
+    assert logo2.endswith(".jpg") and client.get(API + logo).status_code == 404
+    cover = upload_image(client, r["eh"], "cover", "banner.webp", WEBP).json()["cover_url"]
+    assert cover.endswith(".webp")
+    first = upload_image(client, r["eh"], "images", "office.jpeg", JPG)
+    assert first.status_code == 201 and len(first.json()["images"]) == 1
+    assert len(os.listdir(tmp_upload_dir / "company")) == 3
+
+    # Hiển thị công khai ở trang công ty, danh sách công ty và tin tuyển dụng
+    detail = client.get(f"{API}/companies/{cid}").json()
+    assert detail["logo_url"] == logo2 and detail["cover_url"] == cover and len(detail["images"]) == 1
+    assert client.get(f"{API}/companies").json()["items"][0]["cover_url"] == cover
+    assert client.get(f"{API}/jobs/{r['job'].id}").json()["company_logo_url"] == logo2
+
+    # Xóa
+    image_id = detail["images"][0]["id"]
+    assert client.delete(f"{EMP}/images/{image_id}", headers=r["oh"]).status_code == 404  # công ty khác
+    assert client.delete(f"{EMP}/images/{image_id}", headers=r["eh"]).json()["images"] == []
+    assert client.delete(f"{EMP}/logo", headers=r["eh"]).json()["logo_url"] is None
+    assert client.delete(f"{EMP}/cover", headers=r["eh"]).json()["cover_url"] is None
+    assert os.listdir(tmp_upload_dir / "company") == []
+    assert client.get(f"{API}/companies/{cid}").json()["logo_url"] is None
+
+
+def test_company_image_validation_and_permissions(client, db_session, recruitment, tmp_upload_dir):
+    from src.models import CompanyMember
+    r = recruitment
+    assert upload_image(client, {}, "logo").status_code == 401
+    assert upload_image(client, r["ch"], "logo").status_code == 403  # ứng viên
+    assert upload_image(client, r["eh"], "logo", "logo.svg", b"<svg onload=alert(1)>").status_code == 415
+    assert upload_image(client, r["eh"], "logo", "logo.gif", b"GIF89a").status_code == 415
+    assert upload_image(client, r["eh"], "logo", "logo.png", b"MZ not an image").status_code == 415  # giả đuôi tệp
+    assert upload_image(client, r["eh"], "logo", "logo.png", JPG).status_code == 415  # đuôi không khớp nội dung
+    assert upload_image(client, r["eh"], "logo", "logo.png", b"").status_code == 422
+    assert upload_image(client, r["eh"], "logo", "big.png", PNG + b"x" * (2 * 1024 * 1024)).status_code == 413
+    assert upload_image(client, r["eh"], "cover", "big.png", PNG + b"x" * (2 * 1024 * 1024)).status_code == 200  # ảnh bìa tới 5 MB
+    assert upload_image(client, r["eh"], "cover", "huge.png", PNG + b"x" * (5 * 1024 * 1024)).status_code == 413
+    assert len(os.listdir(tmp_upload_dir / "company")) == 1  # không để lại tệp rác
+
+    for _ in range(6):
+        assert upload_image(client, r["eh"], "images").status_code == 201
+    assert upload_image(client, r["eh"], "images").status_code == 409  # tối đa 6 ảnh
+
+    # Thành viên không phải chủ sở hữu chỉ được xem
+    member, mh = actor(db_session, "EMPLOYER", "member@example.com")
+    db_session.add(CompanyMember(company_id=r["job"].company_id, user_id=member.id, member_role="MEMBER"))
+    db_session.commit()
+    assert client.get(f"{EMP}/media", headers=mh).json()["can_edit"] is False
+    assert upload_image(client, mh, "logo").status_code == 403
+    assert client.delete(f"{EMP}/cover", headers=mh).status_code == 403
+
+    # Không dò được tệp ngoài thư mục ảnh công ty (ví dụ CV)
+    os.makedirs(tmp_upload_dir / "cvs", exist_ok=True)
+    (tmp_upload_dir / "cvs" / "secret.pdf").write_bytes(b"%PDF-secret")
+    for name in ("..%2Fcvs%2Fsecret.pdf", "secret.pdf", "%2e%2e%2fcvs%2fsecret.pdf"):
+        assert client.get(f"{API}/media/company/{name}").status_code == 404

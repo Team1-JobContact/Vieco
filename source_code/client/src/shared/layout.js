@@ -247,13 +247,42 @@
         if (words[0].length <= 6) return words[0].toUpperCase();
         return words.slice(0, 3).map(function (w) { return w.charAt(0); }).join("").toUpperCase();
     }
-    function logo(name, size) {
+/** Đường dẫn ảnh do API trả về (/media/...) -> URL đầy đủ; chỉ nhận đường dẫn nội bộ đúng mẫu. */
+    function media(path) {
+        return /^\/media\/company\/[0-9a-f]{32}\.(jpg|png|webp)$/.test(String(path || "")) ? Auth.getApiBaseUrl() + path : null;
+    }
+    /** Ô logo: dùng ảnh công ty tự tải lên, nếu chưa có thì hiển thị tên viết tắt. */
+    function logo(name, size, logoUrl) {
+        var src = media(logoUrl);
+        if (src) return h("span", { class: "v-logo v-logo-img " + (size || "") }, h("img", { src: src, alt: "Logo " + (name || "công ty"), loading: "lazy" }));
         var box = h("span", { class: "v-logo " + (size || ""), text: brand(name), "aria-hidden": "true" });
         box.style.color = brandColor(name);
         return box;
     }
-    var PHOTOS = ["company-fpt.jpg", "company-vng.jpg", "company-techcombank.jpg"];
-    function companyPhoto(id) { return url("src/assets/images/" + PHOTOS[(Number(id) || 0) % PHOTOS.length]); }
+    /** Ảnh bìa công ty tự tải lên; chưa có thì trả về khung trống mang tên công ty (không dùng ảnh mặc định). */
+    function coverImage(company, cls) {
+        var src = media(company.cover_url);
+        if (src) return h("img", { class: cls || "photo", src: src, alt: "Ảnh bìa " + company.name, loading: "lazy" });
+        var box = h("div", { class: "v-photo-empty " + (cls || "photo"), "aria-hidden": "true", text: brand(company.name) });
+        box.style.color = brandColor(company.name);
+        return box;
+    }
+    /** Nhãn hiển thị cho liên kết: link dài thì chỉ hiện "Fanpage" (mạng xã hội) hoặc "Website". */
+    var SOCIAL_HOST = /(^|\.)(facebook\.com|fb\.com|fb\.me|instagram\.com|tiktok\.com|linkedin\.com|zalo\.me|youtube\.com|x\.com|twitter\.com)$/i;
+    function linkInfo(value) {
+        var text = String(value || "").trim();
+        if (!/^https?:\/\//i.test(text)) return null;
+        var host;
+        try { host = new URL(text).hostname; } catch (_) { return null; }
+        var social = SOCIAL_HOST.test(host);
+        var shown = text.replace(/^https?:\/\/(www\.)?/i, "").replace(/\/$/, "");
+        return { href: text, social: social, kind: social ? "Fanpage" : "Website", label: shown.length > 32 ? (social ? "Fanpage" : "Website") : shown };
+    }
+    function externalLink(value, cls) {
+        var info = linkInfo(value);
+        if (!info) return null;
+        return h("a", { class: cls || "v-link", href: info.href, target: "_blank", rel: "noopener noreferrer", title: info.href, text: info.label });
+    }
     function lines(text) {
         return String(text || "").split(/\r?\n/).map(function (l) { return l.replace(/^\s*[-•–*]\s*/, "").trim(); }).filter(Boolean);
     }
@@ -344,7 +373,7 @@
         var chips = (job.skills || []).slice(0, 3).map(function (s) { return h("span", { class: "v-chip", text: s.name }); });
         if (EMPLOYMENT[job.employment_type]) chips.push(h("span", { class: "v-chip", text: EMPLOYMENT[job.employment_type] }));
         return h("article", { class: "v-job-row" },
-            logo(job.company_name, "v-logo-md"),
+            logo(job.company_name, "v-logo-md", job.company_logo_url),
             h("div", {},
                 h("h3", {}, h("a", { href: jobUrl(job.id), text: job.title })),
                 h("p", { class: "company", text: job.company_name || "" }),
@@ -363,7 +392,7 @@
         var name = h("p", { class: "name", text: brand(company.name) });
         name.style.color = brandColor(company.name);
         return h("article", { class: "v-company-card" },
-            h("img", { class: "photo", src: companyPhoto(company.id), alt: "", loading: "lazy" }),
+            coverImage(company),
             h("div", { class: "body" },
                 h("div", { class: "top" }, name, h("a", { class: "v-link v-small", href: companyUrl(company.id), "aria-label": "Xem công ty " + company.name, text: "Xem công ty ↗" })),
                 h("p", { class: "industry", text: company.name }),
@@ -444,7 +473,7 @@
     function accountLinks(user) {
         var links = {
             CANDIDATE: [["pages/profile.html", "Hồ sơ của tôi"], ["pages/profile.html#applications", "Việc đã ứng tuyển"], ["pages/profile.html#saved", "Việc đã lưu"], ["pages/profile.html#cvs", "CV của tôi"]],
-            EMPLOYER: [["pages/employer-jobs.html", "Quản lý tin và ứng viên"], ["pages/employer.html", "Hồ sơ công ty"], ["pages/employer.html#job", "Đăng tin mới"]],
+            EMPLOYER: [["pages/employer-jobs.html", "Quản lý tin và ứng viên"], ["pages/employer.html", "Hồ sơ công ty"], ["pages/company-media.html", "Hình ảnh công ty"], ["pages/employer.html#job", "Đăng tin mới"]],
             ADMIN: [["pages/admin.html", "Trang quản trị"], ["pages/admin.html#jobs", "Duyệt tin tuyển dụng"]]
         }[user.role] || [];
         return links.concat([["pages/notifications.html", "Thông báo"]]);
@@ -643,7 +672,7 @@
     window.Vieco = {
         url: url, h: h, clear: clear, icon: icon, api: api, download: download, goLogin: goLogin, currentUser: currentUser, requireRole: requireRole,
         categories: categories, fillSelect: fillSelect, salary: salary, date: date, ago: ago, initials: initials, shortName: shortName,
-        brand: brand, brandColor: brandColor, logo: logo, companyPhoto: companyPhoto, prose: prose, lines: lines, roleLabel: roleLabel,
+        brand: brand, brandColor: brandColor, logo: logo, media: media, coverImage: coverImage, linkInfo: linkInfo, externalLink: externalLink, prose: prose, lines: lines, roleLabel: roleLabel,
         badge: badge, toast: toast, note: note, loading: loading, empty: empty, saveButton: saveButton, jobCard: jobCard, jobRow: jobRow, companyCard: companyCard,
         jobUrl: jobUrl, companyUrl: companyUrl, pagination: pagination, modal: modal, confirm: confirmDialog, searchForm: searchForm,
         openSearch: openSearch, logout: logout, refreshUnread: function () { refreshUnread(); },

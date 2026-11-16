@@ -57,7 +57,7 @@ def _check_catalog(db: Session, changes: dict) -> None:
 
 def _fields(company: Company) -> dict:
     return dict(
-        id=company.id, name=company.name, slug=company.slug, logo_url=company.logo_url,
+        id=company.id, name=company.name, slug=company.slug, logo_url=company.logo_url, cover_url=company.cover_url,
         description=company.description, industry_id=company.industry_id, size=company.size,
         website=company.website, address=company.address, province_id=company.province_id,
         status=company.status, reject_reason=company.reject_reason, reviewed_at=company.reviewed_at,

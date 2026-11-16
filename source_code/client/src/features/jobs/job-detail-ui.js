@@ -41,7 +41,7 @@
                 h("a", { href: V.url("pages/jobs.html"), text: "Việc làm" }), h("span", { text: "/" }),
                 h("span", { "aria-current": "page", text: job.title })),
             h("div", { class: "v-title-row" },
-                V.logo(job.company_name),
+                V.logo(job.company_name, "", job.company_logo_url),
                 h("div", { class: "grow" },
                     h("p", { class: "v-eyebrow", text: [job.industry_name, V.EMPLOYMENT[job.employment_type]].filter(Boolean).join("  ·  ") }),
                     h("h1", { text: job.title }),
@@ -74,7 +74,7 @@
         brand.style.fontWeight = "700";
         var side = h("aside", {},
             h("div", { class: "v-card v-photo-card", style: "padding:0" },
-                h("img", { src: V.companyPhoto(job.company_id), alt: "" }),
+                company && V.media(company.cover_url) ? h("img", { src: V.media(company.cover_url), alt: "Ảnh bìa " + job.company_name }) : null,
                 h("div", { style: "padding:24px" },
                     h("div", { class: "v-card-title" }, brand, h("a", { class: "v-link v-small", href: V.companyUrl(job.company_id), text: "Xem công ty ↗" })),
                     h("p", { class: "v-small v-muted v-mb-2", text: company && company.description ? V.lines(company.description)[0] : job.company_name }),

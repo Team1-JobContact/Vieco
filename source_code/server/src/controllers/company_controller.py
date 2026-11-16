@@ -1,4 +1,5 @@
-from fastapi import Depends, Query, status
+from fastapi import Depends, File, Query, UploadFile, status
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
 from src.config.database import get_db
@@ -8,7 +9,7 @@ from src.schemas.company import (
     AdminCompanyListResponse, AdminCompanyResponse, CompanyCreate, CompanyStatus,
     CompanyUpdate, MyCompanyResponse, RejectRequest,
 )
-from src.services import company_service
+from src.services import company_media_service, company_service
 
 # ---------- Nhà tuyển dụng: hồ sơ công ty của mình ----------
 
@@ -61,3 +62,41 @@ def approve_company(company_id: int, admin: User = Depends(admin_only), db: Sess
 def reject_company(company_id: int, data: RejectRequest, admin: User = Depends(admin_only),
                    db: Session = Depends(get_db)):
     return company_service.reject_company(db, admin, company_id, data.reason)
+
+
+# ---------- Hình ảnh công ty: logo, ảnh bìa, ảnh không gian làm việc ----------
+
+def get_my_media(user: User = Depends(employer_only), db: Session = Depends(get_db)):
+    """Xem hình ảnh hiện có của công ty mình và giới hạn tải lên."""
+    return company_media_service.get_media(db, user)
+
+
+def upload_logo(file: UploadFile = File(...), user: User = Depends(employer_only), db: Session = Depends(get_db)):
+    return company_media_service.set_logo(db, user, file)
+
+
+def delete_logo(user: User = Depends(employer_only), db: Session = Depends(get_db)):
+    return company_media_service.delete_logo(db, user)
+
+
+def upload_cover(file: UploadFile = File(...), user: User = Depends(employer_only), db: Session = Depends(get_db)):
+    return company_media_service.set_cover(db, user, file)
+
+
+def delete_cover(user: User = Depends(employer_only), db: Session = Depends(get_db)):
+    return company_media_service.delete_cover(db, user)
+
+
+def upload_image(file: UploadFile = File(...), user: User = Depends(employer_only), db: Session = Depends(get_db)):
+    return company_media_service.add_image(db, user, file)
+
+
+def delete_image(image_id: int, user: User = Depends(employer_only), db: Session = Depends(get_db)):
+    return company_media_service.delete_image(db, user, image_id)
+
+
+def serve_company_media(file_name: str):
+    """Ảnh công ty là nội dung công khai; không cần đăng nhập."""
+    path, media_type = company_media_service.file_for_serving(file_name)
+    return FileResponse(path, media_type=media_type,
+                        headers={"X-Content-Type-Options": "nosniff", "Cache-Control": "public, max-age=86400"})

@@ -38,6 +38,7 @@ def enrich(db, row):
         job_status=job.status if job else None,
         company_id=company.id if company else None,
         company_name=company.name if company else None,
+        company_logo_url=company.logo_url if company else None,
         province_name=province.name if province else None,
         cv_file_name=cv.file_name if cv else None,
         candidate_name=user.full_name if user else None,

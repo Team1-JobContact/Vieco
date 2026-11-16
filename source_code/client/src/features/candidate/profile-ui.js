@@ -47,7 +47,7 @@
     // ---------- Đơn ứng tuyển ----------
     function applicationRow(item, onChanged) {
         return h("article", { class: "v-row" },
-            V.logo(item.company_name, "v-logo-sm"),
+            V.logo(item.company_name, "v-logo-sm", item.company_logo_url),
             h("div", {}, h("h3", {}, h("a", { href: V.jobUrl(item.job_id), text: item.job_title || "Tin tuyển dụng" })), h("p", { class: "sub", text: item.company_name || "" })),
             h("div", {}, h("small", { text: "Ngày nộp" }), V.date(item.created_at)),
             V.badge(V.APP_STATUS, item.status),

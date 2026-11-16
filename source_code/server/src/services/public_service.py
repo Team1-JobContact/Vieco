@@ -51,7 +51,7 @@ def get_job(db, job_id):
     db.refresh(job)
     return job_service.to_job_response(db,job)
 
-COMPANY_KEYS = ("id","name","slug","logo_url","description","industry_id","size","website","address","province_id")
+COMPANY_KEYS = ("id","name","slug","logo_url","cover_url","description","industry_id","size","website","address","province_id")
 
 def company_fields(db, row, open_jobs=None):
     from src.models.catalog import Industry, Province
@@ -85,7 +85,10 @@ def get_company(db, company_id):
     row = db.query(Company).filter(Company.id == company_id, Company.status == "APPROVED").first()
     if not row:
         raise HTTPException(404, "Không tìm thấy công ty")
-    return company_fields(db, row)
+    data = company_fields(db, row)
+    from src.services import company_media_service
+    data["images"] = company_media_service.list_images(db, row)
+    return data
 
 # ---------- Việc đã lưu ----------
 

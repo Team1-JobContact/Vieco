@@ -229,12 +229,13 @@
         app.appendChild(h("section", { class: "v-page-head" }, h("div", { class: "v-wrap" },
             h("nav", { class: "v-crumbs", "aria-label": "Đường dẫn" }, h("a", { href: V.url("index.html"), text: "Trang chủ" }), h("span", { text: "/" }), h("span", { "aria-current": "page", text: "Quản lý tuyển dụng" })),
             h("div", { class: "v-title-row" },
-                company ? V.logo(company.name) : null,
+                company ? V.logo(company.name, "", company.logo_url) : null,
                 h("div", { class: "grow" }, h("p", { class: "v-eyebrow", text: "Nhà tuyển dụng" }),
                     h("h1", { text: company ? company.name : "Quản lý tuyển dụng" }),
                     company && h("div", { class: "v-meta" }, V.badge(V.COMPANY_STATUS, company.status), h("span", { text: company.member_role === "OWNER" ? "Chủ sở hữu" : "Thành viên" }))),
                 h("div", { class: "v-title-actions" },
                     h("a", { class: "v-btn v-btn-outline", href: V.url("pages/employer.html") }, "Hồ sơ công ty", V.icon("edit")),
+                    company && h("a", { class: "v-btn v-btn-outline", href: V.url("pages/company-media.html") }, "Hình ảnh công ty", V.icon("upload")),
                     company && company.status === "APPROVED" && h("a", { class: "v-btn v-btn-primary", href: V.companyUrl(company.id) }, "Xem trang công ty", V.icon("out")))))));
         var wrapMain = h("div", { class: "v-wrap" }, message, body);
         app.appendChild(h("section", { class: "v-section" }, wrapMain));
