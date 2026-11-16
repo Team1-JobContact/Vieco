@@ -38,8 +38,8 @@
                     </div>
                 </form>
                 <aside>
-                    <div class="v-contact-card"><svg class="v-icon v-icon-lg" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="1"/><path d="m3 7 9 6 9-6"/></svg><div><small>Email</small><strong>hotro@vieco.example</strong><small>Phản hồi trong vòng 24 giờ</small></div></div>
-                    <div class="v-contact-card"><svg class="v-icon v-icon-lg" viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="1.5"/><path d="M11 18h2"/></svg><div><small>Hotline</small><strong>1900 1234</strong><small>Thứ Hai – Thứ Sáu, 8:30 – 18:00</small></div></div>
+                    <div class="v-contact-card"><svg class="v-icon v-icon-lg" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="1"/><path d="m3 7 9 6 9-6"/></svg><div><small>Email</small><strong><a href="mailto:contact@vieco.click">contact@vieco.click</a></strong><small>Phản hồi trong vòng 24 giờ</small></div></div>
+                    <div class="v-contact-card"><svg class="v-icon v-icon-lg" viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="1.5"/><path d="M11 18h2"/></svg><div><small>Hotline</small><strong><a href="tel:0949231389">0949 231 389</a></strong><small>Thứ Hai – Thứ Sáu, 8:30 – 18:00</small></div></div>
                     <div class="v-contact-card"><svg class="v-icon v-icon-lg" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 10c0 5-7 11-7 11s-7-6-7-11a7 7 0 0 1 14 0Z"/><circle cx="12" cy="10" r="2.5"/></svg><div><small>Văn phòng</small><strong>Quận 1, TP. Hồ Chí Minh</strong><small>Tầng 12, số 01 đường Nguyễn Huệ</small></div></div>
                     <div class="v-contact-card"><svg class="v-icon v-icon-lg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><div><small>Giờ làm việc</small><strong>8:30 – 18:00</strong><small>Nghỉ Thứ Bảy, Chủ nhật và ngày lễ</small></div></div>
                 </aside>
@@ -73,7 +73,7 @@
             // Chưa có API tiếp nhận liên hệ: mở ứng dụng email của người dùng với nội dung đã điền.
             var subject = "[Vieco] " + data.get("topic") + " – " + String(data.get("name")).trim();
             var body = String(data.get("content")).trim() + "\n\n" + data.get("role") + ": " + String(data.get("name")).trim() + " <" + String(data.get("email")).trim() + ">";
-            window.location.href = "mailto:hotro@vieco.example?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
+            window.location.href = "mailto:contact@vieco.click?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
             Vieco.note(box, "Đã mở ứng dụng email của bạn với nội dung vừa nhập. Hãy bấm gửi để hoàn tất.", "success");
         });
     }());
