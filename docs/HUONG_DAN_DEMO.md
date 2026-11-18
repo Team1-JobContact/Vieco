@@ -79,4 +79,6 @@ Test giao diện chạy bằng Node.js và jsdom.
 - Liên kết website dài hơn 32 ký tự chỉ hiển thị chữ "Fanpage" (mạng xã hội) hoặc "Website", bấm vào mở liên kết ở thẻ mới.
 - Chưa có theo dõi công ty, đánh giá công ty và lịch hẹn phỏng vấn như trong bản thiết kế.
 - Trang đăng nhập, đăng ký, khôi phục tài khoản và form hồ sơ công ty/tin tuyển dụng dùng chung header, footer, bảng màu và kiểu khối với các trang khác qua `src/assets/css/vieco-sync.css`. Bố cục bên trong các trang này giữ nguyên vì thiết kế Figma không có màn hình tương ứng.
+- Riêng trang đăng nhập và đăng ký có phong cách bo tròn, điểm nhấn vàng trên nền xanh trong `src/assets/css/auth-modern.css`; các trang khác vẫn giữ góc vuông theo Figma.
+- Logo và favicon nằm trong `src/assets/images/brand/` (logo đầy đủ, biểu tượng chữ V, favicon 32/64px và icon cho iPhone).
 - Thiết kế Figma chỉ có bản desktop; bản di động do nhóm tự co giãn bố cục.

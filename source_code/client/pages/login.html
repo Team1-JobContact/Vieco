@@ -3,12 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="data:,">
+    <link rel="icon" type="image/png" sizes="64x64" href="../src/assets/images/brand/favicon-64.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../src/assets/images/brand/favicon-32.png">
+    <link rel="apple-touch-icon" href="../src/assets/images/brand/apple-touch-icon.png">
     <title>Đăng nhập - Vieco</title>
     <link rel="stylesheet" href="../src/assets/css/style.css">
     <link rel="stylesheet" href="../src/assets/css/auth.css">
     <link rel="stylesheet" href="../src/assets/css/vieco.css">
     <link rel="stylesheet" href="../src/assets/css/vieco-sync.css">
+    <link rel="stylesheet" href="../src/assets/css/auth-modern.css">
 </head>
 <body class="auth-page v-page v-sync" data-root="../">
     <div id="v-header"></div>
@@ -85,6 +88,7 @@
             <!-- Panel Đăng ký (a-container) -->
             <div class="form-container a-container" id="a-container" aria-hidden="true">
                 <form class="neu-form" id="register-form" novalidate>
+                    <img class="auth-logo" src="../src/assets/images/brand/vieco-logo.png" alt="Vieco" width="109" height="72">
                     <h2 class="form__title">Tạo tài khoản</h2>
 
                     <div class="form__icons" aria-hidden="true">
@@ -235,6 +239,7 @@
             <!-- Panel Đăng nhập (b-container) -->
             <div class="form-container b-container" id="b-container" aria-hidden="false">
                 <form class="neu-form" id="login-form" novalidate>
+                    <img class="auth-logo" src="../src/assets/images/brand/vieco-logo.png" alt="Vieco" width="109" height="72">
                     <h2 class="form__title">Đăng nhập Vieco</h2>
 
                     <div class="form__icons" aria-hidden="true">
@@ -307,7 +312,8 @@
                 <div class="switch__circle switch__circle--t"></div>
 
                 <div class="switch__container" id="switch-c1">
-                    <h2 class="switch__title">Chào mừng trở lại!</h2>
+                    <span class="switch__eyebrow">Đã là thành viên</span>
+                    <h2 class="switch__title">Chào mừng <em>trở lại!</em></h2>
                     <p class="switch__description">
                         Đã có tài khoản Vieco? Hãy đăng nhập để tiếp tục kết nối công việc và hồ sơ của bạn.
                     </p>
@@ -315,7 +321,8 @@
                 </div>
 
                 <div class="switch__container is-hidden" id="switch-c2">
-                    <h2 class="switch__title">Xin chào bạn mới!</h2>
+                    <span class="switch__eyebrow">Thành viên mới</span>
+                    <h2 class="switch__title">Xin chào <em>bạn mới!</em></h2>
                     <p class="switch__description">
                         Nhập thông tin cá nhân và bắt đầu hành trình sự nghiệp hoặc tuyển dụng cùng Vieco ngay hôm nay.
                     </p>
