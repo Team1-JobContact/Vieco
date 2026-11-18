@@ -141,7 +141,12 @@ def test_application_ownership_transitions_notifications_and_duplicate(client,db
     assert client.post("/api/v1/applications",headers=r["ch"],json={**payload,"cv_id":r["bad_cv"].id}).status_code == 404
     app=client.post("/api/v1/applications",headers=r["ch"],json=payload)
     assert app.status_code == 201, app.text
-    aid=app.json()["id"]
+    application = app.json()
+    assert application["job_id"] == jid
+    assert application["cv_id"] == payload["cv_id"]
+    assert application["cover_letter"] == payload["cover_letter"]
+    assert application["status"] == "NEW"
+    aid = application["id"]
     assert client.post("/api/v1/applications",headers=r["ch"],json=payload).status_code == 409
     assert client.get("/api/v1/applications/my-applications",headers=r["xh"]).json()["total"] == 0
     assert client.get("/api/v1/applications/my-applications",headers=r["ch"]).json()["total"] == 1
@@ -159,6 +164,18 @@ def test_application_ownership_transitions_notifications_and_duplicate(client,db
     first=client.patch(f"/api/v1/notifications/{nid}/read",headers=r["ch"])
     assert first.json()["is_read"] is True
     assert client.patch(f"/api/v1/notifications/{nid}/read",headers=r["ch"]).json()["read_at"] == first.json()["read_at"]
+
+
+def test_application_rejects_closed_job(client, db_session, recruitment):
+    job = recruitment["job"]
+    job.status = "CLOSED"
+    db_session.commit()
+
+    headers = recruitment["ch"]
+    payload = {"job_id": job.id, "cv_id": recruitment["cv"].id}
+    response = client.post("/api/v1/applications", headers=headers, json=payload)
+    assert response.status_code == 409
+    assert client.get("/api/v1/applications/my-applications", headers=headers).json()["total"] == 0
 
 
 def test_withdraw_is_owned_and_final(client,recruitment):
