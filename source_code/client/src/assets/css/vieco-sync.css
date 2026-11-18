@@ -65,6 +65,7 @@ body.auth-page.v-sync { background: var(--v-cream); }
 .v-sync .neumorphic-main { background: var(--v-white); border: 1px solid var(--v-line-card); }
 .v-sync .form-container { background: var(--v-white); }
 .v-sync .form__title { font-size: 30px; font-weight: 500; letter-spacing: 0; margin-bottom: 22px; }
+.v-sync .auth-logo { display: block; height: 72px; width: auto; margin: 0 auto 12px; }
 .v-sync .form__icons, .v-sync .form__span, .v-sync .switch__circle { display: none; }
 .v-sync .form__input { height: 48px; background: var(--v-white); border: 1px solid var(--v-line-input); font-size: 15px; }
 .v-sync .form__input:focus { border-color: var(--v-blue); outline: 1px solid var(--v-blue); }
