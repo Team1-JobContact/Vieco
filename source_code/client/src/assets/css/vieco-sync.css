@@ -53,10 +53,11 @@
 .v-sync > .navbar, .v-sync > .site-footer { display: none !important; }
 body.v-sync { background: var(--v-bg); color: var(--v-ink); font-size: 15px; }
 
-/* Góc vuông và không đổ bóng như các trang còn lại. */
-.v-sync main *, .v-sync main *::before, .v-sync main *::after { border-radius: 2px !important; box-shadow: none !important; }
-.v-sync main .spinner, .v-sync main .password-rule-dot, .v-sync main .session-avatar,
-.v-sync main .status-pill::before, .v-sync main .hero-caption::before, .v-sync main input[type="radio"] { border-radius: 50% !important; }
+/* Góc vuông và không đổ bóng như các trang còn lại.
+   Trang đăng nhập / đăng ký có phong cách bo tròn riêng trong auth-modern.css nên không áp dụng ở đây. */
+.v-sync:not(.auth-page) main *, .v-sync:not(.auth-page) main *::before, .v-sync:not(.auth-page) main *::after { border-radius: 2px !important; box-shadow: none !important; }
+.v-sync:not(.auth-page) main .spinner, .v-sync:not(.auth-page) main .password-rule-dot, .v-sync:not(.auth-page) main .session-avatar,
+.v-sync:not(.auth-page) main .status-pill::before, .v-sync:not(.auth-page) main .hero-caption::before, .v-sync:not(.auth-page) main input[type="radio"] { border-radius: 50% !important; }
 .v-sync main :focus-visible { outline: 2px solid var(--v-blue); outline-offset: 2px; }
 
 /* ---------- Đăng nhập / Đăng ký ---------- */
