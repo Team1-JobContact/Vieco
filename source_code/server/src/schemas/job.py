@@ -2,6 +2,7 @@ from datetime import date, datetime
 from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator
+from src.utils.dates import business_today
 
 JobStatus = Literal["DRAFT", "PENDING", "APPROVED", "REJECTED", "CLOSED", "EXPIRED"]
 EmploymentType = Literal["FULL_TIME", "PART_TIME", "INTERNSHIP", "CONTRACT", "FREELANCE"]
@@ -95,7 +96,7 @@ class JobExtendRequest(BaseModel):
     @field_validator("deadline")
     @classmethod
     def validate_deadline(cls, v: date) -> date:
-        if v < date.today():
+        if v < business_today():
             raise ValueError("Hạn nộp mới phải là ngày hiện tại hoặc tương lai")
         return v
 

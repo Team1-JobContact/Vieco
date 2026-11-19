@@ -1,10 +1,13 @@
 from sqlalchemy import MetaData, create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 from src.config.settings import settings
+from src.config.connection import connection_args
 
 engine = create_engine(
     settings.DATABASE_URL,
     pool_recycle=3600,
+    pool_pre_ping=True,
+    connect_args=connection_args(settings),
     echo=settings.DEBUG
 )
 

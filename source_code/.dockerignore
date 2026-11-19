@@ -1,0 +1,11 @@
+**/.env
+**/.env.*
+**/uploads
+**/certs
+**/__pycache__
+**/.pytest_cache
+**/node_modules
+**/tests
+**/*.log
+**/*.sql
+**/*.zip

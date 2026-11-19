@@ -15,6 +15,7 @@ from src.schemas.job import (
     JobCreate, JobExtendRequest, JobListResponse, JobResponse, JobUpdate, SkillItem,
 )
 from src.services.company_service import find_membership
+from src.utils.dates import business_today
 
 
 def _utcnow() -> datetime:
@@ -78,7 +79,7 @@ def _validate_job_submission(title: str | None, industry_id: int | None, provinc
         raise HTTPException(HTTP_422, "Yêu cầu kinh nghiệm là bắt buộc khi gửi duyệt tin")
     if not deadline:
         raise HTTPException(HTTP_422, "Hạn nộp hồ sơ là bắt buộc khi gửi duyệt tin")
-    if deadline < date.today():
+    if deadline < business_today():
         raise HTTPException(HTTP_422, "Hạn nộp hồ sơ phải là ngày hiện tại hoặc tương lai")
     if positions is not None and positions < 1:
         raise HTTPException(HTTP_422, "Số lượng tuyển phải lớn hơn hoặc bằng 1")
@@ -391,7 +392,7 @@ def reopen_job(db: Session, user: User, job_id: int, new_deadline: date | None =
         )
 
     target_deadline = new_deadline or job.deadline
-    if not target_deadline or target_deadline < date.today():
+    if not target_deadline or target_deadline < business_today():
         raise HTTPException(
             status.HTTP_400_BAD_REQUEST,
             "Hạn nộp của tin đã quá hạn. Vui lòng cung cấp hạn nộp mới (hôm nay hoặc tương lai) để mở lại tin.",

@@ -25,6 +25,13 @@
             } catch (_) {
                 // Ignore storage restrictions
             }
+            // A shared deployment serves the website and API on port 8000,
+            // or through a reverse proxy on the standard HTTP(S) port.
+            const location = window.location;
+            if (location && /^https?:$/.test(location.protocol) &&
+                (!location.port || ["80", "443", "8000"].includes(location.port))) {
+                return location.origin + "/api/v1";
+            }
         }
         return DEFAULT_API_BASE_URL;
     }

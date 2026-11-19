@@ -3,6 +3,7 @@ from datetime import date, datetime
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, field_validator
+from src.utils.dates import business_today
 
 Gender = Literal["MALE", "FEMALE", "OTHER"]
 Visibility = Literal["PUBLIC", "PRIVATE"]
@@ -44,7 +45,7 @@ class _ProfileFields(BaseModel):
     @field_validator("date_of_birth")
     @classmethod
     def validate_dob(cls, v: date | None) -> date | None:
-        if v is not None and (v >= date.today() or v.year < 1900):
+        if v is not None and (v >= business_today() or v.year < 1900):
             raise ValueError("Ngày sinh không hợp lệ")
         return v
 

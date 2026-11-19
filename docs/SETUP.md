@@ -1,5 +1,9 @@
 # Cài đặt và chạy Vieco
 
+Để cả nhóm dùng cùng database, ảnh và CV, xem [hệ thống dùng chung](SHARED_SYSTEM.md).
+
+Báo cáo kiểm tra mới: [18/11/2026](HOSTING_REVIEW_20261118.md). Hướng dẫn hosting: [Render từng bước](HOSTING_RENDER.md).
+
 Bản bàn giao hiện tại và các việc cần làm khi cập nhật từ main xem [TEAM_CHANGE_REPORT](TEAM_CHANGE_REPORT.md).
 
 ## Yêu cầu
@@ -27,7 +31,7 @@ Sửa .env cục bộ, giữ nguyên cấu hình đang có nếu file đã tồn
 | SECRET_KEY | Khóa riêng dùng ký JWT; thêm vào .env, không dùng khóa mặc định khi triển khai |
 | APP_NAME, DEBUG | Tên ứng dụng và debug; DEBUG dùng True/False |
 | ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES | Thuật toán JWT và thời hạn token theo cấu hình hiện có |
-| UPLOAD_DIR | Thư mục CV; mặc định uploads/ tính từ thư mục chạy server |
+| UPLOAD_DIR | Thư mục CV và ảnh công ty; mặc định uploads/ tính từ thư mục chạy server |
 | ADMIN_EMAIL, ADMIN_PASSWORD, ADMIN_FULL_NAME | Dữ liệu Admin cho seed; tài khoản chỉ được tạo khi có email và password |
 
 Khởi động MySQL và chuẩn bị database phát triển khớp DATABASE_URL. Xem [migration/seed](../source_code/server/migrations/README.md). Với database phát triển đã xác định đúng, các lệnh khởi tạo tại server là:
@@ -78,7 +82,7 @@ $env:DEBUG='False'
 
 DEBUG ở đây chỉ áp dụng tiến trình terminal, không sửa .env. Test backend dùng SQLite cô lập; test tích hợp cần Node trong PATH để gọi `client/tests/job-contract.cjs`. Nếu thiếu Node, test tích hợp có thể bị skip: phải đọc kết quả thay vì coi là đã xác minh.
 
-Kết quả mã nguồn mới nhất đã ghi nhận: 52 test backend và 21 test frontend đạt. Backend dùng SQLite, UI dùng jsdom và email dùng SMTP giả lập. Các con số 44 backend/19 frontend trong báo cáo cũ thuộc bước refactor trung gian. Chưa xác minh MySQL/migration thực tế, SMTP thật và giao diện trực quan trên trình duyệt bằng bộ kiểm thử này.
+Kết quả kiểm tra ngày 18/11/2026: 103 test backend và 24 test frontend đạt. Bộ test dùng SQLite/jsdom và SMTP giả lập; ngoài ra đã kiểm tra migration/snapshot trên MySQL 8.0 thật, 49 kiểm tra HTTP và 38 lượt trang/kích thước trên Chrome thật. Chưa xác minh Aiven bằng CA của nhóm, SMTP thật, Docker/Linux hoặc HTTPS trên hosting. Chi tiết và giới hạn nằm trong [báo cáo trước hosting](HOSTING_REVIEW_20261118.md). Các con số 44/19, 52/21 trong báo cáo cũ thuộc các đợt kiểm tra trước.
 
 Xem thêm [hướng dẫn Windows](HUONG_DAN_CHAY_DU_AN.md), [checklist](TEST_CHECKLIST.md) và [PB-015](PB-015.md). Không commit .env, token, mật khẩu hoặc dữ liệu uploads.
 
