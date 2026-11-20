@@ -78,7 +78,7 @@
         var grid = h("div", { class: "v-grid-3" });
         app.appendChild(h("section", { class: "v-section v-section-cream", id: jobsId }, h("div", { class: "v-wrap" },
             h("div", { class: "v-section-head" },
-                h("div", {}, h("p", { class: "v-eyebrow", text: "Gia nhập đội ngũ" }), h("h2", { class: "v-h2", text: "Vị trí đang tuyển tại " + V.brand(company.name) })),
+                h("div", {}, h("p", { class: "v-eyebrow", text: "Gia nhập đội ngũ" }), h("h2", { class: "v-h2", text: "Vị trí đang tuyển tại " + V.brandName(company.name) })),
                 jobs.total > jobs.items.length ? h("a", { class: "v-link", href: V.url("pages/jobs.html") + "?q=" + encodeURIComponent(company.name), text: "Xem tất cả " + jobs.total + " việc làm  ↗" }) : null),
             grid)));
         if (!jobs.items.length) { grid.style.display = "block"; V.empty(grid, "Công ty chưa có vị trí đang tuyển", "Hãy quay lại sau hoặc khám phá việc làm khác."); }
