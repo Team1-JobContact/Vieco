@@ -419,6 +419,8 @@ body.v-page {
 .v-faq summary::after { content: "+"; font-size: 20px; font-weight: 400; color: var(--v-blue); line-height: 1; }
 .v-faq details[open] summary::after { content: "✓"; font-size: 15px; }
 .v-faq details p { font-size: 14px; color: var(--v-muted); padding-bottom: 18px; }
+.v-contact-layout { grid-template-columns: minmax(0, 1fr) 440px; }
+.v-faq-layout { grid-template-columns: 400px minmax(0, 1fr); }
 .v-contact-card { display: flex; gap: 18px; background: var(--v-white); border: 1px solid var(--v-line-card); padding: 24px; color: var(--v-blue); }
 .v-contact-card + .v-contact-card { margin-top: 16px; }
 .v-contact-card small { display: block; font-size: 12px; color: var(--v-muted); }

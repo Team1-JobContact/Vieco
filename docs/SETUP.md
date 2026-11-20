@@ -2,6 +2,10 @@
 
 Kết quả mới nhất: [review 17/11/2026](REVIEW_2026-11-17.md) và [lệnh chạy Windows](HUONG_DAN_CHAY_DU_AN.md). Backend hiện từ chối SECRET_KEY mặc định/placeholder hoặc dưới 32 ký tự; `.env.example` phải được điền khóa riêng trước khi chạy.
 
+Để cả nhóm dùng cùng database, ảnh và CV, xem [hệ thống dùng chung](SHARED_SYSTEM.md).
+
+Báo cáo kiểm tra mới: [18/11/2026](HOSTING_REVIEW_20261118.md). Hướng dẫn hosting: [Render từng bước](HOSTING_RENDER.md).
+
 Bản bàn giao hiện tại và các việc cần làm khi cập nhật từ main xem [TEAM_CHANGE_REPORT](TEAM_CHANGE_REPORT.md).
 
 ## Yêu cầu
@@ -82,7 +86,7 @@ $env:DEBUG='False'
 
 DEBUG ở đây chỉ áp dụng tiến trình terminal, không sửa .env. Test backend dùng SQLite cô lập; test tích hợp cần Node trong PATH để gọi `client/tests/job-contract.cjs`. Nếu thiếu Node, test tích hợp có thể bị skip: phải đọc kết quả thay vì coi là đã xác minh.
 
-Kiểm tra ngày 16/11/2026 đạt 90 test backend và 28 test frontend. Đã kiểm tra migration 0002 lên 0003, seed chạy lặp và luồng tuyển dụng trên MySQL tạm. Kiểm thử Edge headless gồm quản trị, ứng tuyển, thử lại sau lỗi mạng, hồ sơ ứng viên và bốn trang ở chiều rộng 360 px. Email trong bộ test được giả lập. SMTP thật và môi trường triển khai cần được kiểm tra riêng.
+Kết quả kiểm tra ngày 18/11/2026: 103 test backend và 24 test frontend đạt. Bộ test dùng SQLite/jsdom và SMTP giả lập; ngoài ra đã kiểm tra migration/snapshot trên MySQL 8.0 thật, 49 kiểm tra HTTP và 38 lượt trang/kích thước trên Chrome thật. Chưa xác minh Aiven bằng CA của nhóm, SMTP thật, Docker/Linux hoặc HTTPS trên hosting. Chi tiết và giới hạn nằm trong [báo cáo trước hosting](HOSTING_REVIEW_20261118.md). Các con số 44/19, 52/21 trong báo cáo cũ thuộc các đợt kiểm tra trước.
 
 Xem thêm [hướng dẫn Windows](HUONG_DAN_CHAY_DU_AN.md), [checklist](TEST_CHECKLIST.md) và [PB-015](PB-015.md). Không commit .env, token, mật khẩu hoặc dữ liệu uploads.
 
