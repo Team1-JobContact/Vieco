@@ -241,11 +241,56 @@
         for (var i = 0; i < text.length; i++) sum = (sum + text.charCodeAt(i) * (i + 1)) % 9973;
         return BRAND_COLORS[sum % BRAND_COLORS.length];
     }
-    /** Tên ngắn hiển thị như logo chữ trong Figma (FPT, VNG, TCB). */
+    /* Cụm chỉ loại hình doanh nghiệp đứng đầu tên, không phải tên thương hiệu. Cụm dài đặt trước cụm ngắn. */
+    var LEGAL_PREFIXES = ["thương mại cổ phần", "trách nhiệm hữu hạn", "một thành viên", "tổng công ty", "ngân hàng",
+        "tập đoàn", "công ty", "hệ thống", "liên doanh", "hợp danh", "cổ phần", "chuỗi", "tmcp", "tnhh", "mtv", "cty", "cp"];
+    /* Từ trông như tên thương hiệu: không dấu, viết hoa chữ đầu và dài từ 4 ký tự (Coteccons, Tiki) hoặc viết tắt (FPT). */
+    function isBrandWord(word) {
+        if (!/^[A-Z0-9][A-Za-z0-9&.+'-]*$/.test(word)) return false;
+        return word.length >= 4 || (word.length >= 2 && word === word.toUpperCase());
+    }
+    /** Tên thương hiệu dễ đọc rút từ tên pháp lý:
+     *  "Công ty Cổ phần Dịch vụ Di động Trực tuyến (MoMo)" -> "MoMo", "Tập đoàn FPT" -> "FPT",
+     *  "Công ty Cổ phần Xây dựng Coteccons" -> "Coteccons", "Hệ thống Nhà thuốc FPT Long Châu" -> "FPT Long Châu". */
+    function brandName(name) {
+        var text = String(name || "").replace(/\s+/g, " ").trim();
+        var alias = text.match(/\(([^()]{1,40})\)\s*$/);
+        if (alias && alias[1].trim()) return alias[1].trim();
+        var stripped = true;
+        while (stripped) {
+            stripped = false;
+            for (var i = 0; i < LEGAL_PREFIXES.length; i++) {
+                var p = LEGAL_PREFIXES[i];
+                if (text.toLowerCase().indexOf(p) === 0 && (text.length === p.length || text.charAt(p.length) === " ")) {
+                    text = text.slice(p.length).trim();
+                    stripped = true;
+                    break;
+                }
+            }
+        }
+        var words = text.split(" ").filter(Boolean);
+        if (!words.length) return String(name || "").trim() || "Vieco";
+        for (var j = 0; j < words.length; j++) {
+            if (isBrandWord(words[j])) return words.slice(j).join(" ");
+        }
+        return words.join(" ");
+    }
+    /** Tên thương hiệu in hoa, hiển thị như logo chữ trong Figma (FPT, MOMO, VIETNAM AIRLINES). */
     function brand(name) {
-        var words = String(name || "").replace(/^(công ty|cty)\s+(cổ phần|tnhh|cp)?\s*/i, "").trim().split(/\s+/).filter(Boolean);
-        if (!words.length) return "V";
-        if (words[0].length <= 6) return words[0].toUpperCase();
+        return brandName(name).toUpperCase();
+    }
+    /** Ký hiệu ngắn cho ô logo vuông (chỉ dùng khi công ty chưa tải logo):
+     *  từ đến 6 ký tự in hoa (TIKI), 7–8 ký tự giữ chữ thường để vừa ô (Vinamilk), dài hơn lấy chữ cái đầu (V);
+     *  tên nhiều từ có từ viết tắt thì dùng nó (FPT), còn lại lấy chữ cái đầu mỗi từ (YSL). */
+    function brandMark(name) {
+        var words = brandName(name).split(" ");
+        if (words.length === 1) {
+            var word = words[0];
+            return word.length <= 6 ? word.toUpperCase() : word.length <= 8 ? word : word.charAt(0).toUpperCase();
+        }
+        for (var i = 0; i < words.length; i++) {
+            if (/^[A-Z0-9&]{2,6}$/.test(words[i])) return words[i];
+        }
         return words.slice(0, 3).map(function (w) { return w.charAt(0); }).join("").toUpperCase();
     }
 /** Đường dẫn ảnh do API trả về (/media/...) -> URL đầy đủ; chỉ nhận đường dẫn nội bộ đúng mẫu. */
@@ -256,7 +301,11 @@
     function logo(name, size, logoUrl) {
         var src = media(logoUrl);
         if (src) return h("span", { class: "v-logo v-logo-img " + (size || "") }, h("img", { src: src, alt: "Logo " + (name || "công ty"), loading: "lazy" }));
-        var box = h("span", { class: "v-logo " + (size || ""), text: brand(name), "aria-hidden": "true" });
+        var mark = brandMark(name);
+        var text = h("span", { class: "v-logo-text", text: mark });
+        // Chữ in hoa rộng hơn chữ thường; độ rộng trung bình mỗi ký tự dùng để CSS tự thu nhỏ cỡ chữ cho vừa ô.
+        text.style.setProperty("--chars", String(Math.max(mark.length, 3) * (mark === mark.toUpperCase() ? 0.72 : 0.6)));
+        var box = h("span", { class: "v-logo " + (size || ""), "aria-hidden": "true" }, text);
         box.style.color = brandColor(name);
         return box;
     }
@@ -674,7 +723,7 @@
     window.Vieco = {
         url: url, h: h, clear: clear, icon: icon, api: api, download: download, goLogin: goLogin, currentUser: currentUser, requireRole: requireRole,
         categories: categories, fillSelect: fillSelect, salary: salary, date: date, ago: ago, initials: initials, shortName: shortName,
-        brand: brand, brandColor: brandColor, logo: logo, media: media, coverImage: coverImage, linkInfo: linkInfo, externalLink: externalLink, prose: prose, lines: lines, roleLabel: roleLabel,
+        brand: brand, brandName: brandName, brandMark: brandMark, brandColor: brandColor, logo: logo, media: media, coverImage: coverImage, linkInfo: linkInfo, externalLink: externalLink, prose: prose, lines: lines, roleLabel: roleLabel,
         badge: badge, toast: toast, note: note, loading: loading, empty: empty, saveButton: saveButton, jobCard: jobCard, jobRow: jobRow, companyCard: companyCard,
         jobUrl: jobUrl, companyUrl: companyUrl, pagination: pagination, modal: modal, confirm: confirmDialog, searchForm: searchForm,
         openSearch: openSearch, logout: logout, refreshUnread: function () { refreshUnread(); },
