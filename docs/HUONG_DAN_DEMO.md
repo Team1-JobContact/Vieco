@@ -6,8 +6,15 @@ Tài liệu này dùng cho buổi demo và cho thành viên muốn tự kiểm t
 
 1. Chạy backend ở cổng 8000 và frontend ở cổng 5500 theo README.
 2. Đã chạy `alembic upgrade head` và `python -m src.seeds.run`. Sau khi cập nhật mã nguồn có migration mới (ví dụ `0003` cho hình ảnh công ty), chạy lại `alembic upgrade head`. Tài khoản Admin lấy từ `ADMIN_EMAIL` và `ADMIN_PASSWORD` trong `.env`.
-3. Chuẩn bị một tệp CV thật dạng PDF, DOC hoặc DOCX nhỏ hơn 5 MB.
-4. Mở ba cửa sổ trình duyệt riêng (ví dụ một cửa sổ thường, một cửa sổ ẩn danh và một trình duyệt khác) để đăng nhập ba vai trò cùng lúc.
+3. (Tùy chọn) Nạp dữ liệu demo: 10 doanh nghiệp và 43 tin tuyển dụng phủ đủ 21 ngành nghề, 5 hình thức làm việc và 5 mức kinh nghiệm. Chạy trong `source_code/server`:
+   1. `python -m src.seeds.demo_companies`: tạo 10 tài khoản nhà tuyển dụng `tuyendung.<tên>@vieco.click` (mật khẩu `123345678A`, đổi bằng biến môi trường `DEMO_EMPLOYER_PASSWORD`) kèm hồ sơ công ty ở trạng thái Chờ duyệt, chưa có hình ảnh.
+   2. Admin duyệt 10 công ty tại `pages/admin.html`.
+   3. `python -m src.seeds.demo_jobs`: tạo và duyệt các tin tuyển dụng bằng tài khoản Admin.
+   4. `python -m src.seeds.demo_media`: gắn logo, ảnh bìa và 3 ảnh không gian làm việc cho 10 công ty (ảnh trong `src/seeds/demo_media/`, nguồn và giấy phép ở `CREDITS.md`). Công ty đã có ảnh thì bỏ qua.
+
+   Các script chạy lại nhiều lần không tạo trùng. Nội dung tin và mức lương là dữ liệu demo, không phải tin thật của doanh nghiệp. Một số ảnh không gian làm việc là ảnh minh họa chung, không phải ảnh thật của doanh nghiệp đó.
+4. Chuẩn bị một tệp CV thật dạng PDF, DOC hoặc DOCX nhỏ hơn 5 MB.
+5. Mở ba cửa sổ trình duyệt riêng (ví dụ một cửa sổ thường, một cửa sổ ẩn danh và một trình duyệt khác) để đăng nhập ba vai trò cùng lúc.
 
 ## 2. Các trang giao diện
 
