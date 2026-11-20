@@ -70,7 +70,7 @@ def _notify_members(db: Session, company: Company, type_: str, title: str, messa
                 .filter(CompanyMember.company_id == company.id).all()]
     for uid in user_ids:
         db.add(Notification(user_id=uid, type=type_, title=title, message=message,
-                            action_url="/employer/company",
+                            action_url="/pages/employer.html",
                             reference_type="COMPANY", reference_id=company.id))
 
 

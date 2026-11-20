@@ -20,7 +20,7 @@ def _utcnow() -> datetime:
 def to_user_response(user: User, role_name: str) -> UserResponse:
     return UserResponse(
         id=user.id, email=user.email, full_name=user.full_name, phone=user.phone,
-        role=role_name, is_email_verified=user.is_email_verified,
+        role=role_name, avatar_url=user.avatar_url, is_email_verified=user.is_email_verified,
         status=user.status, created_at=user.created_at,
     )
 

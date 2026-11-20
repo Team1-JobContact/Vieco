@@ -21,7 +21,6 @@ async function setup(t, options = {}) {
     const w = dom.window, calls = [];
     let currentCompany = options.company === undefined ? { ...companyRecord } : options.company;
     let submitFailures = options.submitFailures || 0;
-    w.confirm = () => true;
     w.ViecoAuthApi = { getAuthToken: () => 'test-token', getApiBaseUrl: () => 'http://test/api/v1',
         fetchCurrentUser: async () => ({ full_name: 'Nhà tuyển dụng', role: options.role || 'EMPLOYER' }),
         clearAuthSession() {}, logoutUser: async () => ({}) };
@@ -49,6 +48,9 @@ async function setup(t, options = {}) {
         return { ok: code < 400, status: code, json: async () => JSON.parse(JSON.stringify(data)) };
     };
     w.eval(apiSource);
+    w.document.getElementById('v-header').remove();
+    w.document.getElementById('v-footer').remove();
+    w.eval(fs.readFileSync(path.join(root, 'src/shared/layout.js'), 'utf8'));
     w.eval(uiSource);
     for (let i = 0; i < 5; i++) await tick();
     function fill(id, data) {

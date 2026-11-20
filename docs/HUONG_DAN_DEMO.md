@@ -31,6 +31,9 @@ Giao diện dựng theo thiết kế Figma "Vieco • Desktop". Mọi trang dùn
 | Quản lý tin và ứng viên | `pages/employer-jobs.html` | Nhà tuyển dụng |
 | Hình ảnh công ty (logo, ảnh bìa, không gian làm việc) | `pages/company-media.html` | Nhà tuyển dụng |
 | Trang quản trị | `pages/admin.html` | Admin |
+| Quản lý tài khoản, danh mục, nội dung, giới hạn tải tệp và nhật ký | `pages/admin.html#users`, `#categories`, `#pages`, `#settings`, `#audit` | Admin |
+| Học vấn, kinh nghiệm, kỹ năng và ảnh đại diện | `pages/profile.html#history`, `pages/profile.html#settings` | Ứng viên |
+| Trang nội dung đã xuất bản | `pages/content.html?slug=gioi-thieu`, `?slug=dieu-khoan`, `?slug=faq` | Mọi người |
 | Thông báo | `pages/notifications.html` | Người đã đăng nhập |
 | Giới thiệu cho nhà tuyển dụng, Thư viện CV, Liên hệ | `pages/for-employers.html`, `pages/cv-library.html`, `pages/contact.html` | Mọi người |
 

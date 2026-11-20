@@ -225,3 +225,12 @@ __marimo__/
 # Runtime uploads
 /source_code/server/uploads/*
 !/source_code/server/uploads/.gitkeep
+
+# Shared environment, certificates and private data transfers
+.env.*
+!.env.example
+**/certs/*.pem
+vieco-data-*/
+vieco-data-*.zip
+vieco_data.sql
+backup*.sql

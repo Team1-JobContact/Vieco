@@ -4,9 +4,13 @@
     var V = window.Vieco, h = V.h;
     var app = document.getElementById("app");
     var content, message, tabsBox, counters = {};
-    var TABS = [["companies", "Duyệt công ty"], ["jobs", "Duyệt tin tuyển dụng"]];
+    var TABS = [["companies", "Duyệt công ty"], ["jobs", "Duyệt tin tuyển dụng"],
+        ["users", "Tài khoản"], ["categories", "Danh mục"], ["pages", "Nội dung"], ["settings", "Tải tệp"], ["audit", "Nhật ký"]];
 
-    function currentTab() { return window.location.hash === "#jobs" ? "jobs" : "companies"; }
+    function currentTab() {
+        var tab = window.location.hash.slice(1);
+        return TABS.some(function (entry) { return entry[0] === tab; }) ? tab : "companies";
+    }
     function kv(label, value) { return h("div", { class: "v-kv" }, h("dt", { text: label }), h("dd", { text: value || "—" })); }
 
     /** Hộp thoại nhập lý do (10–500 ký tự) dùng cho từ chối công ty, từ chối tin và gỡ tin. */
@@ -200,7 +204,13 @@
         var tab = currentTab();
         V.note(message, "");
         tabsBox.querySelectorAll("a").forEach(function (link) { link.classList.toggle("is-active", link.dataset.tab === tab); link.setAttribute("aria-selected", String(link.dataset.tab === tab)); });
-        if (tab === "jobs") renderJobs(); else renderCompanies();
+        if (tab === "jobs") renderJobs();
+        else if (tab === "companies") renderCompanies();
+        else {
+            var panel = h("div", {});
+            V.clear(content).appendChild(panel);
+            window.ViecoAdminManagement[tab](panel);
+        }
     }
 
     async function init() {
@@ -213,8 +223,8 @@
         app.appendChild(h("section", { class: "v-page-head", style: "padding-bottom:0" }, h("div", { class: "v-wrap" },
             h("nav", { class: "v-crumbs", "aria-label": "Đường dẫn" }, h("a", { href: V.url("index.html"), text: "Trang chủ" }), h("span", { text: "/" }), h("span", { "aria-current": "page", text: "Quản trị" })),
             h("p", { class: "v-eyebrow", text: "Quản trị viên" }),
-            h("h1", { class: "v-h1", text: "Kiểm duyệt nội dung" }),
-            h("p", { class: "v-lead", text: "Duyệt hồ sơ công ty và tin tuyển dụng trước khi hiển thị công khai." }),
+            h("h1", { class: "v-h1", text: "Quản trị hệ thống" }),
+            h("p", { class: "v-lead", text: "Quản lý tài khoản, danh mục và kiểm duyệt nội dung tuyển dụng." }),
             h("div", { class: "v-stats" }, stat("companies", "brief", "Công ty chờ duyệt"), stat("jobs", "file", "Tin chờ duyệt"),
                 stat("approvedCompanies", "shield", "Công ty đã duyệt"), stat("approvedJobs", "trend", "Tin đã duyệt")),
             tabsBox)));

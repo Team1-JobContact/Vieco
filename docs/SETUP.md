@@ -1,5 +1,13 @@
 # Cài đặt và chạy Vieco
 
+Phạm vi hợp nhất và kiểm thử bản Render: [báo cáo tích hợp 20/11/2026](INTEGRATION_RENDER_RELEASE.md).
+
+Kết quả mới nhất: [review 17/11/2026](REVIEW_2026-11-17.md) và [lệnh chạy Windows](HUONG_DAN_CHAY_DU_AN.md). Backend hiện từ chối SECRET_KEY mặc định/placeholder hoặc dưới 32 ký tự; `.env.example` phải được điền khóa riêng trước khi chạy.
+
+Để cả nhóm dùng cùng database, ảnh và CV, xem [hệ thống dùng chung](SHARED_SYSTEM.md).
+
+Báo cáo kiểm tra mới: [18/11/2026](HOSTING_REVIEW_20261118.md). Hướng dẫn hosting: [Render từng bước](HOSTING_RENDER.md).
+
 Bản bàn giao hiện tại và các việc cần làm khi cập nhật từ main xem [TEAM_CHANGE_REPORT](TEAM_CHANGE_REPORT.md).
 
 ## Yêu cầu
@@ -27,8 +35,10 @@ Sửa .env cục bộ, giữ nguyên cấu hình đang có nếu file đã tồn
 | SECRET_KEY | Khóa riêng dùng ký JWT; thêm vào .env, không dùng khóa mặc định khi triển khai |
 | APP_NAME, DEBUG | Tên ứng dụng và debug; DEBUG dùng True/False |
 | ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES | Thuật toán JWT và thời hạn token theo cấu hình hiện có |
-| UPLOAD_DIR | Thư mục CV; mặc định uploads/ tính từ thư mục chạy server |
+| UPLOAD_DIR | Thư mục lưu tệp. Đường dẫn tương đối được tính từ source_code/server |
 | ADMIN_EMAIL, ADMIN_PASSWORD, ADMIN_FULL_NAME | Dữ liệu Admin cho seed; tài khoản chỉ được tạo khi có email và password |
+| FRONTEND_URL | Địa chỉ frontend dùng trong liên kết email và danh sách CORS |
+| CORS_ORIGINS | Mảng JSON các origin frontend bổ sung, mặc định []; FRONTEND_URL luôn được phép |
 
 Khởi động MySQL và chuẩn bị database phát triển khớp DATABASE_URL. Xem [migration/seed](../source_code/server/migrations/README.md). Với database phát triển đã xác định đúng, các lệnh khởi tạo tại server là:
 
@@ -37,7 +47,7 @@ Khởi động MySQL và chuẩn bị database phát triển khớp DATABASE_URL
 ..\..\.venv\Scripts\python.exe -m src.seeds.run
 ```
 
-Migration thay đổi schema; seed ghi dữ liệu danh mục/roles và tùy chọn Admin. Đây là hướng dẫn để người vận hành chủ động chạy, không phải thao tác được thực hiện trong phiên refactoring. Không chạy vào database chưa xác định hoặc dùng downgrade để kiểm tra.
+Migration thay đổi schema. Seed ghi dữ liệu danh mục, vai trò và tùy chọn Admin. Tài khoản đã tồn tại được bỏ qua, vì vậy sửa ADMIN_PASSWORD trong .env không đặt lại mật khẩu trong database.
 
 Chạy backend từ server để giữ đúng cách nạp .env, Alembic và đường dẫn uploads:
 
@@ -58,7 +68,29 @@ cd source_code/client
 
 Mở http://localhost:5500, đăng nhập tại /pages/login.html hoặc mở /pages/employer.html. Dùng HTTP thay vì mở file HTML trực tiếp. Frontend không có script build/start/dev.
 
-API mặc định là http://127.0.0.1:8000/api/v1, khai báo tại `src/services/auth-api.js`. Có thể dùng `window.VIECO_API_BASE_URL` trước khi nạp script, hoặc `localStorage.vieco_api_base_url` của frontend. Giữ tiền tố /api/v1. Không đổi CORS hoặc cấu hình bảo mật chỉ để tổ chức thư mục.
+Khi frontend phát triển chạy trên localhost, 127.0.0.1 hoặc [::1] ở cổng 5500, API mặc định là http://127.0.0.1:8000/api/v1. Static Site https://vieco-frontend.onrender.com dùng API https://vieco.onrender.com/api/v1. Chế độ chạy chung trên cổng 8000 hoặc cổng HTTP(S) chuẩn dùng cùng origin cho website/API. Cấu hình dùng chung nằm tại `src/services/auth-api.js`; nếu tách frontend/backend trên tên miền khác, đặt `window.VIECO_API_BASE_URL` trước khi nạp script hoặc `localStorage.vieco_api_base_url` của frontend để ghi đè. Giữ tiền tố /api/v1. Khi chạy frontend ở origin khác, thêm origin tương ứng vào CORS_ORIGINS rồi khởi động lại backend.
+
+## Triển khai frontend trên Render
+
+Backend hiện tại là https://vieco.onrender.com; kiểm tra tiến trình tại https://vieco.onrender.com/api/v1/health hoặc Swagger tại https://vieco.onrender.com/docs. Trang gốc backend có thể trả 404 vì không phục vụ frontend.
+
+Static Site `vieco-frontend` đã được xác minh tại https://vieco-frontend.onrender.com. Với hai dịch vụ hiện tại, đặt trên Environment của backend:
+
+```ini
+FRONTEND_URL=https://vieco-frontend.onrender.com
+```
+
+1. Tạo hoặc mở dịch vụ **Static Site** cho repository này. Đặt **Root Directory** là `source_code/client`, **Build Command** là `echo "Static frontend: no build required"`, **Publish Directory** là `.`. Frontend HTML/CSS/JS không cần npm build. Nếu đã có Static Site, đối chiếu các giá trị trước khi thay đổi.
+2. Sao chép URL của **Static Site** trong Overview, mở trang chủ và `/pages/login.html`. URL này khác URL backend `https://vieco.onrender.com`.
+3. Triển khai mã nguồn mới để frontend gọi `https://vieco.onrender.com/api/v1`. Nếu trình duyệt từng lưu API tùy chỉnh, mở Console tại website frontend và chạy `localStorage.removeItem("vieco_api_base_url")`, rồi tải lại trang.
+4. Tại Render → backend `vieco` → Environment, đặt `FRONTEND_URL` bằng URL Static Site thật, chỉ gồm `https://tên-miền`, không thêm đường dẫn. Lưu và chờ backend triển khai lại. Biến này dùng cho CORS và các liên kết email. CORS chỉ cho phép origin đã cấu hình; khi dùng cấu hình phát triển mặc định, cả localhost:5500 và 127.0.0.1:5500 được chấp nhận.
+5. Mở DevTools → Network tại frontend, thử đăng ký, đăng nhập, xem hồ sơ và danh sách việc làm. Request phải tới backend với tiền tố `/api/v1`; preflight OPTIONS phải thành công và response phải có `Access-Control-Allow-Origin` khớp URL frontend. Đăng ký phải trả 201, đăng nhập trả 200. Chỉ kiểm tra health chưa đủ xác nhận database hoạt động.
+
+Không đặt URL backend vào `FRONTEND_URL`. Cấu hình Environment trên Render độc lập với `.env` cục bộ và `.env.example` trong repository.
+
+Nếu health trả 200 nhưng `/api/v1/categories` hoặc `/api/v1/jobs` trả 500, mở Render → backend → Logs ngay sau khi gọi API và đọc traceback. Đối chiếu `DATABASE_URL` với database đã triển khai; nếu log báo thiếu bảng, kiểm tra migration; nếu báo thiếu vai trò, kiểm tra seed. Xem [hướng dẫn migration/seed](../source_code/server/migrations/README.md) và chỉ chạy trên database đích đã xác định. Lỗi 500 không đủ để kết luận nguyên nhân là CORS hoặc database.
+
+Tham khảo cấu hình dịch vụ trong [hướng dẫn triển khai chính thức của Render](https://render.com/docs/your-first-deploy).
 
 ## Kiểm thử
 
@@ -78,7 +110,7 @@ $env:DEBUG='False'
 
 DEBUG ở đây chỉ áp dụng tiến trình terminal, không sửa .env. Test backend dùng SQLite cô lập; test tích hợp cần Node trong PATH để gọi `client/tests/job-contract.cjs`. Nếu thiếu Node, test tích hợp có thể bị skip: phải đọc kết quả thay vì coi là đã xác minh.
 
-Kết quả mã nguồn mới nhất đã ghi nhận: 52 test backend và 21 test frontend đạt. Backend dùng SQLite, UI dùng jsdom và email dùng SMTP giả lập. Các con số 44 backend/19 frontend trong báo cáo cũ thuộc bước refactor trung gian. Chưa xác minh MySQL/migration thực tế, SMTP thật và giao diện trực quan trên trình duyệt bằng bộ kiểm thử này.
+Kết quả kiểm tra ngày 18/11/2026: 103 test backend và 24 test frontend đạt. Bộ test dùng SQLite/jsdom và SMTP giả lập; ngoài ra đã kiểm tra migration/snapshot trên MySQL 8.0 thật, 49 kiểm tra HTTP và 38 lượt trang/kích thước trên Chrome thật. Chưa xác minh Aiven bằng CA của nhóm, SMTP thật, Docker/Linux hoặc HTTPS trên hosting. Chi tiết và giới hạn nằm trong [báo cáo trước hosting](HOSTING_REVIEW_20261118.md). Các con số 44/19, 52/21 trong báo cáo cũ thuộc các đợt kiểm tra trước.
 
 Xem thêm [hướng dẫn Windows](HUONG_DAN_CHAY_DU_AN.md), [checklist](TEST_CHECKLIST.md) và [PB-015](PB-015.md). Không commit .env, token, mật khẩu hoặc dữ liệu uploads.
 

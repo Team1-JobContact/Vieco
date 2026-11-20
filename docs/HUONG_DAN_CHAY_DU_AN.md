@@ -1,263 +1,191 @@
-# Hướng dẫn chạy dự án Vieco trên Windows
+# Chạy Vieco trên Windows — kiểm tra ngày 17/11/2026
 
-Tài liệu hướng dẫn chạy giao diện, API Python và cơ sở dữ liệu MySQL trên máy cá nhân bằng VS Code và PowerShell.
+Dự án thực tế: frontend HTML/CSS/JavaScript tại `source_code/client`; backend FastAPI tại `source_code/server`; MySQL qua SQLAlchemy/Alembic. Không cài Express, Prisma, React hay Live Server để chạy mã hiện tại. `archive/` chỉ giữ mã cũ.
 
-## 1. Thông tin đã xác định
+## 1. Phần mềm
 
-- Giao diện nằm trong `source_code/client`, trang chính là `index.html`.
-- API Python nằm trong `source_code/server`.
-- File `source_code/server/run.py` chạy Uvicorn với ứng dụng `src.app:app`, địa chỉ `127.0.0.1`, cổng `8000` và chế độ tự tải lại.
-- Backend sử dụng SQLAlchemy và PyMySQL để kết nối MySQL.
-- Backend có `requirements.txt`, `.env.example`, `alembic.ini` và thư mục `migrations`.
-- `package.json` của client hiện chỉ có script kiểm thử `test`; không có script `start` hoặc `dev`.
+- Python và pip. Môi trường hiện có đã test bằng Python **3.15.2**.
+- MySQL Server. Đã kiểm chứng bằng **MySQL 8.0.45**; schema cần MySQL hỗ trợ CHECK constraint.
+- Node.js/npm nếu chạy test frontend: đã test bằng Node **24.13.0**, npm **11.6.2**. Chạy giao diện không cần Node.
 
-**Cập nhật sau tổ chức mã nguồn:** Xem [SETUP](SETUP.md) và [cấu trúc dự án](PROJECT_STRUCTURE.md) cho đường dẫn và lệnh hiện tại. Đã đối chiếu route, cấu hình Alembic và tên biến môi trường; chưa xác minh MySQL/migration thực tế hoặc giao diện trực quan trên browser.
-
-## 2. Chuẩn bị
-
-Cài đặt:
-
-1. Python tương thích với phiên bản thư viện trong `requirements.txt` và hướng dẫn tại README của dự án.
-2. MySQL Server, hoặc MySQL trong XAMPP nếu dự án tương thích phiên bản đó.
-3. VS Code và extension **Live Server**.
-4. Node.js nếu cần chạy các bài kiểm thử JavaScript của client; không bắt buộc để mở HTML bằng Live Server.
-
-Mở thư mục gốc `Vieco` trong VS Code bằng **File → Open Folder**. Mở Terminal qua **Terminal → New Terminal**.
-
-Kiểm tra Python:
+Tại thời điểm review, dịch vụ **MySQL80 đang dừng**. Mở PowerShell **Run as administrator** và chạy:
 
 ```powershell
-python --version
-python -m pip --version
+Start-Service -Name MySQL80
+Get-Service -Name MySQL80
 ```
 
-Nếu `python` không được nhận diện, kiểm tra cài đặt Python và PATH. Có thể kiểm tra Python Launcher bằng `py --version`.
+Sau đó dùng terminal thông thường cho các bước sau. Không cần đổi execution policy hoặc activate môi trường ảo.
 
-## 3. Tạo và sử dụng môi trường Python
-
-Các lệnh dưới đây bắt đầu tại thư mục gốc `Vieco`.
-
-Nếu chưa có thư mục `.venv`, tạo môi trường:
+## 2. Cài dependencies và tạo .env nếu chưa có
 
 ```powershell
-python -m venv .venv
+Set-Location 'C:\Users\nandz\OneDrive\Documents\ThucTap_Nhom1\Dự án\Vieco 2\Vieco'
+if (-not (Test-Path '.\.venv\Scripts\python.exe')) { python -m venv .venv }
+.\.venv\Scripts\python.exe -m pip install -r .\source_code\server\requirements.txt
+.\.venv\Scripts\python.exe -m pip check
+if (-not (Test-Path '.\source_code\server\.env')) { Copy-Item '.\source_code\server\.env.example' '.\source_code\server\.env' }
+notepad .\source_code\server\.env
 ```
 
-Có thể dùng trực tiếp Python của môi trường mà không cần kích hoạt:
+`.env` đã tồn tại trên máy này: giữ các giá trị đang dùng nếu đúng. Những giá trị phải kiểm tra:
+
+```dotenv
+DATABASE_URL=mysql+pymysql://root:MAT_KHAU_MYSQL@127.0.0.1:3306/job_contact_db
+SECRET_KEY=KHOA_NGAU_NHIEN_RIENG_CUA_BAN
+DEBUG=false
+UPLOAD_DIR=uploads/
+FRONTEND_URL=http://localhost:5500
+CORS_ORIGINS=["http://localhost:5500","http://127.0.0.1:5500"]
+ADMIN_EMAIL=admin@jobcontact.vn
+ADMIN_PASSWORD=MAT_KHAU_ADMIN_BAN_TU_DAT
+ADMIN_FULL_NAME=Quản trị viên
+```
+
+**Thay các giá trị viết hoa dạng MAT_KHAU/KHOA bằng giá trị thật.** DATABASE_URL phải khớp tài khoản MySQL của bạn. Mật khẩu MySQL có `@`, `:`, `%`, `#`... cần URL-encode phần mật khẩu. Không thay cả URL bằng một chuỗi đã encode.
+
+SECRET_KEY phải là khóa riêng ít nhất 32 ký tự; backend từ chối khóa mặc định hoặc placeholder. Nếu chưa có khóa, tạo bằng:
 
 ```powershell
-.\.venv\Scripts\python.exe --version
+.\.venv\Scripts\python.exe -c "import secrets; print(secrets.token_hex(32))"
 ```
 
-Nếu muốn kích hoạt trong PowerShell:
+Dán kết quả vào SECRET_KEY, giữ ổn định giữa các lần chạy. ADMIN_PASSWORD dùng ít nhất 8 ký tự gồm chữ và số, tối đa 72 byte. Seed chỉ tạo admin khi có email/password; **không đặt lại mật khẩu tài khoản đã tồn tại**.
+
+SMTP là tùy chọn. Giữ SMTP_HOST trống để chạy chức năng tuyển dụng cục bộ; khi đó đăng ký/đăng nhập vẫn dùng được, nhưng không gửi xác thực và API quên mật khẩu trả 503. Để bật email, điền các biến SMTP theo `.env.example` bằng cấu hình nhà cung cấp, rồi khởi động lại backend. Review này không xác minh SMTP thật.
+
+## 3. Tạo database, migration và seed
+
+Lệnh sau dùng đúng vị trí MySQL 8.0 đã tìm thấy trên máy. Nhập mật khẩu MySQL khi được hỏi:
 
 ```powershell
-.\.venv\Scripts\Activate.ps1
-```
-
-Nếu PowerShell chặn `Activate.ps1`, tiếp tục sử dụng đường dẫn đến `python.exe` như trong các bước dưới; không cần thay đổi execution policy.
-
-## 4. Cài thư viện backend
-
-Từ thư mục gốc:
-
-```powershell
-cd .\source_code\server
-..\..\.venv\Scripts\python.exe -m pip install -r requirements.txt
-```
-
-Chờ lệnh hoàn tất và kiểm tra lỗi trước khi chạy API. Nếu lỗi liên quan phiên bản Python, đối chiếu README và yêu cầu phiên bản của các thư viện, sau đó tạo lại môi trường bằng phiên bản phù hợp.
-
-Không chạy `npm install` tại thư mục gốc để cài backend Python.
-
-## 5. Khởi động MySQL
-
-Chọn cách tương ứng với phần mềm đã cài:
-
-### MySQL cài riêng
-
-1. Nhấn `Win + R`, nhập `services.msc`.
-2. Tìm dịch vụ MySQL; tên có thể là `MySQL`, `MySQL80`, `MySQL84` hoặc tên khác do lúc cài đặt đặt ra.
-3. Chọn **Start** nếu dịch vụ chưa chạy.
-
-### XAMPP
-
-1. Mở XAMPP Control Panel.
-2. Chọn **Start** ở dòng MySQL.
-3. Kiểm tra cổng thực tế trong cấu hình nếu không dùng cổng mặc định.
-
-Chỉ chạy một dịch vụ cơ sở dữ liệu trên cùng một cổng. Không khởi động đồng thời MySQL riêng và MySQL của XAMPP nếu cả hai dùng chung cổng.
-
-Kiểm tra cổng bằng PowerShell, thay `3306` nếu cấu hình của bạn khác:
-
-```powershell
-Test-NetConnection -ComputerName 127.0.0.1 -Port 3306
-```
-
-`TcpTestSucceeded: True` chỉ xác nhận có dịch vụ nhận kết nối TCP; chưa xác nhận tài khoản, mật khẩu hoặc database đúng.
-
-## 6. Cấu hình backend và database
-
-Tại `source_code/server`, nếu chưa có `.env`, sao chép file mẫu:
-
-```powershell
-Copy-Item .env.example .env
-```
-
-Nếu `.env` đã tồn tại, mở và đối chiếu với `.env.example`; không ghi đè cấu hình đang có.
-
-Điền đúng tên biến mà file mẫu và mã nguồn đang sử dụng. Các giá trị cần kiểm tra thường gồm:
-
-| Thông tin | Giá trị cần xác định |
-| --- | --- |
-| Host MySQL | `127.0.0.1` hoặc địa chỉ máy chủ thực tế |
-| Port MySQL | Thường là `3306`; dùng cổng thực tế |
-| Database | Tên database dự án yêu cầu |
-| Username | Tài khoản MySQL có quyền trên database |
-| Password | Mật khẩu của tài khoản trên |
-| Cấu hình khác | Các biến bắt buộc khác trong `.env.example` |
-
-Nếu dự án dùng một chuỗi kết nối SQLAlchemy cho PyMySQL, dạng thường gặp là:
-
-```text
-mysql+pymysql://USER:PASSWORD@127.0.0.1:3306/DATABASE
-```
-
-Đây là định dạng của biến `DATABASE_URL`; thay USER, PASSWORD, host, port và database bằng cấu hình phát triển của bạn. Nếu mật khẩu có ký tự đặc biệt và được đưa vào URL, cần mã hóa thành phần mật khẩu đúng định dạng URL hoặc dùng cơ chế cấu hình mà dự án cung cấp.
-
-Không công khai `.env`, mật khẩu hoặc khóa bí mật.
-
-### Tạo database và cấu trúc bảng
-
-Đọc `README.md`, `source_code/README.md`, `alembic.ini` và hướng dẫn trong `migrations` để biết tên database và cách khởi tạo chính thức.
-
-Nếu cần tạo database thủ công, có thể dùng MySQL Workbench hoặc công cụ quản trị đang sử dụng. Câu SQL minh họa dưới đây phải được thay bằng tên database đúng trong cấu hình:
-
-```sql
-CREATE DATABASE ten_database_du_an CHARACTER SET utf8mb4;
-```
-
-Dự án quản lý schema bằng Alembic. Khi chủ động khởi tạo database phát triển, chạy tại `source_code/server` sau khi cấu hình database:
-
-```powershell
+& 'C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe' -u root -p -e "CREATE DATABASE IF NOT EXISTS job_contact_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+Set-Location 'C:\Users\nandz\OneDrive\Documents\ThucTap_Nhom1\Dự án\Vieco 2\Vieco\source_code\server'
 ..\..\.venv\Scripts\python.exe -m alembic upgrade head
+..\..\.venv\Scripts\python.exe -m alembic current
+..\..\.venv\Scripts\python.exe -m src.seeds.run
 ```
 
-Lệnh này thay đổi cấu trúc database. Chỉ chạy sau khi xác nhận database đích là database phát triển của bạn và cấu hình Alembic đã đúng. File khung Prisma đã nằm trong `archive/source_code/server/prisma`; không chạy Prisma cho backend hiện tại.
+Nếu DATABASE_URL dùng tên database khác, thay `job_contact_db` trong câu CREATE DATABASE cho khớp. Migration hiện tại là **0003**, gồm **29 bảng ứng dụng + alembic_version**. Không dùng `alembic downgrade base` để xử lý lỗi chạy.
 
-Để nạp roles và danh mục vào database phát triển đã chuẩn bị, chạy `..\..\.venv\Scripts\python.exe -m src.seeds.run` tại server. Seed ghi dữ liệu; chỉ tạo Admin khi có ADMIN_EMAIL và ADMIN_PASSWORD. Không giả định có tài khoản mẫu.
+Seed tạo roles, ngành nghề, tỉnh/thành, kỹ năng, cấu hình, trang nội dung và admin tùy chọn. **Không seed công ty/tin tuyển dụng hay tài khoản ứng viên/nhà tuyển dụng mẫu.** Trang chủ có thể rỗng khi chưa có tin được duyệt.
 
-## 7. Chạy API
-
-Tại `source_code/server`:
+## 4. Chạy backend — terminal thứ nhất
 
 ```powershell
+Set-Location 'C:\Users\nandz\OneDrive\Documents\ThucTap_Nhom1\Dự án\Vieco 2\Vieco\source_code\server'
 ..\..\.venv\Scripts\python.exe run.py
 ```
 
-Nếu đã kích hoạt đúng `.venv`, cũng có thể dùng:
+Giữ terminal mở. API: http://127.0.0.1:8000/api/v1; Swagger: http://127.0.0.1:8000/docs.
+
+## 5. Chạy frontend — terminal thứ hai
 
 ```powershell
-python run.py
+Set-Location 'C:\Users\nandz\OneDrive\Documents\ThucTap_Nhom1\Dự án\Vieco 2\Vieco\source_code\client'
+..\..\.venv\Scripts\python.exe -m http.server 5500 --bind 127.0.0.1
 ```
 
-Theo `run.py`, địa chỉ API là:
+Mở **http://localhost:5500**. Không mở HTML bằng file://. Frontend không cần npm build. Hai terminal dùng trực tiếp Python của `.venv`, không phụ thuộc interpreter mặc định trong PATH.
 
-```text
-http://127.0.0.1:8000
+API mặc định trong `src/services/auth-api.js` là `http://127.0.0.1:8000/api/v1`. Nếu browser từng lưu API khác, mở Console trên frontend và chạy `localStorage.removeItem('vieco_api_base_url'); location.reload();`. Khi đổi cổng frontend, cập nhật FRONTEND_URL/CORS_ORIGINS tương ứng và khởi động lại backend.
+
+## 6. Kiểm tra hoạt động — terminal thứ ba
+
+```powershell
+Invoke-RestMethod 'http://127.0.0.1:8000/api/v1/health'
+Invoke-RestMethod 'http://127.0.0.1:8000/api/v1/categories'
 ```
 
-Chờ thông báo `Application startup complete` và kiểm tra không có traceback làm ứng dụng khởi động thất bại. Giữ Terminal này mở.
+Health chỉ kiểm tra tiến trình; `/categories` phải trả về danh mục sau seed để xác minh API đọc được database.
 
-Nếu ứng dụng bật trang tài liệu API theo cấu hình FastAPI thông thường, thử mở `http://127.0.0.1:8000/docs`. Nếu nhận 404, kiểm tra cấu hình route trong `src/app.py`; không kết luận máy chủ hỏng chỉ vì đường dẫn `/` hoặc `/docs` trả 404.
+Luồng kiểm tra đầy đủ:
 
-## 8. Kết nối giao diện với API
+1. Đăng nhập admin bằng ADMIN_EMAIL/ADMIN_PASSWORD đã seed ở `/pages/login.html`; mở `/pages/admin.html`.
+2. Đăng ký một tài khoản **Nhà tuyển dụng**; tạo công ty ở `/pages/employer.html`.
+3. Admin duyệt công ty; nhà tuyển dụng tạo tin đủ thông tin, gửi duyệt; admin duyệt tin.
+4. Tin xuất hiện ở trang chủ và `/pages/jobs.html`; tìm kiếm, mở chi tiết.
+5. Đăng ký một tài khoản **Ứng viên**; cập nhật hồ sơ, tải CV PDF/DOC/DOCX, ứng tuyển.
+6. Nhà tuyển dụng xem đơn, tải CV, chuyển trạng thái; ứng viên xem lịch sử và thông báo.
+7. Kiểm tra đóng tin, gia hạn, mở lại. Tin quá hạn hiển thị EXPIRED theo ngày Việt Nam; gia hạn tin hết hạn phải duyệt lại. Tin bị admin gỡ không thể tự mở lại.
 
-Trong VS Code, dùng `Ctrl + Shift + F`, giới hạn tìm trong `source_code/client` và tìm:
+Không có mật khẩu mẫu dùng chung. Tài khoản và dữ liệu trong kiểm thử của reviewer chỉ nằm trong database tạm, đã được dọn sau kiểm tra.
 
-- `8000`
-- `localhost`
-- `127.0.0.1`
-- `API_BASE_URL`
-- `fetch(`
+## 7. Chạy test khi cần
 
-Địa chỉ mặc định nằm trong `src/services/auth-api.js`: `http://127.0.0.1:8000/api/v1`. Có thể cấu hình bằng `window.VIECO_API_BASE_URL` trước khi nạp script hoặc `localStorage.vieco_api_base_url`. Giữ đúng tiền tố đường dẫn của dự án, chẳng hạn `/api` nếu mã nguồn có sử dụng; không tự thêm hoặc bỏ tiền tố.
+Backend **phải chạy từ server** để import package `src` đúng:
 
-Nếu mã nguồn gọi đường dẫn tương đối như `/api/...`, kiểm tra README xem có cần proxy hoặc phục vụ frontend qua backend hay không. Live Server không tự chuyển các yêu cầu đó đến cổng 8000.
+```powershell
+Set-Location 'C:\Users\nandz\OneDrive\Documents\ThucTap_Nhom1\Dự án\Vieco 2\Vieco\source_code\server'
+..\..\.venv\Scripts\python.exe -m pytest tests -q
+```
 
-Để mở giao diện bằng Live Server:
+Frontend:
 
-1. Mở `source_code/client/index.html`.
-2. Nhấp chuột phải → **Open with Live Server**.
-3. Ghi nhận địa chỉ thực tế trên trình duyệt, ví dụ `http://127.0.0.1:5500` cùng đường dẫn trang.
-4. Mở trang nhà tuyển dụng, đăng nhập hoặc đăng ký từ giao diện.
+```powershell
+Set-Location 'C:\Users\nandz\OneDrive\Documents\ThucTap_Nhom1\Dự án\Vieco 2\Vieco\source_code\client'
+npm.cmd ci
+npm.cmd test
+```
 
-Không mở HTML bằng đường dẫn `file://` khi cần gọi API.
+Kết quả ngày 17/11/2026: **105 backend**, **29 frontend** đạt. Bộ test backend thường dùng SQLite cô lập; review bổ sung kiểm tra migration, schema, seed, nghiệp vụ trên MySQL tạm và 22 kiểm tra Edge headless. Một cảnh báo deprecation từ Starlette TestClient không làm test thất bại.
 
-### Nếu gặp CORS
+## 8. Chạy lại dự án sau khi đã thoát tất cả
 
-Mở DevTools bằng `F12`, xem **Console** và **Network**. Nếu trình duyệt báo CORS, tìm cấu hình CORS của backend và thêm đúng origin frontend đang dùng theo cơ chế cấu hình của dự án.
+Sau khi đã cài đặt, cấu hình `.env`, migration và seed thành công, mỗi lần mở lại chỉ cần thực hiện các bước dưới đây. Cài dependencies, tạo database và seed thuộc bước thiết lập ban đầu; chỉ thực hiện lại khi có thay đổi yêu cầu tương ứng.
 
-Ví dụ, `http://localhost:5500` và `http://127.0.0.1:5500` là hai origin khác nhau. Nếu sử dụng cookie hoặc thông tin xác thực, cần cấu hình origin cụ thể và chế độ credentials phù hợp; không mặc định dùng `*`.
+### Bước 1 — Kiểm tra MySQL
 
-Khởi động lại backend sau khi sửa cấu hình `.env` hoặc cấu hình kết nối khi cần.
+Mở PowerShell và chạy:
 
-## 9. Kiểm tra chạy hoàn chỉnh
+```powershell
+Get-Service MySQL80
+```
 
-Thực hiện với database phát triển và dữ liệu thử:
+Nếu trạng thái là **Running**, chuyển sang bước 2. Nếu là **Stopped**, mở PowerShell bằng **Run as administrator** rồi chạy:
 
-1. MySQL đang chạy và cổng database nhận kết nối.
-2. Backend khởi động xong, không còn lỗi kết nối hoặc thiếu bảng.
-3. Frontend mở bằng HTTP qua Live Server hoặc cách phục vụ được README chỉ định.
-4. Trong **F12 → Network**, tải lại trang và kiểm tra URL API gọi đúng host, port và đường dẫn.
-5. Thử đăng ký tài khoản thử, đăng nhập và tải dữ liệu theo các chức năng dự án hỗ trợ.
-6. Kiểm tra dữ liệu thử được lưu vào đúng database khi chức năng yêu cầu lưu trữ.
+```powershell
+Start-Service -Name MySQL80
+Get-Service MySQL80
+```
 
-Tham khảo thêm `docs/TEST_CHECKLIST.md` để kiểm tra các chức năng theo checklist của dự án.
+### Bước 2 — Chạy backend
 
-## 10. Các lỗi thường gặp
+Mở dự án trong VS Code, chọn **Terminal → New Terminal** và chạy:
 
-| Hiện tượng | Cách kiểm tra và xử lý |
+```powershell
+Set-Location 'C:\Users\nandz\OneDrive\Documents\ThucTap_Nhom1\Dự án\Vieco 2\Vieco\source_code\server'
+..\..\.venv\Scripts\python.exe run.py
+```
+
+Nhấn Enter sau khi nhập lệnh. Đợi thông báo **Application startup complete.** và giữ terminal này mở.
+
+### Bước 3 — Chạy frontend
+
+Nhấn nút **+** ở khu vực Terminal để mở terminal thứ hai, rồi chạy:
+
+```powershell
+Set-Location 'C:\Users\nandz\OneDrive\Documents\ThucTap_Nhom1\Dự án\Vieco 2\Vieco\source_code\client'
+..\..\.venv\Scripts\python.exe -m http.server 5500 --bind 127.0.0.1
+```
+
+Giữ terminal thứ hai mở và truy cập **http://localhost:5500**. Swagger của backend ở **http://127.0.0.1:8000/docs**. Thử đăng nhập và tải danh sách việc làm để kiểm tra dự án hoạt động.
+
+### Dừng dự án
+
+Nhấn **Ctrl + C** trong từng terminal backend và frontend. Giữ MySQL chạy nếu các ứng dụng khác còn sử dụng dịch vụ này.
+
+## Lỗi thường gặp
+
+| Hiện tượng | Xử lý |
 | --- | --- |
-| `npm error enoent` tại thư mục gốc | Đang chạy npm ở nơi không có `package.json`. Backend chạy bằng Python; client chỉ cần npm khi chạy kiểm thử. |
-| `ModuleNotFoundError` | Cài `requirements.txt` bằng chính Python của `.venv`, rồi chạy backend bằng Python đó. |
-| MySQL lỗi `2003`, `WinError 10061` | Kiểm tra MySQL đã chạy, host và port trong cấu hình đúng. Đây là lỗi kết nối bị từ chối, chưa phải bằng chứng mật khẩu sai. |
-| MySQL `Access denied` | Kiểm tra username, password và quyền của tài khoản đối với host/database. |
-| `Unknown database` | Kiểm tra tên database; tạo database đúng theo README nếu chưa có. |
-| Thiếu bảng hoặc cột | Kiểm tra đã áp dụng migration hoặc import schema theo hướng dẫn dự án. |
-| Cổng 8000 đang được sử dụng | Kiểm tra có backend đang chạy ở Terminal khác không. Dừng đúng tiến trình của dự án hoặc đổi cổng và cập nhật cấu hình frontend tương ứng. |
-| Giao diện báo không kết nối được API | Xem Network để phân biệt URL sai, backend chưa chạy, CORS hoặc lỗi HTTP từ server. |
-| HTTP 404 ở API | Kiểm tra route, tiền tố `/api` và phương thức gọi. |
-| HTTP 401/403 | Kiểm tra đăng nhập và quyền truy cập. |
-| HTTP 500 | Đọc traceback trong Terminal backend để xác định nguyên nhân. |
+| MySQL 2003/10061 | Dịch vụ MySQL chưa chạy, sai host/cổng; kiểm tra MySQL80 trước. |
+| Access denied/Unknown database | Sửa DATABASE_URL, tài khoản/quyền hoặc tạo đúng database. |
+| SECRET_KEY bị từ chối | Thay placeholder bằng khóa riêng sinh ở bước 2. |
+| Thiếu bảng/cột | Chạy `python -m alembic upgrade head` bằng `.venv` tại server. |
+| ModuleNotFoundError: src | Chạy backend/test từ `source_code/server`. |
+| Lỗi CORS | Mở frontend ở localhost:5500; đối chiếu origin trong CORS_ORIGINS. |
+| Quên mật khẩu trả 503 | SMTP_HOST chưa cấu hình; không phải lỗi database. |
+| Đổi ADMIN_PASSWORD nhưng login vẫn sai | Seed bỏ qua tài khoản đã tồn tại; không reset password. |
 
-Khi cần hỗ trợ, gửi lệnh vừa chạy, traceback liên quan, URL request và mã trạng thái HTTP. Che mật khẩu, token và dữ liệu cá nhân.
-
-## 11. Chạy kiểm thử client khi cần
-
-Mở Terminal mới từ thư mục gốc:
-
-```powershell
-cd .\source_code\client
-npm ci
-npm test
-```
-
-`npm ci` sử dụng `package-lock.json` hiện có. Kiểm thử client không thay thế việc kiểm tra backend và database đang hoạt động.
-
-## 12. Các lần chạy tiếp theo
-
-Sau khi đã cài thư viện, cấu hình `.env` và khởi tạo database:
-
-1. Khởi động MySQL.
-2. Mở Terminal tại thư mục gốc `Vieco` và chạy:
-
-```powershell
-cd .\source_code\server
-..\..\.venv\Scripts\python.exe run.py
-```
-
-3. Mở `source_code/client/index.html` bằng Live Server.
-4. Tải lại trang sau khi backend khởi động xong.
-
-Dừng API bằng `Ctrl + C` trong Terminal. Dừng Live Server bằng nút **Port** trên thanh trạng thái VS Code. Chỉ dừng dịch vụ MySQL khi không còn ứng dụng khác cần sử dụng.
+Xem [báo cáo review](REVIEW_2026-11-17.md) để biết phạm vi sửa và phần chưa hoàn thiện.

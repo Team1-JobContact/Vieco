@@ -12,8 +12,8 @@
 
     function notice(id, message, variant) {
         const el = $(id);
-        el.textContent = message || "";
-        el.className = "notice" + (variant ? " " + variant : "");
+        el.className = "notice-message";
+        window.Vieco.note(el, message, variant === "warning" ? "warn" : variant);
         el.hidden = !message;
     }
 
@@ -282,7 +282,7 @@
     $("resubmit-company").addEventListener("click", function () { saveCompany(true); });
     jobForm.addEventListener("submit", function (event) { event.preventDefault(); saveJob(Boolean(event.submitter && event.submitter.value === "submit")); });
     $("refresh-company").addEventListener("click", async function () {
-        if (state.companyDirty && !confirm("Tải lại hồ sơ sẽ thay thế các thay đổi chưa lưu. Tiếp tục?")) return;
+        if (state.companyDirty && !await window.Vieco.confirm("Tải lại hồ sơ?", "Các thay đổi chưa lưu sẽ được thay bằng dữ liệu mới nhất của công ty.", "Tải lại hồ sơ")) return;
         state.companyBusy = true;
         renderCompany();
         try { await loadCompany(); notice("company-message", "Đã cập nhật trạng thái công ty.", "success"); }
@@ -292,7 +292,7 @@
     $("retry-load").addEventListener("click", boot);
     $("retry-job").addEventListener("click", loadJob);
     $("logout").addEventListener("click", async function () {
-        if ((state.companyDirty || state.jobDirty) && !confirm("Bạn có thay đổi chưa lưu. Vẫn đăng xuất?")) return;
+        if ((state.companyDirty || state.jobDirty) && !await window.Vieco.confirm("Đăng xuất?", "Bạn còn thay đổi chưa lưu. Các thay đổi này sẽ bị mất khi đăng xuất.", "Đăng xuất", true)) return;
         if (state.companyBusy || state.jobBusy) return;
         $("logout").disabled = true;
         try {

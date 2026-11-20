@@ -2,6 +2,7 @@ from datetime import date, datetime
 from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator
+from src.utils.dates import business_today
 
 JobStatus = Literal["DRAFT", "PENDING", "APPROVED", "REJECTED", "CLOSED", "EXPIRED"]
 EmploymentType = Literal["FULL_TIME", "PART_TIME", "INTERNSHIP", "CONTRACT", "FREELANCE"]
@@ -24,18 +25,18 @@ class JobBase(BaseModel):
     """Các trường thông tin cơ bản của tin tuyển dụng (FR-M2-01)."""
 
     title: str | None = None
-    industry_id: int | None = None
-    province_id: int | None = None
-    work_address: str | None = None
-    description: str | None = None
-    requirements: str | None = None
-    benefits: str | None = None
-    salary_min: int | None = None
-    salary_max: int | None = None
-    salary_currency: str = "VND"
+    industry_id: int | None = Field(default=None, gt=0, le=2**63 - 1)
+    province_id: int | None = Field(default=None, gt=0, le=2**63 - 1)
+    work_address: str | None = Field(default=None, max_length=255)
+    description: str | None = Field(default=None, max_length=10000)
+    requirements: str | None = Field(default=None, max_length=10000)
+    benefits: str | None = Field(default=None, max_length=10000)
+    salary_min: int | None = Field(default=None, le=2**63 - 1)
+    salary_max: int | None = Field(default=None, le=2**63 - 1)
+    salary_currency: str = Field(default="VND", pattern=r"^[A-Z]{3}$")
     experience_level: ExperienceLevel | None = None
     employment_type: EmploymentType | None = None
-    positions: int = 1
+    positions: int = Field(default=1, le=2**31 - 1)
     deadline: date | None = None
     skill_ids: list[int] = Field(default_factory=list)
 
@@ -95,7 +96,7 @@ class JobExtendRequest(BaseModel):
     @field_validator("deadline")
     @classmethod
     def validate_deadline(cls, v: date) -> date:
-        if v < date.today():
+        if v < business_today():
             raise ValueError("Hạn nộp mới phải là ngày hiện tại hoặc tương lai")
         return v
 

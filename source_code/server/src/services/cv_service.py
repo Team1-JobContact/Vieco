@@ -6,6 +6,8 @@ Tệp lưu tại <UPLOAD_DIR>/cvs/ với tên ngẫu nhiên và KHÔNG được 
 """
 import os
 import uuid
+import zipfile
+from xml.etree import ElementTree
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
@@ -81,7 +83,7 @@ def list_cvs(db: Session, profile: CandidateProfile) -> list[CV]:
 
 
 def get_cv_or_404(db: Session, profile: CandidateProfile, cv_id: int) -> CV:
-    cv = _active_cvs(db, profile).filter(CV.id == cv_id).first()
+    cv = _active_cvs(db, profile).filter(CV.id == cv_id).populate_existing().with_for_update().first()
     if cv is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Không tìm thấy CV")
     return cv
@@ -102,6 +104,7 @@ def extension_of(filename: str) -> str:
 
 
 def upload_cv(db: Session, profile: CandidateProfile, file: UploadFile) -> CV:
+    db.query(CandidateProfile).filter(CandidateProfile.id == profile.id).with_for_update().one()
     limits = get_limits(db)
     file_name = _clean_filename(file.filename)
     ext = extension_of(file_name)
@@ -109,7 +112,7 @@ def upload_cv(db: Session, profile: CandidateProfile, file: UploadFile) -> CV:
         raise HTTPException(status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
                             f"Chỉ chấp nhận tệp {', '.join(e.upper() for e in limits.allowed_extensions)}")
 
-    count = _active_cvs(db, profile).count()
+    count = len(_active_cvs(db, profile).with_for_update().all())
     if count >= limits.max_count:
         raise HTTPException(status.HTTP_409_CONFLICT,
                             f"Mỗi hồ sơ chỉ được tối đa {limits.max_count} CV, hãy xóa bớt CV cũ")
@@ -136,6 +139,8 @@ def upload_cv(db: Session, profile: CandidateProfile, file: UploadFile) -> CV:
         if not head.startswith(MAGIC_BYTES[ext]):
             raise HTTPException(status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
                                 "Nội dung tệp không đúng định dạng PDF/DOC/DOCX")
+        if ext == "docx":
+            _validate_docx(path)
 
         cv = CV(candidate_profile_id=profile.id, file_name=file_name,
                 file_url=f"{CV_SUBDIR}/{stored_name}", file_size=size,
@@ -154,6 +159,7 @@ def upload_cv(db: Session, profile: CandidateProfile, file: UploadFile) -> CV:
 
 
 def set_default(db: Session, profile: CandidateProfile, cv_id: int) -> CV:
+    db.query(CandidateProfile).filter(CandidateProfile.id == profile.id).with_for_update().one()
     cv = get_cv_or_404(db, profile, cv_id)
     _active_cvs(db, profile).filter(CV.id != cv.id).update({CV.is_default: False}, synchronize_session=False)
     cv.is_default = True
@@ -164,9 +170,10 @@ def set_default(db: Session, profile: CandidateProfile, cv_id: int) -> CV:
 
 def delete_cv(db: Session, profile: CandidateProfile, cv_id: int) -> None:
     """CV đã gắn với đơn ứng tuyển thì xóa mềm (giữ tệp cho nhà tuyển dụng, BR-15); ngược lại xóa hẳn."""
+    db.query(CandidateProfile).filter(CandidateProfile.id == profile.id).with_for_update().one()
     cv = get_cv_or_404(db, profile, cv_id)
     was_default = cv.is_default
-    used = db.query(Application.id).filter(Application.cv_id == cv.id).first() is not None
+    used = db.query(Application.id).filter(Application.cv_id == cv.id).with_for_update().first() is not None
     path = _abs_path(cv)
 
     if used:
@@ -177,7 +184,7 @@ def delete_cv(db: Session, profile: CandidateProfile, cv_id: int) -> None:
     db.flush()
 
     if was_default:  # chuyển mặc định sang CV mới nhất còn lại
-        nxt = _active_cvs(db, profile).order_by(CV.created_at.desc(), CV.id.desc()).first()
+        nxt = _active_cvs(db, profile).order_by(CV.created_at.desc(), CV.id.desc()).with_for_update().first()
         if nxt is not None:
             nxt.is_default = True
     db.commit()
@@ -194,3 +201,21 @@ def file_for_download(cv: CV) -> tuple[str, str]:
     if not os.path.isfile(path):
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Tệp CV không còn trên máy chủ")
     return path, MEDIA_TYPES.get(extension_of(cv.file_name), "application/octet-stream")
+
+
+def _validate_docx(path: str) -> None:
+    """Accept a Word document container, with bounded metadata reads and no extraction."""
+    required = {"[Content_Types].xml", "word/document.xml"}
+    try:
+        with zipfile.ZipFile(path) as document:
+            if not required.issubset(document.namelist()):
+                raise ValueError
+            for name in required:
+                entry = document.getinfo(name)
+                if entry.file_size > 10 * 1024 * 1024 or entry.flag_bits & 1:
+                    raise ValueError
+                tree = ElementTree.fromstring(document.read(name))
+                if name == "word/document.xml" and tree.tag != "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}document":
+                    raise ValueError
+    except (zipfile.BadZipFile, KeyError, ValueError, RuntimeError, ElementTree.ParseError):
+        raise HTTPException(415, "Tệp DOCX bị hỏng hoặc không phải tài liệu Word")

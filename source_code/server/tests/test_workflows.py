@@ -1,5 +1,8 @@
 """PB-018/020/022/024/025/026: API bổ sung cho giao diện và luồng end-to-end."""
 import os
+from io import BytesIO
+
+from PIL import Image
 
 import pytest
 
@@ -231,9 +234,15 @@ def test_role_matrix_blocks_cross_role_access(client, db_session, recruitment):
 
 # ---------- Hình ảnh công ty do nhà tuyển dụng tự tải lên ----------
 
-PNG = b"\x89PNG\r\n\x1a\n" + b"x" * 200
-JPG = b"\xff\xd8\xff\xe0" + b"x" * 200
-WEBP = b"RIFF\x00\x00\x00\x00WEBPVP8 " + b"x" * 200
+_png = BytesIO()
+Image.new("RGB", (2, 2), "white").save(_png, format="PNG")
+PNG = _png.getvalue()
+_jpg = BytesIO()
+Image.new("RGB", (2, 2), "white").save(_jpg, format="JPEG")
+JPG = _jpg.getvalue()
+_webp = BytesIO()
+Image.new("RGB", (2, 2), "white").save(_webp, format="WEBP")
+WEBP = _webp.getvalue()
 EMP = f"{API}/employer/company"
 
 

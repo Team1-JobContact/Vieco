@@ -8,7 +8,7 @@ from src.models.user import User
 from src.schemas.candidate import (
     CVListResponse, CVResponse, ProfileCreate, ProfileResponse, ProfileUpdate,
 )
-from src.services import candidate_service, cv_service
+from src.services import avatar_service, candidate_service, cv_service
 
 candidate_only = require_roles("CANDIDATE")
 
@@ -66,3 +66,11 @@ def delete_cv(cv_id: int, user: User = Depends(candidate_only), db: Session = De
     profile = candidate_service.get_profile_or_404(db, user)
     cv_service.delete_cv(db, profile, cv_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+def upload_avatar(file: UploadFile = File(...), user: User = Depends(candidate_only), db: Session = Depends(get_db)):
+    return avatar_service.set_avatar(db, user, file)
+
+
+def delete_avatar(user: User = Depends(candidate_only), db: Session = Depends(get_db)):
+    return avatar_service.set_avatar(db, user)

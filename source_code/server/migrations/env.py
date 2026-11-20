@@ -5,6 +5,7 @@ from sqlalchemy import engine_from_config, pool
 
 from src.config.database import Base
 from src.config.settings import settings
+from src.config.connection import connection_args
 import src.models  # noqa: F401 - đăng ký toàn bộ model vào Base.metadata
 
 config = context.config
@@ -33,6 +34,7 @@ def run_migrations_online() -> None:
         config.get_section(config.config_ini_section, {}),
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
+        connect_args=connection_args(settings),
     )
     with connectable.connect() as connection:
         context.configure(connection=connection, target_metadata=target_metadata, compare_type=True)

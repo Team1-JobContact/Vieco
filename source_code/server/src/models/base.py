@@ -1,19 +1,41 @@
 """Lớp nền chung cho mọi model: id, created_at, updated_at (theo mục 1.2 tài liệu thiết kế)."""
+from datetime import timezone
+
 from sqlalchemy import (
     BigInteger, Boolean, CheckConstraint, Column, DateTime, ForeignKey, Integer, func, true, false,
 )
+from sqlalchemy.types import TypeDecorator
+from src.config import database
 from src.config.database import Base
 
 # BIGINT tự tăng trên MySQL/PostgreSQL; SQLite (nếu dùng để test) chỉ tự tăng với INTEGER.
 BigInt = BigInteger().with_variant(Integer, "sqlite")
 
 
+class ServerTimestamp(TypeDecorator):
+    """Label database-generated dates with their clock, including existing rows."""
+    impl = DateTime
+    cache_ok = True
+
+    def process_result_value(self, value, dialect):
+        if value is None or value.tzinfo is not None:
+            return value
+        zone = database.SERVER_TIMEZONE if dialect.name == "mysql" else timezone.utc
+        return value.replace(tzinfo=zone)
+
+    def process_bind_param(self, value, dialect):
+        if value is None or value.tzinfo is None:
+            return value
+        zone = database.SERVER_TIMEZONE if dialect.name == "mysql" else timezone.utc
+        return value.astimezone(zone).replace(tzinfo=None)
+
+
 class BaseModel(Base):
     __abstract__ = True
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
-    created_at = Column(DateTime, nullable=False, server_default=func.now())
-    updated_at = Column(DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
+    created_at = Column(ServerTimestamp(), nullable=False, server_default=func.now())
+    updated_at = Column(ServerTimestamp(), nullable=False, server_default=func.now(), onupdate=func.now())
 
 
 def fk(target: str, nullable: bool = False, ondelete: str | None = None, **kwargs) -> Column:
