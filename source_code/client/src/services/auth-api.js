@@ -7,7 +7,8 @@
 }(typeof globalThis !== "undefined" ? globalThis : this, function () {
     "use strict";
 
-    const DEFAULT_API_BASE_URL = "http://127.0.0.1:8000/api/v1";
+    const LOCAL_API_BASE_URL = "http://127.0.0.1:8000/api/v1";
+    const DEPLOYED_API_BASE_URL = "https://vieco.onrender.com/api/v1";
     const TOKEN_KEY = "vieco_access_token";
     const USER_KEY = "vieco_user";
     const REQUEST_TIMEOUT_MS = 15000;
@@ -25,6 +26,10 @@
             } catch (_) {
                 // Ignore storage restrictions
             }
+            // The Render Static Site calls the separately deployed backend.
+            if (window.location.hostname === "vieco-frontend.onrender.com") {
+                return DEPLOYED_API_BASE_URL;
+            }
             // A shared deployment serves the website and API on port 8000,
             // or through a reverse proxy on the standard HTTP(S) port.
             const location = window.location;
@@ -33,7 +38,12 @@
                 return location.origin + "/api/v1";
             }
         }
-        return DEFAULT_API_BASE_URL;
+        // Use the local API only when the frontend itself runs on loopback.
+        if (typeof window === "undefined" ||
+            ["localhost", "127.0.0.1", "[::1]"].includes(window.location.hostname)) {
+            return LOCAL_API_BASE_URL;
+        }
+        return DEPLOYED_API_BASE_URL;
     }
 
     function utf8ByteLength(str) {
