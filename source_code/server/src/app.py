@@ -21,7 +21,7 @@ app = FastAPI(title=settings.APP_NAME, debug=settings.DEBUG)
 # Cấu hình CORS cho phép frontend HTML/JS gọi API
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=settings.cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

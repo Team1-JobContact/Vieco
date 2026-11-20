@@ -58,7 +58,29 @@ cd source_code/client
 
 Mở http://localhost:5500, đăng nhập tại /pages/login.html hoặc mở /pages/employer.html. Dùng HTTP thay vì mở file HTML trực tiếp. Frontend không có script build/start/dev.
 
-API mặc định là http://127.0.0.1:8000/api/v1, khai báo tại `src/services/auth-api.js`. Có thể dùng `window.VIECO_API_BASE_URL` trước khi nạp script, hoặc `localStorage.vieco_api_base_url` của frontend. Giữ tiền tố /api/v1. Không đổi CORS hoặc cấu hình bảo mật chỉ để tổ chức thư mục.
+Khi frontend chạy trên localhost, 127.0.0.1 hoặc [::1], API mặc định là http://127.0.0.1:8000/api/v1. Khi frontend được triển khai, API mặc định là https://vieco.onrender.com/api/v1; cấu hình dùng chung nằm tại `src/services/auth-api.js`. Có thể dùng `window.VIECO_API_BASE_URL` trước khi nạp script, hoặc `localStorage.vieco_api_base_url` của frontend để ghi đè. Giữ tiền tố /api/v1.
+
+## Triển khai frontend trên Render
+
+Backend hiện tại là https://vieco.onrender.com; kiểm tra tiến trình tại https://vieco.onrender.com/api/v1/health hoặc Swagger tại https://vieco.onrender.com/docs. Trang gốc backend có thể trả 404 vì không phục vụ frontend.
+
+Static Site `vieco-frontend` đã được xác minh tại https://vieco-frontend.onrender.com. Với hai dịch vụ hiện tại, đặt trên Environment của backend:
+
+```ini
+FRONTEND_URL=https://vieco-frontend.onrender.com
+```
+
+1. Tạo hoặc mở dịch vụ **Static Site** cho repository này. Đặt **Root Directory** là `source_code/client`, **Build Command** là `echo "Static frontend: no build required"`, **Publish Directory** là `.`. Frontend HTML/CSS/JS không cần npm build. Nếu đã có Static Site, đối chiếu các giá trị trước khi thay đổi.
+2. Sao chép URL của **Static Site** trong Overview, mở trang chủ và `/pages/login.html`. URL này khác URL backend `https://vieco.onrender.com`.
+3. Triển khai mã nguồn mới để frontend gọi `https://vieco.onrender.com/api/v1`. Nếu trình duyệt từng lưu API tùy chỉnh, mở Console tại website frontend và chạy `localStorage.removeItem("vieco_api_base_url")`, rồi tải lại trang.
+4. Tại Render → backend `vieco` → Environment, đặt `FRONTEND_URL` bằng URL Static Site thật, chỉ gồm `https://tên-miền`, không thêm đường dẫn. Lưu và chờ backend triển khai lại. Biến này dùng cho CORS và các liên kết email. CORS chỉ cho phép origin đã cấu hình; khi dùng cấu hình phát triển mặc định, cả localhost:5500 và 127.0.0.1:5500 được chấp nhận.
+5. Mở DevTools → Network tại frontend, thử đăng ký, đăng nhập, xem hồ sơ và danh sách việc làm. Request phải tới backend với tiền tố `/api/v1`; preflight OPTIONS phải thành công và response phải có `Access-Control-Allow-Origin` khớp URL frontend. Đăng ký phải trả 201, đăng nhập trả 200. Chỉ kiểm tra health chưa đủ xác nhận database hoạt động.
+
+Không đặt URL backend vào `FRONTEND_URL`. Cấu hình Environment trên Render độc lập với `.env` cục bộ và `.env.example` trong repository.
+
+Nếu health trả 200 nhưng `/api/v1/categories` hoặc `/api/v1/jobs` trả 500, mở Render → backend → Logs ngay sau khi gọi API và đọc traceback. Đối chiếu `DATABASE_URL` với database đã triển khai; nếu log báo thiếu bảng, kiểm tra migration; nếu báo thiếu vai trò, kiểm tra seed. Xem [hướng dẫn migration/seed](../source_code/server/migrations/README.md) và chỉ chạy trên database đích đã xác định. Lỗi 500 không đủ để kết luận nguyên nhân là CORS hoặc database.
+
+Tham khảo cấu hình dịch vụ trong [hướng dẫn triển khai chính thức của Render](https://render.com/docs/your-first-deploy).
 
 ## Kiểm thử
 
