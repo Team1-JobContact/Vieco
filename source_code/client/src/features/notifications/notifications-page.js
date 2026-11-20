@@ -14,5 +14,5 @@
             h("p", { class: "v-lead", text: "Cập nhật về đơn ứng tuyển, tin tuyển dụng và hồ sơ công ty." }))));
         app.appendChild(h("section", { class: "v-section" }, h("div", { class: "v-wrap", style: "max-width:1000px" }, box)));
         window.ViecoNotifications.mount(box);
-    });
+    }).catch(function (error) { V.note(app, error.message, "error"); });
 }());

@@ -1,4 +1,6 @@
 import os
+from io import BytesIO
+from zipfile import ZipFile
 
 import pytest
 
@@ -6,7 +8,11 @@ from src.config.settings import settings
 from src.models import CV, Application, CandidateProfile, Province, SystemSetting
 
 PDF = b"%PDF-1.4\n" + b"x" * 100
-DOCX = b"PK\x03\x04" + b"x" * 100
+_docx = BytesIO()
+with ZipFile(_docx, "w") as _archive:
+    _archive.writestr("[Content_Types].xml", '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"/>')
+    _archive.writestr("word/document.xml", '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body/></w:document>')
+DOCX = _docx.getvalue()
 DOC = b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1" + b"x" * 100
 
 BASE = "/api/v1/candidates/me"

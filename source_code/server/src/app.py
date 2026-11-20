@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from src.config.settings import settings
 import src.models  # noqa: F401 - Đăng ký model (schema do Alembic quản lý: alembic upgrade head)
 from src.routes.core import router as core_router
+from src.routes.admin import router as admin_router
 from src.routes.auth import router as auth_router
 from src.routes.candidate import router as candidate_router
 from src.routes.catalog import router as catalog_router
@@ -21,13 +22,14 @@ app = FastAPI(title=settings.APP_NAME, debug=settings.DEBUG)
 # Cấu hình CORS cho phép frontend HTML/JS gọi API
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
+    allow_origins=list(dict.fromkeys([settings.FRONTEND_URL.rstrip("/"), *settings.CORS_ORIGINS])),
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 app.include_router(core_router)
+app.include_router(admin_router)
 app.include_router(auth_router)
 app.include_router(candidate_router)
 app.include_router(catalog_router)

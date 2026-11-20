@@ -44,6 +44,9 @@
         clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
         bookmark: '<path d="M6 3h12v18l-6-4-6 4V3Z"/>',
         check: '<path d="m5 12.5 4.5 4.5L19 7.5"/>',
+        info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7h.01"/>',
+        warning: '<path d="m12 3 10 18H2L12 3Z"/><path d="M12 9v5M12 17h.01"/>',
+        error: '<circle cx="12" cy="12" r="9"/><path d="m9 9 6 6m0-6-6 6"/>',
         plus: '<path d="M12 5v14M5 12h14"/>',
         left: '<path d="m14 6-6 6 6 6"/>',
         right: '<path d="m10 6 6 6-6 6"/>',
@@ -98,11 +101,14 @@
             query = params.toString() ? "?" + params.toString() : "";
         }
         var response;
+        var controller = typeof AbortController === "function" ? new AbortController() : null;
+        var timeout = controller ? setTimeout(function () { controller.abort(); }, 15000) : null;
         try {
-            response = await fetch(Auth.getApiBaseUrl() + path + query, { method: options.method || "GET", headers: headers, body: body });
-        } catch (_) {
-            // Trình duyệt cũng báo lỗi mạng khi backend trả lỗi 500 ở chế độ DEBUG (thiếu header CORS).
-            throw new Error("Không nhận được phản hồi từ máy chủ. Kiểm tra backend đang chạy ở cổng 8000; nếu đang chạy, xem lỗi trong terminal backend (thường do chưa chạy alembic upgrade head).");
+            response = await fetch(Auth.getApiBaseUrl() + path + query, { method: options.method || "GET", headers: headers, body: body, signal: controller ? controller.signal : undefined });
+        } catch (error) {
+            throw new Error(error.name === "AbortError" ? "Máy chủ phản hồi quá lâu. Vui lòng thử lại." : "Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối và thử lại.");
+        } finally {
+            if (timeout) clearTimeout(timeout);
         }
         if (options.blob && response.ok) return response.blob();
         var data = null;
@@ -137,9 +143,13 @@
     function currentUser() {
         if (!userPromise) {
             var token = Auth.getAuthToken();
-            userPromise = !token ? Promise.resolve(null) : Auth.fetchCurrentUser(token).catch(function () {
-                Auth.clearAuthSession();
-                return null;
+            userPromise = !token ? Promise.resolve(null) : Auth.fetchCurrentUser(token).catch(function (error) {
+                userPromise = null;
+                if (error.status === 401) {
+                    Auth.clearAuthSession();
+                    return null;
+                }
+                throw error;
             });
         }
         return userPromise;
@@ -147,7 +157,12 @@
 
     /** Trả về user nếu đúng vai trò; chưa đăng nhập thì chuyển tới trang đăng nhập; sai vai trò thì trả null. */
     async function requireRole(roles, container) {
-        var user = await currentUser();
+        var user;
+        try { user = await currentUser(); }
+        catch (error) {
+            if (container) note(container, error.message, "error");
+            return null;
+        }
         if (!user) { goLogin(); return null; }
         if (roles.indexOf(user.role) === -1) {
             if (container) {
@@ -295,18 +310,53 @@
     }
 
     // ---------- Thông báo nhanh ----------
-    var toastTimer = null;
+    var dismissToast = null;
     function toast(message, isError) {
-        var old = document.querySelector(".v-toast");
-        if (old) old.remove();
-        var node = h("div", { class: "v-toast" + (isError ? " v-toast-error" : ""), role: "status", text: message });
+        if (dismissToast) dismissToast();
+        if (!message) return;
+        var previous = document.activeElement;
+        var duration = isError ? 8000 : 5000;
+        var remaining = duration, startedAt, timer = null;
+        var hovering = false, focused = false, closed = false;
+        var progress = h("span", { class: "v-toast-progress", "aria-hidden": "true" });
+        progress.style.animationDuration = duration + "ms";
+        var node = h("div", { class: "v-toast" + (isError ? " v-toast-error" : ""), role: isError ? "alert" : "status", "aria-atomic": "true" },
+            h("span", { class: "v-toast-symbol", "aria-hidden": "true" }, icon(isError ? "error" : "check")),
+            h("p", { class: "v-toast-message", text: message }),
+            h("button", { type: "button", class: "v-toast-close", "aria-label": "Đóng thông báo", onclick: close }, icon("close", "v-icon-sm")), progress);
+        function close() {
+            if (closed) return;
+            closed = true;
+            clearTimeout(timer);
+            timer = null;
+            if (node.contains(document.activeElement) && previous && previous.isConnected) previous.focus();
+            node.remove();
+            if (dismissToast === close) dismissToast = null;
+        }
+        function updateTimer() {
+            if (closed) return;
+            if (timer !== null) {
+                clearTimeout(timer);
+                remaining = Math.max(0, remaining - (Date.now() - startedAt));
+                timer = null;
+            }
+            var paused = hovering || focused;
+            progress.style.animationPlayState = paused ? "paused" : "running";
+            if (!paused) { startedAt = Date.now(); timer = setTimeout(close, remaining); }
+        }
+        node.addEventListener("mouseenter", function () { hovering = true; updateTimer(); });
+        node.addEventListener("mouseleave", function () { hovering = false; updateTimer(); });
+        node.addEventListener("focusin", function () { focused = true; updateTimer(); });
+        node.addEventListener("focusout", function (event) { focused = node.contains(event.relatedTarget); updateTimer(); });
+        dismissToast = close;
         document.body.appendChild(node);
-        clearTimeout(toastTimer);
-        toastTimer = setTimeout(function () { node.remove(); }, 4000);
+        updateTimer();
     }
     function note(container, message, kind) {
         clear(container);
-        if (message) container.appendChild(h("div", { class: "v-note " + (kind ? "v-note-" + kind : ""), role: kind === "error" ? "alert" : "status", text: message }));
+        if (message) container.appendChild(h("div", { class: "v-note " + (kind ? "v-note-" + kind : ""), role: kind === "error" ? "alert" : "status" },
+            h("span", { class: "v-note-symbol", "aria-hidden": "true" }, icon(kind === "error" ? "error" : kind === "success" ? "check" : kind === "warn" || kind === "warning" ? "warning" : "info", "v-icon-sm")),
+            h("span", { class: "v-note-message", text: message })));
     }
     function loading(container, text) { clear(container).appendChild(h("p", { class: "v-loading", text: text || "Đang tải..." })); }
     function empty(container, title, text, action) {
@@ -315,16 +365,21 @@
 
     // ---------- Việc đã lưu ----------
     var savedIds = null;
+    var savedPromise = null;
     async function loadSaved() {
         if (savedIds) return savedIds;
-        savedIds = new Set();
-        var user = await currentUser();
-        if (user && user.role === "CANDIDATE") {
-            try {
-                (await api("/saved-jobs")).items.forEach(function (job) { savedIds.add(job.id); });
-            } catch (_) { /* không chặn trang nếu lỗi */ }
+        if (!savedPromise) {
+            savedPromise = (async function () {
+                var user = await currentUser();
+                var set = new Set();
+                if (user && user.role === "CANDIDATE") {
+                    (await api("/saved-jobs")).items.forEach(function (job) { set.add(job.id); });
+                }
+                savedIds = set;
+                return set;
+            }()).finally(function () { savedPromise = null; });
         }
-        return savedIds;
+        return savedPromise;
     }
     function saveButton(job) {
         var button = h("button", { type: "button", class: "v-save", "aria-label": "Lưu việc " + job.title, "aria-pressed": "false" }, icon("bookmark"));
@@ -332,20 +387,23 @@
             button.classList.toggle("is-saved", saved);
             button.setAttribute("aria-pressed", String(saved));
         }
-        loadSaved().then(function (set) { paint(set.has(job.id)); });
+        loadSaved().then(function (set) { paint(set.has(job.id)); }).catch(function () {});
         button.addEventListener("click", async function (event) {
             event.preventDefault();
-            var user = await currentUser();
-            if (!user) return goLogin();
-            if (user.role !== "CANDIDATE") return toast("Chỉ tài khoản ứng viên mới lưu được việc làm", true);
-            var set = await loadSaved(), saved = set.has(job.id);
+            if (button.disabled) return;
+            button.disabled = true;
             try {
+                var user = await currentUser();
+                if (!user) return goLogin();
+                if (user.role !== "CANDIDATE") return toast("Chỉ tài khoản ứng viên mới lưu được việc làm", true);
+                var set = await loadSaved(), saved = set.has(job.id);
                 await api("/saved-jobs/" + job.id, { method: saved ? "DELETE" : "PUT" });
                 if (saved) set.delete(job.id); else set.add(job.id);
                 paint(!saved);
                 toast(saved ? "Đã bỏ lưu việc làm" : "Đã lưu việc làm");
                 document.dispatchEvent(new CustomEvent("vieco:saved-changed"));
             } catch (error) { toast(error.message, true); }
+            finally { button.disabled = false; }
         });
         return button;
     }
@@ -426,16 +484,32 @@
     function modal(content, options) {
         options = options || {};
         var previous = document.activeElement;
-        var box = h("div", { class: "v-modal " + (options.small ? "v-modal-sm" : ""), role: "dialog", "aria-modal": "true", "aria-label": options.label || "Hộp thoại" });
+        var previousOverflow = document.body.style.overflow;
+        var closed = false;
+        var box = h("div", { class: "v-modal " + (options.small ? "v-modal-sm" : "") + (options.className ? " " + options.className : ""), role: "dialog", "aria-modal": "true", "aria-label": options.label || "Hộp thoại" });
         var scrim = h("div", { class: "v-modal-scrim" }, box);
         function close() {
+            if (closed) return;
+            closed = true;
             scrim.remove();
             document.removeEventListener("keydown", onKey);
-            document.body.style.overflow = "";
+            document.body.style.overflow = previousOverflow;
             if (previous && previous.focus) previous.focus();
             if (options.onClose) options.onClose();
         }
-        function onKey(event) { if (event.key === "Escape") close(); }
+        function onKey(event) {
+            if (event.key === "Escape") { event.preventDefault(); close(); }
+            if (event.key !== "Tab") return;
+            var items = box.querySelectorAll('button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), a[href], [tabindex="0"]');
+            var first = items[0], last = items[items.length - 1];
+            if (!first) { event.preventDefault(); box.focus(); }
+            else if (event.shiftKey && (document.activeElement === first || !box.contains(document.activeElement))) {
+                event.preventDefault(); last.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault(); first.focus();
+            }
+        }
+        box.setAttribute("tabindex", "-1");
         if (!options.small) box.appendChild(h("button", { type: "button", class: "v-modal-close", "aria-label": "Đóng", onclick: close }, icon("close", "v-icon-lg")));
         append(box, typeof content === "function" ? content(close) : content);
         scrim.addEventListener("mousedown", function (event) { if (event.target === scrim) close(); });
@@ -443,7 +517,7 @@
         document.body.appendChild(scrim);
         document.body.style.overflow = "hidden";
         var focusable = box.querySelector("input, select, textarea, button, a");
-        if (focusable) focusable.focus();
+        if (focusable) focusable.focus(); else box.focus();
         return close;
     }
     function confirmDialog(title, message, confirmText, danger) {
@@ -451,14 +525,15 @@
             var done = false;
             modal(function (close) {
                 return [
+                    h("div", { class: "v-confirm-symbol" + (danger ? " is-danger" : ""), "aria-hidden": "true" }, icon(danger ? "warning" : "info", "v-icon-lg")),
                     h("h2", { class: "v-mt-0", text: title }),
-                    h("p", { class: "v-lead", text: message }),
-                    h("div", { class: "v-flex v-mt-3", style: "justify-content:center" },
+                    h("p", { class: "v-confirm-message", text: message }),
+                    h("div", { class: "v-confirm-actions" },
                         h("button", { type: "button", class: "v-btn v-btn-outline v-btn-sm", text: "Hủy", onclick: close }),
                         h("button", { type: "button", class: "v-btn v-btn-sm " + (danger ? "v-btn-danger" : "v-btn-primary"), text: confirmText || "Xác nhận",
                             onclick: function () { done = true; close(); } }))
                 ];
-            }, { small: true, label: title, onClose: function () { resolve(done); } });
+            }, { small: true, className: "v-confirm", label: title, onClose: function () { resolve(done); } });
         });
     }
 
@@ -475,7 +550,8 @@
         var links = {
             CANDIDATE: [["pages/profile.html", "Hồ sơ của tôi"], ["pages/profile.html#applications", "Việc đã ứng tuyển"], ["pages/profile.html#saved", "Việc đã lưu"], ["pages/profile.html#cvs", "CV của tôi"]],
             EMPLOYER: [["pages/employer-jobs.html", "Quản lý tin và ứng viên"], ["pages/employer.html", "Hồ sơ công ty"], ["pages/company-media.html", "Hình ảnh công ty"], ["pages/employer.html#job", "Đăng tin mới"]],
-            ADMIN: [["pages/admin.html", "Trang quản trị"], ["pages/admin.html#jobs", "Duyệt tin tuyển dụng"]]
+            ADMIN: [["pages/admin.html", "Trang quản trị"], ["pages/admin.html#jobs", "Duyệt tin tuyển dụng"],
+                ["pages/admin.html#users", "Quản lý tài khoản"], ["pages/admin.html#categories", "Quản lý danh mục"]]
         }[user.role] || [];
         return links.concat([["pages/notifications.html", "Thông báo"]]);
     }
@@ -504,7 +580,7 @@
                 h("a", { class: "v-wordmark", href: url("index.html"), text: "VIECO" }),
                 h("div", { class: "v-header-right" },
                     h("a", { class: "v-head-btn v-hide-md", href: url("pages/contact.html"), text: "Liên hệ" }),
-                    h("button", { type: "button", class: "v-head-btn", "aria-haspopup": "dialog", onclick: openSearch },
+                    h("button", { type: "button", class: "v-head-btn", "aria-label": "Tìm kiếm", "aria-haspopup": "dialog", onclick: openSearch },
                         h("img", { src: url("src/assets/images/icons/search.svg"), alt: "" }), h("span", { class: "v-hide-md", text: "Tìm kiếm" })),
                     actions)));
         clear(mount).appendChild(header);
@@ -537,7 +613,7 @@
                 }).catch(function () {});
             };
             refreshUnread();
-        });
+        }).catch(function (error) { toast(error.message, true); });
     }
     var refreshUnread = function () {};
 
@@ -589,7 +665,7 @@
             ]));
             append(foot, h("div", { class: "v-drawer-meta" }, h("span", { text: "Tiếng Việt" }),
                 h("a", { class: "v-link", href: url("pages/contact.html"), text: "Trung tâm trợ giúp ↗" })));
-        });
+        }).catch(function (error) { note(foot, error.message, "error"); });
         showOverlay(drawer);
         drawer.querySelector(".v-close").focus();
     }
@@ -661,7 +737,7 @@
                         h("p", { text: "Nền tảng kết nối ứng viên với doanh nghiệp. Cùng bạn tìm kiếm cơ hội, phát triển sự nghiệp và kiến tạo những kết nối có ý nghĩa." })),
                     col("Dành cho bạn", [["pages/jobs.html", "Khám phá việc làm"], ["pages/cv-library.html", "Tạo CV chuyên nghiệp"], ["pages/profile.html", "Hồ sơ tìm việc"], ["pages/for-employers.html", "Dành cho nhà tuyển dụng"]]),
                     col("Hỗ trợ & liên hệ", [["pages/contact.html", "Trung tâm trợ giúp"], ["pages/contact.html#faq", "Hướng dẫn ứng tuyển"], ["pages/contact.html", "Kết nối với Vieco ↗"], ["pages/contact.html", "Báo cáo tin tuyển dụng"]]),
-                    col("Thông tin pháp lý", [["pages/contact.html#faq", "Điều khoản sử dụng"], ["pages/contact.html#faq", "Chính sách bảo mật"], ["pages/contact.html#faq", "Quy chế hoạt động"]])),
+                    col("Thông tin", [["pages/content.html?slug=gioi-thieu", "Giới thiệu Vieco"], ["pages/content.html?slug=dieu-khoan", "Điều khoản sử dụng"], ["pages/content.html?slug=faq", "Câu hỏi thường gặp"]])),
                 h("div", { class: "v-footer-bottom" }, h("span", { text: "© 2026 Vieco. Chạm cơ hội, mở tương lai." }), h("span", { text: "Tiếng Việt" })))));
     }
 

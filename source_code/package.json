@@ -1,0 +1,19 @@
+{
+  "name": "source_code",
+  "version": "1.0.0",
+  "description": "- `client/`: HTML/CSS/JavaScript; trang trong `pages/`, UI theo chức năng trong `src/features/`, HTTP client trong `src/services/`, CSS trong `src/assets/`. Chạy HTTP server từ client; kiểm thử bằng `npm test`.\r - `server/`: FastAPI; `routes/` khai báo URL và response, `controllers/` nhận dữ liệu HTTP và dependency, `services/` xử lý nghiệp vụ, `models/` ánh xạ SQLAlchemy. `middlewares/auth.py` kiểm tra JWT và RBAC. `dependencies/auth.py` giữ import tương thích.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently -k -n FRONTEND,BACKEND -c cyan,green \"npm run dev:frontend\" \"npm run dev:backend\"",
+    "dev:frontend": "python -m http.server 5500 --directory client",
+    "dev:backend": "python -m uvicorn src.app:app --app-dir server --reload --port 8000",
+    "test:client": "npm --prefix client test"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "concurrently": "^10.0.7"
+  }
+}

@@ -7,12 +7,13 @@ document.addEventListener("DOMContentLoaded", function () {
     const form = document.getElementById("account-form");
     const title = document.getElementById("account-title");
     const message = document.getElementById("account-message");
+    function showMessage(text, kind) { window.Vieco.note(message, text, kind); }
     const button = document.getElementById("account-submit");
     const email = form.elements.email;
     const password = form.elements.password;
     if (!["verify-email", "reset-password", "forgot-password"].includes(action) ||
         (action !== "forgot-password" && !token)) {
-        message.textContent = "Liên kết không hợp lệ";
+        showMessage("Liên kết không hợp lệ", "error");
         form.hidden = true;
         return;
     }
@@ -27,18 +28,18 @@ document.addEventListener("DOMContentLoaded", function () {
         if (button.disabled) return;
         if (action === "reset-password") {
             const validation = window.ViecoAuthApi.validatePassword(password.value);
-            if (!validation.valid) { message.textContent = validation.message; return; }
+            if (!validation.valid) { showMessage(validation.message, "error"); return; }
         }
         button.disabled = true;
         try {
             const payload = action === "forgot-password" ? {email: email.value.trim()} :
                 action === "verify-email" ? {token} : {token, password: password.value};
             const result = await window.ViecoAccountApi.submit(action, payload);
-            message.textContent = result.message;
+            showMessage(result.message, "success");
             if (action === "reset-password") window.ViecoAuthApi.clearAuthSession();
             form.hidden = true;
         } catch (error) {
-            message.textContent = error.message || "Không kết nối được máy chủ";
+            showMessage(error.message || "Không kết nối được máy chủ", "error");
         } finally {
             button.disabled = false;
         }

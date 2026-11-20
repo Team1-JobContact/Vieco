@@ -55,6 +55,7 @@ class UserResponse(BaseModel):
     full_name: str
     phone: str | None = None
     role: str
+    avatar_url: str | None = None
     is_email_verified: bool
     status: str
     created_at: datetime | None = None

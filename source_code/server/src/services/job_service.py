@@ -2,9 +2,10 @@ from datetime import date, datetime, timezone
 import math
 
 from fastapi import HTTPException, status
+from sqlalchemy import and_, or_
 from sqlalchemy.orm import Session
 
-HTTP_422 = getattr(status, "HTTP_422_UNPROCESSABLE_CONTENT", status.HTTP_422_UNPROCESSABLE_ENTITY)
+HTTP_422 = getattr(status, "HTTP_422_UNPROCESSABLE_CONTENT", 422)
 
 from src.models.catalog import Industry, Province, Skill
 from src.models.company import Company, CompanyMember
@@ -15,6 +16,7 @@ from src.schemas.job import (
     JobCreate, JobExtendRequest, JobListResponse, JobResponse, JobUpdate, SkillItem,
 )
 from src.services.company_service import find_membership
+from src.utils.dates import business_today
 
 
 def _utcnow() -> datetime:
@@ -78,7 +80,7 @@ def _validate_job_submission(title: str | None, industry_id: int | None, provinc
         raise HTTPException(HTTP_422, "Yêu cầu kinh nghiệm là bắt buộc khi gửi duyệt tin")
     if not deadline:
         raise HTTPException(HTTP_422, "Hạn nộp hồ sơ là bắt buộc khi gửi duyệt tin")
-    if deadline < date.today():
+    if deadline < business_today():
         raise HTTPException(HTTP_422, "Hạn nộp hồ sơ phải là ngày hiện tại hoặc tương lai")
     if positions is not None and positions < 1:
         raise HTTPException(HTTP_422, "Số lượng tuyển phải lớn hơn hoặc bằng 1")
@@ -102,6 +104,33 @@ def _notify_employer(db: Session, user_id: int, job: Job, type_: str, title: str
         reference_type="JOB",
         reference_id=job.id,
     ))
+
+
+def effective_status(job: Job) -> str:
+    if job.status == "APPROVED" and job.deadline and job.deadline < business_today():
+        return "EXPIRED"
+    return job.status
+
+
+def _filter_status(query, status_filter):
+    expired = and_(Job.status == "APPROVED", Job.deadline < business_today())
+    if status_filter == "EXPIRED":
+        return query.filter(or_(Job.status == "EXPIRED", expired))
+    if status_filter == "APPROVED":
+        return query.filter(Job.status == "APPROVED", Job.deadline >= business_today())
+    return query.filter(Job.status == status_filter) if status_filter else query
+
+
+def _validate_stored_submission(db: Session, job: Job, changes=None):
+    changes = changes or {}
+    names = ("title", "industry_id", "province_id", "description", "requirements",
+             "employment_type", "experience_level", "deadline", "salary_min", "salary_max", "positions")
+    values = {key: changes.get(key, getattr(job, key)) for key in names}
+    _validate_job_submission(**values)
+    skills = changes.get("skill_ids")
+    if skills is None:
+        skills = [sid for (sid,) in db.query(JobSkill.skill_id).filter(JobSkill.job_id == job.id)]
+    _check_catalog(db, values["industry_id"], values["province_id"], skills)
 
 
 def to_job_response(db: Session, job: Job) -> JobResponse:
@@ -140,7 +169,7 @@ def to_job_response(db: Session, job: Job) -> JobResponse:
         employment_type=job.employment_type,
         positions=job.positions,
         deadline=job.deadline,
-        status=job.status,
+        status=effective_status(job),
         reject_reason=job.reject_reason,
         reviewed_by=job.reviewed_by,
         reviewed_at=job.reviewed_at,
@@ -228,8 +257,7 @@ def list_employer_jobs(
     company, _ = require_approved_company(db, user)
     query = db.query(Job).filter(Job.company_id == company.id)
 
-    if status_filter:
-        query = query.filter(Job.status == status_filter)
+    query = _filter_status(query, status_filter)
     if q and q.strip():
         query = query.filter(Job.title.ilike(f"%{q.strip()}%"))
 
@@ -261,6 +289,9 @@ def update_job(db: Session, user: User, job_id: int, data: JobUpdate) -> JobResp
     company, _ = require_approved_company(db, user)
     job = get_employer_job_or_404(db, job_id, company.id)
 
+    if effective_status(job) not in ("DRAFT", "REJECTED", "APPROVED") or job.removed_at:
+        raise HTTPException(409, "Không thể sửa tin ở trạng thái hiện tại")
+
     _check_catalog(db, data.industry_id, data.province_id, data.skill_ids)
 
     old_values = {
@@ -283,6 +314,9 @@ def update_job(db: Session, user: User, job_id: int, data: JobUpdate) -> JobResp
     if new_smin is not None and new_smax is not None and new_smin > new_smax:
         raise HTTPException(HTTP_422,
                             "Mức lương tối thiểu không được lớn hơn mức lương tối đa")
+
+    if job.status == "APPROVED" and changes:
+        _validate_stored_submission(db, job, changes)
 
     # Kiểm tra xem có chỉnh sửa nội dung chính không (FR-M2-03)
     major_fields = [
@@ -342,11 +376,7 @@ def submit_job(db: Session, user: User, job_id: int) -> JobResponse:
             f"Chỉ có thể gửi duyệt tin đang ở trạng thái Nháp hoặc Bị từ chối (trạng thái hiện tại: {job.status})",
         )
 
-    _validate_job_submission(
-        job.title, job.industry_id, job.province_id, job.description,
-        job.requirements, job.employment_type, job.experience_level,
-        job.deadline, job.salary_min, job.salary_max, job.positions,
-    )
+    _validate_stored_submission(db, job)
 
     old_status = job.status
     job.status = "PENDING"
@@ -384,6 +414,9 @@ def reopen_job(db: Session, user: User, job_id: int, new_deadline: date | None =
     company, _ = require_approved_company(db, user)
     job = get_employer_job_or_404(db, job_id, company.id)
 
+    if job.removed_at:
+        raise HTTPException(409, "Tin đã bị Admin gỡ, không thể mở lại")
+
     if job.status != "CLOSED":
         raise HTTPException(
             status.HTTP_400_BAD_REQUEST,
@@ -391,11 +424,13 @@ def reopen_job(db: Session, user: User, job_id: int, new_deadline: date | None =
         )
 
     target_deadline = new_deadline or job.deadline
-    if not target_deadline or target_deadline < date.today():
+    if not target_deadline or target_deadline < business_today():
         raise HTTPException(
             status.HTTP_400_BAD_REQUEST,
             "Hạn nộp của tin đã quá hạn. Vui lòng cung cấp hạn nộp mới (hôm nay hoặc tương lai) để mở lại tin.",
         )
+
+    _validate_stored_submission(db, job, {"deadline": target_deadline})
 
     old_status = job.status
     job.deadline = target_deadline
@@ -413,19 +448,26 @@ def extend_job(db: Session, user: User, job_id: int, data: JobExtendRequest) -> 
     company, _ = require_approved_company(db, user)
     job = get_employer_job_or_404(db, job_id, company.id)
 
-    if job.status not in ("APPROVED", "EXPIRED"):
+    if job.removed_at:
+        raise HTTPException(409, "Tin đã bị Admin gỡ, không thể gia hạn")
+    if job.status not in ("APPROVED", "EXPIRED", "CLOSED"):
         raise HTTPException(
             status.HTTP_400_BAD_REQUEST,
             f"Chỉ có thể gia hạn tin đang mở hoặc đã hết hạn (trạng thái hiện tại: {job.status})",
         )
 
-    old_status = job.status
+    old_status = effective_status(job)
     old_deadline = str(job.deadline) if job.deadline else None
 
+    if job.deadline and data.deadline <= job.deadline:
+        raise HTTPException(HTTP_422, "Hạn nộp mới phải sau hạn nộp hiện tại")
+    if old_status == "EXPIRED":
+        _validate_stored_submission(db, job, {"deadline": data.deadline})
     job.deadline = data.deadline
     # Bảng 3.7.1: Hết hạn -> Chờ duyệt khi gia hạn
-    if job.status == "EXPIRED":
+    if old_status == "EXPIRED":
         job.status = "PENDING"
+        job.published_at = None
 
     _audit(
         db, user, "EXTEND_JOB", job,
@@ -466,8 +508,7 @@ def admin_list_jobs(
     page_size: int = 20,
 ) -> JobListResponse:
     query = db.query(Job)
-    if status_filter:
-        query = query.filter(Job.status == status_filter)
+    query = _filter_status(query, status_filter)
     if company_id:
         query = query.filter(Job.company_id == company_id)
     if q and q.strip():
@@ -509,6 +550,11 @@ def approve_job(db: Session, admin: User, job_id: int) -> JobResponse:
             status.HTTP_400_BAD_REQUEST,
             f"Chỉ có thể duyệt tin đang ở trạng thái Chờ duyệt (PENDING) (trạng thái hiện tại: {job.status})",
         )
+
+    company = db.get(Company, job.company_id)
+    if job.removed_at or company is None or company.status != "APPROVED":
+        raise HTTPException(409, "Tin bị gỡ hoặc công ty chưa được duyệt")
+    _validate_stored_submission(db, job)
 
     old_status = job.status
     now = _utcnow()

@@ -1,13 +1,10 @@
-from datetime import datetime, timezone, timedelta
 from fastapi import HTTPException
 from sqlalchemy import func, or_
 from src.models.company import Company
 from src.models.recruitment import Job
 from src.services import job_service, candidate_service, auth_service
 from src.schemas.candidate import ProfileCreate
-
-def today():
-    return datetime.now(timezone(timedelta(hours=7))).date()
+from src.utils.dates import business_today as today
 
 def public_jobs_query(db):
     return db.query(Job).join(Company, Company.id == Job.company_id).filter(

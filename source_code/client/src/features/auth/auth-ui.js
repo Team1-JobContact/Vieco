@@ -39,6 +39,9 @@
     }
 
     function getAlertIconSvg(variant) {
+        if (variant === "info") {
+            return '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7h.01"/></svg>';
+        }
         if (variant === "success") {
             return '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>';
         }
@@ -52,6 +55,8 @@
         if (!bannerEl) return;
         var variant = options.variant || "error";
         bannerEl.className = "auth-alert auth-alert--" + variant;
+        bannerEl.setAttribute("role", variant === "error" ? "alert" : "status");
+        bannerEl.setAttribute("aria-live", variant === "error" ? "assertive" : "polite");
         bannerEl.innerHTML = "";
 
         var iconSpan = document.createElement("span");
@@ -143,11 +148,15 @@
 
     function sanitizeRedirectTarget(rawTarget) {
         if (!rawTarget || typeof rawTarget !== "string") return "../index.html";
-        var trimmed = rawTarget.trim();
-        if (trimmed.indexOf("http://") === 0 || trimmed.indexOf("https://") === 0 || trimmed.indexOf("//") === 0) {
+        try {
+            var target = new URL(rawTarget.trim(), window.location.href);
+            if (target.origin === window.location.origin && /https?:/.test(target.protocol)) {
+                return target.pathname + target.search + target.hash;
+            }
+        } catch (_) {
             return "../index.html";
         }
-        return trimmed;
+        return "../index.html";
     }
 
     function applyMode(mode, animate) {

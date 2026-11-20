@@ -3,7 +3,7 @@
     "use strict";
     var V = window.Vieco, h = V.h;
     var app = document.getElementById("app");
-    var TABS = [["overview", "Tổng quan"], ["applications", "Việc đã ứng tuyển"], ["saved", "Việc đã lưu"], ["cvs", "CV của tôi"], ["notifications", "Thông báo"], ["settings", "Cài đặt tài khoản"]];
+    var TABS = [["overview", "Tổng quan"], ["history", "Học vấn & kinh nghiệm"], ["applications", "Việc đã ứng tuyển"], ["saved", "Việc đã lưu"], ["cvs", "CV của tôi"], ["notifications", "Thông báo"], ["settings", "Cài đặt tài khoản"]];
     var GENDERS = { MALE: "Nam", FEMALE: "Nữ", OTHER: "Khác" };
     var user, profile = null, cvData = { items: [], total: 0, max_count: 5, max_size_mb: 5, allowed_extensions: ["pdf", "doc", "docx"] };
     var counts = { applications: 0, saved: 0, unread: 0 };
@@ -31,7 +31,9 @@
     function renderHead() {
         V.clear(headBox);
         headBox.appendChild(h("div", { class: "v-title-row" },
-            h("span", { class: "v-avatar", "aria-hidden": "true", text: V.initials(user.full_name) }),
+            h("span", { class: "v-avatar", style: "overflow:hidden" }, V.media(user.avatar_url)
+                ? h("img", { src: V.media(user.avatar_url), alt: "Ảnh đại diện", style: "width:100%;height:100%;object-fit:cover" })
+                : V.initials(user.full_name)),
             h("div", { class: "grow" },
                 h("p", { class: "v-eyebrow", text: "Ứng viên" }),
                 h("h1", { text: user.full_name }),
@@ -256,6 +258,7 @@
             h("div", { class: "v-form-foot" }, h("span", {}), h("div", { class: "actions" }, submit)));
         form.addEventListener("submit", async function (event) {
             event.preventDefault();
+            if (submit.disabled) return;
             if (fullName.value.trim().length < 2) return V.note(message, "Họ tên phải từ 2 đến 150 ký tự.", "error");
             if (phone.value.trim() && !/^\+?\d{9,15}$/.test(phone.value.trim())) return V.note(message, "Số điện thoại không hợp lệ.", "error");
             submit.disabled = true;
@@ -274,6 +277,31 @@
             submit.disabled = false;
         });
         box.appendChild(form);
+        var avatarFile = h("input", { type: "file", accept: ".jpg,.jpeg,.png,.webp", "aria-label": "Chọn ảnh đại diện" });
+        var avatarMessage = h("div", {});
+        var uploadAvatar = h("button", { type: "button", class: "v-btn v-btn-outline v-btn-sm", text: "Tải ảnh đại diện" });
+        var deleteAvatar = h("button", { type: "button", class: "v-btn v-btn-outline v-btn-sm", text: "Xóa ảnh đại diện", hidden: !user.avatar_url });
+        async function saveAvatar(remove) {
+            if (uploadAvatar.disabled) return;
+            if (!remove && !avatarFile.files[0]) return V.note(avatarMessage, "Vui lòng chọn ảnh JPG, PNG hoặc WEBP.", "error");
+            uploadAvatar.disabled = true; deleteAvatar.disabled = true;
+            try {
+                var options = { method: remove ? "DELETE" : "POST" };
+                if (!remove) { options.formData = new FormData(); options.formData.append("file", avatarFile.files[0]); }
+                var result = await V.api("/candidates/me/avatar", options);
+                user.avatar_url = result.avatar_url;
+                deleteAvatar.hidden = !result.avatar_url;
+                avatarFile.value = "";
+                renderHead();
+                V.note(avatarMessage, remove ? "Đã xóa ảnh đại diện." : "Đã cập nhật ảnh đại diện.", "success");
+            } catch (error) { V.note(avatarMessage, error.message, "error"); }
+            finally { uploadAvatar.disabled = false; deleteAvatar.disabled = false; }
+        }
+        uploadAvatar.addEventListener("click", function () { saveAvatar(false); });
+        deleteAvatar.addEventListener("click", function () { saveAvatar(true); });
+        box.appendChild(h("section", { class: "v-card v-mt-3 v-mb-3" }, h("h2", { class: "v-h3", text: "Ảnh đại diện" }),
+            h("p", { class: "v-small v-muted", text: "JPG, PNG hoặc WEBP. Dung lượng tối đa theo cấu hình quản trị." }),
+            avatarMessage, avatarFile, h("div", { class: "v-flex v-mt-2" }, uploadAvatar, deleteAvatar)));
         box.appendChild(h("div", { class: "v-card" }, h("h2", { class: "v-h3 v-mb-2", text: "Tài khoản" }),
             h("p", { class: "v-muted v-mb-2", text: "Đổi mật khẩu bằng liên kết gửi qua email, hoặc đăng xuất khỏi thiết bị này." }),
             h("div", { class: "v-flex" },
@@ -300,17 +328,19 @@
     function renderTab() {
         var tab = currentTab();
         tabsBox.querySelectorAll("a").forEach(function (link) { link.setAttribute("aria-selected", String(link.dataset.tab === tab)); link.classList.toggle("is-active", link.dataset.tab === tab); });
-        V.clear(content);
-        if (tab === "applications") renderApplications(content);
-        else if (tab === "saved") renderSaved(content);
-        else if (tab === "cvs") renderCvs(content);
-        else if (tab === "settings") renderSettings(content);
+        var panel = h("div", {});
+        V.clear(content).appendChild(panel);
+        if (tab === "applications") renderApplications(panel);
+        else if (tab === "saved") renderSaved(panel);
+        else if (tab === "cvs") renderCvs(panel);
+        else if (tab === "settings") renderSettings(panel);
+        else if (tab === "history") window.ViecoProfileHistory.render(panel);
         else if (tab === "notifications") {
-            content.appendChild(h("h2", { class: "v-h3 v-mb-2", text: "Thông báo" }));
+            panel.appendChild(h("h2", { class: "v-h3 v-mb-2", text: "Thông báo" }));
             var box = h("div", {});
-            content.appendChild(box);
+            panel.appendChild(box);
             window.ViecoNotifications.mount(box, { onCount: function (unread) { counts.unread = unread; paintCounts(); } });
-        } else renderOverview(content);
+        } else renderOverview(panel);
     }
 
     async function attachProvinceName() {
