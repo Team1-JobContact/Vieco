@@ -1,6 +1,6 @@
 # Tích hợp các nhánh cho bản triển khai Render
 
-Ngày kiểm tra: 20/11/2026. Nhánh tích hợp: `integration/render-release`, nền `main` tại `6d5d9c5`.
+Ngày kiểm tra: 20/11/2026. Nhánh tích hợp: `integration/render-release`, nền ban đầu `main` tại `6d5d9c5`; đã đồng bộ với `main` tại `a8be094` sau khi merge các PR #32 và #33.
 
 ## Phạm vi đã hợp nhất
 
@@ -12,6 +12,7 @@ Ngày kiểm tra: 20/11/2026. Nhánh tích hợp: `integration/render-release`, 
 | `feature/t05c34c-apply-api-tests` | Kiểm thử bổ sung API ứng tuyển |
 | `feature/demo-companies-jobs-seed` | Hai lệnh seed demo cho 10 công ty và 43 tin tuyển dụng |
 | `bugfix/company-brand-name` | Sửa tên thương hiệu và ký hiệu công ty khi chưa có logo |
+| `feature/demo-company-media` | PR #35: 10 logo, 10 ảnh bìa và 30 ảnh thư viện; lệnh seed riêng, chạy lại không đổi ảnh đã có |
 
 Nhánh E2E đã bao gồm commit `01524ff` của `feature/t05c34b-integration-testing`, `feature/t05c34e-job-search-apply` và `feature/t05c34f-application-status-withdraw`; không cần merge lại các nhánh trỏ cùng commit. Các nhánh chức năng cũ còn lại đã có trong lịch sử tích hợp.
 
@@ -30,8 +31,9 @@ Không hợp nhất `feat/init-project`: đây là nhánh khởi tạo cũ với
 | Kiểm tra | Kết quả |
 | --- | --- |
 | Toàn bộ backend sau khi giải quyết xung đột | 145 passed, không skip; 20 cảnh báo deprecation có sẵn |
-| Seed demo bổ sung | 1 passed; 10 công ty PENDING, duyệt qua nghiệp vụ, 43 tin APPROVED; chạy lại không tăng số bản ghi |
-| Toàn bộ frontend | 36 passed, không skip |
+| Seed demo bổ sung, chạy lại sau khi tích hợp PR #35 | 1 passed; 10 công ty PENDING, duyệt qua nghiệp vụ, 43 tin APPROVED, 50 tệp ảnh và 30 ảnh thư viện; chạy lại giữ nguyên số bản ghi, tên tệp và URL ảnh |
+| Kiểm tra ảnh demo | Cả 50 ảnh giải mã được và nằm trong giới hạn dung lượng upload |
+| Toàn bộ frontend, chạy lại sau khi thêm kiểm thử thương hiệu | 37 passed, không skip; có kiểm tra tên/ô logo FPT, MoMo, Vinamilk, Coteccons, Vietnam Airlines và FPT Long Châu |
 | Dependency Python | pip check đạt; đã cài Pillow theo requirements của nhánh hồ sơ/ảnh |
 | Git | diff check đạt; không còn xung đột |
 
@@ -43,4 +45,4 @@ Repository yêu cầu ít nhất một lượt review chấp thuận trước kh
 
 Backend cần SECRET_KEY riêng từ 32 ký tự, FRONTEND_URL đúng địa chỉ frontend, DATABASE_URL trỏ tới database online và CA/TLS phù hợp nếu dùng Aiven. Dùng `/api/v1/ready` để kiểm tra kết nối database; endpoint này chưa kiểm tra đủ bảng, seed hoặc toàn bộ nghiệp vụ. Các lệnh demo chỉ chạy khi người vận hành chủ động gọi.
 
-Các PR #31, #32, #33 đã có nội dung trong nhánh tích hợp; giữ nguyên PR nguồn trong lúc chờ bản tích hợp được duyệt. Không cần triển khai từng nhánh riêng lên Render.
+PR #35 đã merge vào nhánh dữ liệu demo; sau đó PR #32 (bao gồm #35) và PR #33 đã được review bằng tài khoản khác tác giả và merge vào main. Nhánh tích hợp đã đồng bộ các merge commit này. PR #31 vẫn có nội dung trong #34; cả #31 và #34 cần một thành viên khác review vì cùng tài khoản hiện tại là tác giả. Không tự duyệt PR của mình hoặc thay đổi quy tắc main. Không cần triển khai từng nhánh riêng lên Render.
