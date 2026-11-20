@@ -140,7 +140,7 @@ def test_database_default_timestamps_include_server_offset(monkeypatch):
 
 
 def test_cors_allows_frontend_and_rejects_other_origins(client):
-    for origin in ("http://localhost:5500", "http://127.0.0.1:5500"):
+    for origin in settings.cors_origins:
         response = client.options("/api/v1/auth/login", headers={"Origin": origin, "Access-Control-Request-Method": "POST"})
         assert response.status_code == 200
         assert response.headers["access-control-allow-origin"] == origin

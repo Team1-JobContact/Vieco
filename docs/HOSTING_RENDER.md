@@ -1,6 +1,12 @@
 # Đưa Vieco lên Render để mọi người truy cập
 
-Hướng dẫn dành cho mã nguồn sau đợt [kiểm tra ngày 18/11/2026](HOSTING_REVIEW_20261118.md). Đây là các bước triển khai, chưa được thực hiện trên tài khoản hosting của nhóm.
+Hướng dẫn dành cho mã nguồn sau đợt [kiểm tra ngày 18/11/2026](HOSTING_REVIEW_20261118.md), đã được hợp nhất với cấu hình Render trong nhánh `integration/render-release`.
+
+## Hai dịch vụ hiện có của nhóm
+
+Nhóm đã có Static Site `vieco-frontend` tại https://vieco-frontend.onrender.com và backend tại https://vieco.onrender.com. Có thể tiếp tục dùng hai dịch vụ này; xem [các bước triển khai tách frontend/backend](SETUP.md#triển-khai-frontend-trên-render). Bản tích hợp tự chọn backend Render cho Static Site này. Trên backend, đặt `FRONTEND_URL=https://vieco-frontend.onrender.com` và `SERVE_FRONTEND=false`.
+
+Các bước bên dưới mô tả phương án khác: phục vụ cả website và API trên một Web Service với `run_shared.py`. Chỉ chọn phương án này nếu nhóm muốn chạy chung một địa chỉ. Thông tin Aiven và `.env.shared` trong các báo cáo là cấu hình được nhắc tới ở lần kiểm tra trước; cần xác nhận dịch vụ, chứng chỉ và dữ liệu hiện tại trước khi dùng. Việc hợp nhất mã nguồn không xác minh hoặc thay đổi database cloud.
 
 ## 1. Chọn cách triển khai
 

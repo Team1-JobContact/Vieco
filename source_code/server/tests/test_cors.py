@@ -21,6 +21,12 @@ def test_local_frontend_supports_both_loopback_names():
     assert set(config.cors_origins) == {"http://localhost:5500", "http://127.0.0.1:5500"}
 
 
+def test_extra_origins_preserve_frontend_and_remove_duplicates():
+    config = Settings(_env_file=None, FRONTEND_URL="https://vieco-frontend.onrender.com",
+                      CORS_ORIGINS=["https://additional.example.com", "https://vieco-frontend.onrender.com"])
+    assert config.cors_origins == ["https://vieco-frontend.onrender.com", "https://additional.example.com"]
+
+
 def test_frontend_can_preflight_authenticated_json_requests(client):
     origin = settings.FRONTEND_URL
     response = client.options("/api/v1/auth/login", headers={

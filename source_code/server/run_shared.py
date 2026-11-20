@@ -8,7 +8,13 @@ if __name__ == "__main__":
     os.chdir(Path(__file__).resolve().parent)
     os.environ.setdefault("VIECO_ENV_FILE", ".env.shared")
     os.environ["SERVE_FRONTEND"] = "true"
-    from src.config.settings import Settings, settings
+    from pydantic import ValidationError
+    try:
+        from src.config.settings import Settings, settings
+    except ValidationError as error:
+        if any(item["loc"] == ("SECRET_KEY",) for item in error.errors()):
+            raise SystemExit("Set a private SECRET_KEY of at least 32 characters in the shared environment.") from None
+        raise
     from sqlalchemy.engine import make_url
 
     if settings.DEBUG:

@@ -9,6 +9,7 @@ import pytest
 
 from scripts.import_shared_data import preflight, require_empty
 from src.config.connection import connection_args
+from src.config.settings import settings
 
 
 def test_cloud_tls_requires_verified_certificate_and_hostname():
@@ -25,9 +26,9 @@ def test_cors_only_allows_configured_frontend(client):
     denied = client.options("/api/v1/auth/login", headers=headers)
     assert denied.status_code == 400
     assert "access-control-allow-origin" not in denied.headers
-    allowed = client.options("/api/v1/auth/login", headers={**headers, "Origin": "http://localhost:5500"})
+    allowed = client.options("/api/v1/auth/login", headers={**headers, "Origin": settings.FRONTEND_URL})
     assert allowed.status_code == 200
-    assert allowed.headers["access-control-allow-origin"] == "http://localhost:5500"
+    assert allowed.headers["access-control-allow-origin"] == settings.FRONTEND_URL
 
 
 @pytest.mark.parametrize("overrides,message", [

@@ -1,5 +1,7 @@
 # Cài đặt và chạy Vieco
 
+Phạm vi hợp nhất và kiểm thử bản Render: [báo cáo tích hợp 20/11/2026](INTEGRATION_RENDER_RELEASE.md).
+
 Kết quả mới nhất: [review 17/11/2026](REVIEW_2026-11-17.md) và [lệnh chạy Windows](HUONG_DAN_CHAY_DU_AN.md). Backend hiện từ chối SECRET_KEY mặc định/placeholder hoặc dưới 32 ký tự; `.env.example` phải được điền khóa riêng trước khi chạy.
 
 Để cả nhóm dùng cùng database, ảnh và CV, xem [hệ thống dùng chung](SHARED_SYSTEM.md).
