@@ -3,6 +3,8 @@
 Giới hạn lấy từ bảng system_settings (cv_max_size_mb, cv_max_count, cv_allowed_extensions),
 mặc định theo SRS: PDF/DOC/DOCX, tối đa 5 MB mỗi tệp, tối đa 5 CV mỗi hồ sơ.
 Tệp lưu tại <UPLOAD_DIR>/cvs/ với tên ngẫu nhiên và KHÔNG được public tĩnh (NFR-07, BR-16).
+
+CV tạo bằng trình tạo CV trực tuyến là tệp PDF như CV tải lên, kèm builder_data để mở lại chỉnh sửa.
 """
 import os
 import uuid
@@ -12,7 +14,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 
 from fastapi import HTTPException, UploadFile, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, undefer
 
 from src.config.settings import settings
 from src.models.catalog import SystemSetting
@@ -103,7 +105,13 @@ def extension_of(filename: str) -> str:
     return filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
 
 
-def upload_cv(db: Session, profile: CandidateProfile, file: UploadFile) -> CV:
+def upload_cv(db: Session, profile: CandidateProfile, file: UploadFile,
+              builder_data: dict | None = None, replace_id: int | None = None) -> CV:
+    """Lưu tệp CV mới. builder_data: nội dung từ trình tạo CV (chỉ nhận PDF).
+
+    replace_id: CV tạo trực tuyến được thay bằng bản mới (cập nhật CV). Bản mới giữ trạng thái mặc định,
+    không tính thêm vào giới hạn số CV; bản cũ đã gắn đơn ứng tuyển thì xóa mềm để giữ tệp đã nộp (BR-15).
+    """
     db.query(CandidateProfile).filter(CandidateProfile.id == profile.id).with_for_update().one()
     limits = get_limits(db)
     file_name = _clean_filename(file.filename)
@@ -111,9 +119,15 @@ def upload_cv(db: Session, profile: CandidateProfile, file: UploadFile) -> CV:
     if ext not in limits.allowed_extensions:
         raise HTTPException(status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
                             f"Chỉ chấp nhận tệp {', '.join(e.upper() for e in limits.allowed_extensions)}")
+    if builder_data is not None and ext != "pdf":
+        raise HTTPException(status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, "CV tạo trực tuyến phải được lưu dưới dạng PDF")
+
+    old = get_cv_or_404(db, profile, replace_id) if replace_id is not None else None
+    if old is not None and not old.has_builder_data:
+        raise HTTPException(status.HTTP_409_CONFLICT, "Chỉ cập nhật được CV tạo bằng trình tạo CV của Vieco")
 
     count = len(_active_cvs(db, profile).with_for_update().all())
-    if count >= limits.max_count:
+    if old is None and count >= limits.max_count:
         raise HTTPException(status.HTTP_409_CONFLICT,
                             f"Mỗi hồ sơ chỉ được tối đa {limits.max_count} CV, hãy xóa bớt CV cũ")
 
@@ -124,6 +138,7 @@ def upload_cv(db: Session, profile: CandidateProfile, file: UploadFile) -> CV:
 
     size = 0
     head = b""
+    old_path = None
     try:
         with open(path, "wb") as out:
             while chunk := file.file.read(CHUNK_SIZE):
@@ -144,8 +159,11 @@ def upload_cv(db: Session, profile: CandidateProfile, file: UploadFile) -> CV:
 
         cv = CV(candidate_profile_id=profile.id, file_name=file_name,
                 file_url=f"{CV_SUBDIR}/{stored_name}", file_size=size,
-                is_default=count == 0)  # CV đầu tiên tự thành mặc định
+                is_default=old.is_default if old is not None else count == 0,  # CV đầu tiên tự thành mặc định
+                builder_data=builder_data)
         db.add(cv)
+        if old is not None:
+            old_path = _retire(db, old)
         db.commit()
     except BaseException:
         db.rollback()
@@ -154,8 +172,33 @@ def upload_cv(db: Session, profile: CandidateProfile, file: UploadFile) -> CV:
         except FileNotFoundError:
             pass
         raise
+    if old_path:
+        try:
+            os.remove(old_path)
+        except FileNotFoundError:
+            pass
     db.refresh(cv)
     return cv
+
+
+def get_builder_cv_or_404(db: Session, profile: CandidateProfile, cv_id: int) -> CV:
+    cv = _active_cvs(db, profile).filter(CV.id == cv_id).options(undefer(CV.builder_data)).first()
+    if cv is None or cv.builder_data is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Không tìm thấy CV tạo trực tuyến để chỉnh sửa")
+    return cv
+
+
+def _retire(db: Session, cv: CV) -> str | None:
+    """Bỏ CV khỏi danh sách. CV đã gắn đơn ứng tuyển thì xóa mềm và giữ tệp (BR-15);
+    ngược lại xóa hẳn, trả về đường dẫn tệp để xóa sau khi commit."""
+    used = db.query(Application.id).filter(Application.cv_id == cv.id).with_for_update().first() is not None
+    if used:
+        cv.deleted_at = datetime.now(timezone.utc).replace(tzinfo=None)
+        cv.is_default = False
+        return None
+    path = _abs_path(cv)
+    db.delete(cv)
+    return path
 
 
 def set_default(db: Session, profile: CandidateProfile, cv_id: int) -> CV:
@@ -173,14 +216,7 @@ def delete_cv(db: Session, profile: CandidateProfile, cv_id: int) -> None:
     db.query(CandidateProfile).filter(CandidateProfile.id == profile.id).with_for_update().one()
     cv = get_cv_or_404(db, profile, cv_id)
     was_default = cv.is_default
-    used = db.query(Application.id).filter(Application.cv_id == cv.id).with_for_update().first() is not None
-    path = _abs_path(cv)
-
-    if used:
-        cv.deleted_at = datetime.now(timezone.utc).replace(tzinfo=None)
-        cv.is_default = False
-    else:
-        db.delete(cv)
+    path = _retire(db, cv)
     db.flush()
 
     if was_default:  # chuyển mặc định sang CV mới nhất còn lại
@@ -189,7 +225,7 @@ def delete_cv(db: Session, profile: CandidateProfile, cv_id: int) -> None:
             nxt.is_default = True
     db.commit()
 
-    if not used:
+    if path:
         try:
             os.remove(path)
         except FileNotFoundError:

@@ -1,5 +1,6 @@
 """Module M1: Hồ sơ ứng viên, học vấn, kinh nghiệm, kỹ năng, CV."""
-from sqlalchemy import Column, Date, DateTime, Integer, String, Text, UniqueConstraint
+from sqlalchemy import JSON, Column, Date, DateTime, Integer, String, Text, UniqueConstraint
+from sqlalchemy.orm import column_property, deferred
 from src.models.base import BaseModel, fk, flag, in_check
 from src.models.enums import GENDERS, SKILL_LEVELS, VISIBILITIES
 
@@ -66,4 +67,10 @@ class CV(BaseModel):
     is_default = flag(False)
     # Bổ sung so với ERD: CV đã gắn với đơn ứng tuyển thì không xóa cứng (BR-15), dùng xóa mềm.
     deleted_at = Column(DateTime)
+    # Nội dung CV tạo bằng trình tạo CV trực tuyến (NULL với CV tải tệp lên). Chỉ nạp khi mở trình chỉnh sửa.
+    builder_data = deferred(Column(JSON(none_as_null=True)))
     # Giới hạn tối đa 5 CV/hồ sơ do tầng ứng dụng kiểm soát.
+
+
+# Tính bằng SQL để danh sách CV biết CV nào sửa được mà không phải nạp cả builder_data.
+CV.has_builder_data = column_property(CV.__table__.c.builder_data.isnot(None))

@@ -26,6 +26,9 @@ class Settings(BaseSettings):
     SMTP_STARTTLS: bool = True
     SMTP_SSL: bool = False
     FRONTEND_URL: str = "http://localhost:5500"
+    # Tạo CV bằng AI (Claude). Để trống khóa thì chỉ tắt nút AI, trình tạo CV vẫn dùng bình thường.
+    ANTHROPIC_API_KEY: str = ""
+    AI_CV_MODEL: str = "claude-opus-5-5"
 
     @field_validator("SECRET_KEY")
     @classmethod

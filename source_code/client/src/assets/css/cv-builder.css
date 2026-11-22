@@ -1,0 +1,167 @@
+/* Trình tạo CV: bố cục trang chỉnh sửa và 3 mẫu CV khổ A4 (794 x 1123 px ở 96 dpi).
+   Mẫu CV chỉ dùng CSS mà html2canvas vẽ lại được (không object-fit, không hàm màu mới). */
+
+/* ---------- Thanh công cụ ---------- */
+.cvb-section { padding-top: 28px; }
+.cvb-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px 24px; flex-wrap: wrap; padding-bottom: 20px; border-bottom: 1px solid var(--v-line); margin-bottom: 20px; }
+.cvb-templates { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.cvb-templates .label { font-size: 12px; font-weight: 500; letter-spacing: 1.5px; text-transform: uppercase; color: var(--v-muted); margin-right: 6px; }
+.cvb-template { display: inline-flex; align-items: center; gap: 10px; height: 44px; padding: 0 16px; background: var(--v-white); border: 1px solid var(--v-line-input); font-size: 13px; color: var(--v-ink); }
+.cvb-template:hover { border-color: var(--v-blue); }
+.cvb-template .swatch { width: 14px; height: 14px; border-radius: 50%; background: var(--swatch); box-shadow: inset 0 0 0 2px rgba(255, 255, 255, .5); }
+.cvb-template[aria-pressed="true"] { border: 2px solid var(--v-blue); padding: 0 15px; background: var(--v-cream); font-weight: 500; }
+.cvb-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.cvb-jump { display: none; }
+.cvb-status:empty { display: none; }
+.cvb-status .v-note { margin-bottom: 20px; }
+.cvb-status .v-link { white-space: nowrap; }
+
+/* ---------- Bố cục: form bên trái, xem trước bên phải ---------- */
+.cvb-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr); gap: 32px; align-items: start; }
+.cvb-card { padding: 24px 24px 6px; }
+.cvb-card + .cvb-card { margin-top: 20px; }
+.cvb-card-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 18px; }
+.cvb-card-head h2 { font-size: 17px; font-weight: 500; }
+.cvb-card-head small { font-size: 12px; color: var(--v-muted); white-space: nowrap; }
+.cvb-hint { display: block; margin-top: 6px; font-size: 12px; font-weight: 400; color: var(--v-muted); }
+.cvb-hint.is-over { color: var(--v-danger); }
+.cvb-form .v-field textarea { min-height: 96px; }
+
+.cvb-photo { display: flex; gap: 20px; align-items: center; margin-bottom: 22px; }
+.cvb-photo-box { width: 90px; height: 120px; flex: none; display: grid; place-items: center; overflow: hidden; background: var(--v-bg); border: 1px dashed var(--v-line-warm); color: var(--v-muted); font-size: 12px; text-align: center; }
+.cvb-photo-box img { width: 100%; height: 100%; object-fit: cover; }
+.cvb-photo-title { display: block; font-size: 14px; font-weight: 500; }
+.cvb-photo p { margin-top: 4px; }
+.cvb-photo-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+
+.cvb-entry { background: var(--v-bg); border: 1px solid var(--v-line-card); padding: 14px 16px 0; margin-bottom: 14px; }
+.cvb-entry-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px; font-size: 13px; font-weight: 500; color: var(--v-muted); }
+.cvb-entry-tools { display: flex; gap: 6px; }
+.cvb-icon-btn { width: 32px; height: 32px; display: grid; place-items: center; background: var(--v-white); border: 1px solid var(--v-line-card); color: var(--v-blue); }
+.cvb-icon-btn:hover:not(:disabled) { border-color: var(--v-blue); }
+.cvb-icon-btn.is-danger { color: var(--v-danger); }
+.cvb-icon-btn:disabled { opacity: .35; cursor: default; }
+.cvb-entry .v-field { margin-bottom: 14px; }
+.cvb-entry .v-field input { height: 46px; font-size: 14px; }
+.cvb-entry .v-field textarea { font-size: 14px; }
+.cvb-add { margin-bottom: 18px; }
+
+.cvb-preview { position: sticky; top: calc(var(--v-header-h) + 20px); min-width: 0; }
+.cvb-preview-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 10px; font-size: 13px; color: var(--v-muted); }
+.cvb-preview-head strong { font-size: 15px; font-weight: 500; color: var(--v-ink); }
+.cvb-stage { background: #dfe6e3; padding: 20px; max-height: calc(100vh - var(--v-header-h) - 92px); overflow: auto; }
+.cvb-frame { position: relative; margin: 0 auto; overflow: hidden; }
+.cvb-scale { position: absolute; left: 0; top: 0; width: 794px; transform-origin: 0 0; }
+.cvb-scale .cv-sheet { box-shadow: 0 12px 32px rgba(18, 61, 88, .16); }
+
+/* ---------- Hộp thoại AI ---------- */
+.cvb-ai-modal { width: min(760px, 100%); }
+.cvb-ai .v-field textarea { min-height: 230px; font-size: 14px; }
+.cvb-ai-count { margin: -12px 0 14px; text-align: right; font-size: 12px; color: var(--v-muted); }
+.cvb-ai-privacy { font-size: 12px; color: var(--v-muted); margin-bottom: 16px; }
+.cvb-ai-actions { display: flex; justify-content: flex-end; gap: 12px; flex-wrap: wrap; }
+
+@media (max-width: 1100px) {
+    .cvb-layout { grid-template-columns: minmax(0, 1fr); }
+    .cvb-preview { position: static; scroll-margin-top: calc(var(--v-header-h) + 12px); }
+    .cvb-stage { max-height: none; }
+    .cvb-jump { display: inline-flex; align-items: center; height: 44px; }
+}
+@media (max-width: 640px) {
+    .cvb-actions { width: 100%; }
+    .cvb-actions .v-btn { flex: 1 1 auto; }
+    .cvb-templates .label { width: 100%; }
+    .cvb-template { flex: 1 1 0; justify-content: center; padding: 0 10px; }
+    .cvb-template[aria-pressed="true"] { padding: 0 9px; }
+    .cvb-card { padding: 20px 16px 4px; }
+    .cvb-stage { padding: 10px; }
+    .cvb-photo { align-items: flex-start; }
+}
+
+/* ---------- Trang CV dùng chung cho mọi mẫu ---------- */
+.cv-export-host { position: absolute; left: 0; top: 0; width: 794px; opacity: 0; pointer-events: none; z-index: -1; }
+.cv-sheet { position: relative; width: 794px; min-height: 1123px; overflow: hidden; background: #ffffff; color: #333d47; font-family: "Inter", Arial, sans-serif; font-size: 13.5px; line-height: 1.55; text-align: left; overflow-wrap: anywhere; }
+.cv-sheet :where(p, h2, ul, li) { margin: 0; padding: 0; list-style: none; }
+.cv-flow { position: relative; }
+.cv-spacer { display: block; }
+.cv-photo { display: block; flex: none; }
+.cv-head-main { min-width: 0; }
+.cv-name { font-weight: 700; line-height: 1.2; }
+.cv-sheet .cv-name.is-placeholder, .cv-sheet .cv-role.is-placeholder { color: #b9c2c6; }
+.cv-contact-key { color: #8a979b; margin-right: 6px; }
+.cv-hint { margin: 28px 0 0; padding: 22px 20px; border: 1px dashed #c9d3d0; color: #8a959b; font-size: 13px; text-align: center; }
+.cv-text + .cv-text { margin-top: 6px; }
+.cv-entry + .cv-entry { margin-top: 15px; }
+.cv-entry-head { display: flex; gap: 16px; }
+.cv-entry-titles { flex: 1; min-width: 0; }
+.cv-entry-title { font-size: 14px; font-weight: 600; color: #1f2a33; }
+.cv-entry-sub { font-size: 13px; }
+.cv-entry-date { font-size: 12.5px; white-space: nowrap; }
+.cv-bullets { margin-top: 5px; }
+.cv-bullets li, .cv-list li { position: relative; padding-left: 16px; }
+.cv-bullets li + li, .cv-list li + li { margin-top: 3px; }
+.cv-bullets li::before, .cv-list li::before { content: ""; position: absolute; left: 2px; top: 10px; width: 5px; height: 5px; border-radius: 50%; background: #8a979b; }
+.cv-page-break { position: absolute; left: 0; right: 0; height: 0; border-top: 2px dashed rgba(26, 82, 118, .4); z-index: 2; }
+.cv-page-break span { position: absolute; right: 12px; top: 6px; padding: 1px 8px; background: #ffffff; color: #1a5276; font-size: 11px; font-weight: 500; }
+
+/* ---------- Thanh lịch ---------- */
+.cv-elegant .cv-topbar { height: 10px; background: #214e53; }
+.cv-elegant .cv-flow { padding: 44px 60px 48px; }
+.cv-elegant .cv-head { display: flex; align-items: center; gap: 32px; }
+.cv-elegant .cv-head-main { flex: 1; }
+.cv-elegant .cv-name { font-size: 32px; color: #214e53; letter-spacing: .5px; text-transform: uppercase; }
+.cv-elegant .cv-role { margin-top: 8px; font-size: 13px; font-weight: 500; letter-spacing: 2.4px; text-transform: uppercase; color: #5b6b6e; }
+.cv-elegant .cv-contact { display: flex; flex-wrap: wrap; gap: 6px 24px; margin-top: 18px; font-size: 12.5px; color: #3f4b52; }
+.cv-elegant .cv-photo { width: 118px; height: 157px; border: 4px solid #e4ece9; }
+.cv-elegant .cv-rule { height: 1px; margin: 26px 0 4px; background: #cfdad6; }
+.cv-elegant .cv-section { margin-top: 24px; }
+.cv-elegant .cv-section-title { margin-bottom: 12px; padding-bottom: 7px; border-bottom: 1px solid #cfdad6; font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #214e53; }
+.cv-elegant .cv-entry-sub { font-weight: 500; color: #214e53; }
+.cv-elegant .cv-entry-date { color: #6b787c; }
+.cv-elegant .cv-bullets li::before, .cv-elegant .cv-list li::before { background: #214e53; }
+.cv-elegant .cv-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.cv-elegant .cv-tag { padding: 4px 12px; background: #e6eeeb; color: #214e53; font-size: 12.5px; }
+
+/* ---------- Hiện đại ---------- */
+.cv-modern .cv-side-bg { position: absolute; left: 0; top: 0; bottom: 0; width: 270px; background: #1a5276; }
+.cv-modern .cv-columns { position: relative; display: flex; align-items: flex-start; }
+.cv-modern .cv-side { width: 270px; flex: none; padding: 44px 28px 40px 30px; color: #dfeaf1; font-size: 12.5px; }
+.cv-modern .cv-main { flex: 1; min-width: 0; padding: 48px 46px 44px 40px; }
+.cv-modern .cv-side .cv-photo { width: 150px; height: 200px; margin: 0 auto 30px; border: 4px solid rgba(255, 255, 255, .9); }
+.cv-modern .cv-side .cv-section + .cv-section { margin-top: 26px; }
+.cv-modern .cv-side .cv-section-title { margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid rgba(228, 190, 114, .45); font-size: 12px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: #e4be72; }
+.cv-modern .cv-side .cv-list li::before { top: 9px; border-radius: 0; background: #e4be72; }
+.cv-modern .cv-contact-list li { padding-left: 0; }
+.cv-modern .cv-contact-list li::before { display: none; }
+.cv-modern .cv-contact-list li + li { margin-top: 10px; }
+.cv-modern .cv-contact-list .cv-contact-key { display: block; margin: 0 0 2px; font-size: 10.5px; letter-spacing: 1px; text-transform: uppercase; color: #9fbdd0; }
+.cv-modern .cv-contact-value { color: #ffffff; }
+.cv-modern .cv-name { font-size: 32px; color: #1a5276; }
+.cv-modern .cv-role { margin-top: 8px; font-size: 13px; font-weight: 600; letter-spacing: 2.4px; text-transform: uppercase; color: #1a5276; }
+.cv-modern .cv-head::after { content: ""; display: block; width: 56px; height: 3px; margin-top: 18px; background: #e4be72; }
+.cv-modern .cv-main .cv-section { margin-top: 26px; }
+.cv-modern .cv-main .cv-section-title { margin-bottom: 12px; padding-bottom: 7px; border-bottom: 1px solid #d3dce2; font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #1a5276; }
+.cv-modern .cv-main .cv-entry-head { display: block; }
+.cv-modern .cv-main .cv-entry-date { margin-bottom: 2px; font-size: 11.5px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: #89672d; }
+.cv-modern .cv-main .cv-entry-date:empty { display: none; }
+.cv-modern .cv-entry-sub { font-weight: 500; color: #1a5276; }
+.cv-modern .cv-main .cv-bullets li::before { background: #1a5276; }
+
+/* ---------- Tối giản ---------- */
+.cv-minimal .cv-flow { padding: 56px 62px 52px; }
+.cv-minimal .cv-head { display: flex; align-items: flex-start; gap: 28px; }
+.cv-minimal .cv-head-main { flex: 1; }
+.cv-minimal .cv-name { font-size: 34px; font-weight: 500; letter-spacing: .3px; color: #202734; }
+.cv-minimal .cv-role { margin-top: 8px; font-size: 12.5px; font-weight: 500; letter-spacing: 3px; text-transform: uppercase; color: #876b40; }
+.cv-minimal .cv-contact { display: flex; flex-wrap: wrap; gap: 4px 22px; margin-top: 16px; font-size: 12.5px; color: #4d5660; }
+.cv-minimal .cv-photo { width: 92px; height: 123px; }
+.cv-minimal .cv-rule { height: 2px; margin: 24px 0 6px; background: #876b40; }
+.cv-minimal .cv-section { margin-top: 26px; }
+.cv-minimal .cv-section-title { display: flex; align-items: baseline; gap: 14px; margin-bottom: 12px; font-size: 12.5px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: #876b40; }
+.cv-minimal .cv-num { width: 118px; flex: none; letter-spacing: 1px; }
+.cv-minimal .cv-entry-head { gap: 0; }
+.cv-minimal .cv-entry-date { width: 132px; flex: none; padding-right: 16px; white-space: normal; color: #876b40; }
+.cv-minimal .cv-entry-title { font-weight: 500; color: #202734; }
+.cv-minimal .cv-entry-sub { color: #5b6470; }
+.cv-minimal .cv-bullets, .cv-minimal .cv-section > .cv-text, .cv-minimal .cv-section > .cv-list { margin-left: 132px; }
+.cv-minimal .cv-bullets li::before, .cv-minimal .cv-list li::before { background: #876b40; }

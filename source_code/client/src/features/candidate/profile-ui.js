@@ -187,9 +187,11 @@
         box.appendChild(list);
         function paint() {
             V.clear(list);
-            if (!cvData.items.length) V.empty(list, "Bạn chưa có CV nào", "Tải CV lên để sẵn sàng ứng tuyển chỉ với một lần bấm.");
+            if (!cvData.items.length) V.empty(list, "Bạn chưa có CV nào", "Tải CV lên hoặc tạo CV trực tuyến để sẵn sàng ứng tuyển chỉ với một lần bấm.");
             cvData.items.forEach(function (cv) {
                 var actions = h("div", { class: "v-row-actions" },
+                    cv.has_builder_data && h("a", { class: "v-btn v-btn-outline v-btn-xs", href: V.url("pages/cv-builder.html") + "?cv=" + encodeURIComponent(cv.id),
+                        "aria-label": "Chỉnh sửa " + cv.file_name }, V.icon("edit", "v-icon-sm"), "Chỉnh sửa"),
                     h("button", { type: "button", class: "v-btn v-btn-outline v-btn-xs", "aria-label": "Tải xuống " + cv.file_name, onclick: function () {
                         V.download("/candidates/me/cvs/" + cv.id + "/download", cv.file_name).catch(function (e) { V.note(message, e.message, "error"); });
                     } }, V.icon("download", "v-icon-sm"), "Tải xuống"),
@@ -204,11 +206,14 @@
                     } }, V.icon("trash", "v-icon-sm"), "Xóa"));
                 list.appendChild(h("article", { class: "v-row", style: "grid-template-columns:52px minmax(0,1fr) auto auto" },
                     h("span", { class: "v-logo v-logo-sm", style: "color:var(--v-blue)" }, V.icon("file", "v-icon-lg")),
-                    h("div", {}, h("h3", { text: cv.file_name }), h("p", { class: "sub", text: Math.max(1, Math.round(cv.file_size / 1024)) + " KB · tải lên " + V.ago(cv.created_at).toLowerCase() })),
+                    h("div", {}, h("h3", { text: cv.file_name }), h("p", { class: "sub", text: (cv.has_builder_data ? "Tạo trên Vieco · " : "") +
+                        Math.max(1, Math.round(cv.file_size / 1024)) + " KB · " + (cv.has_builder_data ? "cập nhật " : "tải lên ") + V.ago(cv.created_at).toLowerCase() })),
                     cv.is_default ? h("span", { class: "v-badge v-badge-sand", text: "Mặc định" }) : h("span", {}),
                     actions));
             });
-            list.appendChild(h("div", { class: "v-mt-3", style: "max-width:320px" }, uploadControl(paint, message)));
+            list.appendChild(h("div", { class: "v-flex v-mt-3", style: "align-items:stretch" },
+                h("div", { style: "width:min(320px,100%)" }, uploadControl(paint, message)),
+                h("a", { class: "v-btn v-btn-primary v-btn-sm", href: V.url("pages/cv-builder.html") }, "Tạo CV trực tuyến", V.icon("edit"))));
         }
         paint();
     }
@@ -226,6 +231,7 @@
             : h("p", { class: "v-small v-muted v-mb-2", text: "Bạn chưa có CV. Tải CV lên để bắt đầu ứng tuyển." }));
         sideCv.appendChild(message);
         uploadControl(function () { if (currentTab() === "cvs") renderTab(); }, message).forEach(function (node) { sideCv.appendChild(node); });
+        sideCv.appendChild(h("a", { class: "v-link v-small", style: "display:inline-block;margin-top:14px", href: V.url("pages/cv-builder.html"), text: "Hoặc tạo CV trực tuyến từ mẫu có sẵn ↗" }));
     }
 
     // ---------- Cài đặt ----------
