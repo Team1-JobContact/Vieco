@@ -27,10 +27,10 @@
     --vieco-warning: var(--v-gold-ink);
     --vieco-warning-bg: #f6ecd6;
     --vieco-warning-border: var(--v-sand);
-    --vieco-radius-sm: 2px;
-    --vieco-radius-md: 2px;
-    --vieco-radius-lg: 2px;
-    --vieco-radius-xl: 2px;
+    --vieco-radius-sm: 8px;
+    --vieco-radius-md: var(--v-radius-sm);
+    --vieco-radius-lg: var(--v-radius);
+    --vieco-radius-xl: var(--v-radius-lg);
     --vieco-shadow-sm: none;
     --vieco-shadow-md: none;
     /* auth.css */
@@ -53,9 +53,9 @@
 .v-sync > .navbar, .v-sync > .site-footer { display: none !important; }
 body.v-sync { background: var(--v-bg); color: var(--v-ink); font-size: 15px; }
 
-/* Góc vuông và không đổ bóng như các trang còn lại.
+/* Không đổ bóng như các trang còn lại; góc bo theo các biến --v-radius-* (đặt riêng ở phần nhà tuyển dụng bên dưới).
    Trang đăng nhập / đăng ký có phong cách bo tròn riêng trong auth-modern.css nên không áp dụng ở đây. */
-.v-sync:not(.auth-page) main *, .v-sync:not(.auth-page) main *::before, .v-sync:not(.auth-page) main *::after { border-radius: 2px !important; box-shadow: none !important; }
+.v-sync:not(.auth-page) main *, .v-sync:not(.auth-page) main *::before, .v-sync:not(.auth-page) main *::after { box-shadow: none !important; }
 .v-sync:not(.auth-page) main .spinner, .v-sync:not(.auth-page) main .password-rule-dot, .v-sync:not(.auth-page) main .session-avatar,
 .v-sync:not(.auth-page) main .status-pill::before, .v-sync:not(.auth-page) main .hero-caption::before, .v-sync:not(.auth-page) main input[type="radio"] { border-radius: 50% !important; }
 .v-sync main :focus-visible { outline: 2px solid var(--v-blue); outline-offset: 2px; }
@@ -102,7 +102,7 @@ body.auth-page.v-sync { background: var(--v-cream); }
 .v-sync .auth-alert-action { color: var(--v-blue); }
 
 /* ---------- Nút dùng chung của các trang cũ ---------- */
-.v-sync main .btn { height: 44px; padding: 0 20px; font-size: 13px; font-weight: 500; border: 1px solid transparent; display: inline-flex; align-items: center; justify-content: center; transform: none; }
+.v-sync main .btn { height: 44px; padding: 0 20px; font-size: 13px; font-weight: 500; border: 1px solid transparent; border-radius: var(--v-radius-sm); display: inline-flex; align-items: center; justify-content: center; transform: none; }
 .v-sync main .btn-primary { background: var(--v-blue); color: var(--v-bg); border-color: var(--v-blue); }
 .v-sync main .btn-primary:hover:not(:disabled) { background: var(--v-blue-hover); }
 .v-sync main .btn-outline { background: transparent; color: var(--v-blue); border-color: var(--v-blue); }
@@ -111,7 +111,7 @@ body.auth-page.v-sync { background: var(--v-cream); }
 
 /* ---------- Không gian nhà tuyển dụng: hồ sơ công ty và tin tuyển dụng ---------- */
 .v-sync .employer-main { max-width: 1440px; padding: 0 var(--v-gutter) 72px; }
-.v-sync .page-heading { display: block; margin: 0 calc(-1 * var(--v-gutter)) 40px; padding: 48px var(--v-gutter) 52px; background: var(--v-cream); border: 0; }
+.v-sync .page-heading { display: block; margin: 0 calc(-1 * var(--v-gutter)) 40px; padding: 48px var(--v-gutter) 52px; background: var(--v-cream); border: 0; border-radius: 0; }
 .v-sync .hero-art { display: none; }
 .v-sync .eyebrow { font-size: 11px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; color: var(--v-gold-ink); margin-bottom: 10px; }
 .v-sync .eyebrow::before { display: none; }
@@ -121,14 +121,14 @@ body.auth-page.v-sync { background: var(--v-cream); }
 .v-sync .hero-description { font-size: 15px; line-height: 1.6; color: var(--v-muted); margin-top: 12px; }
 .v-sync .hero-caption { font-size: 12px; color: var(--v-muted); margin-top: 16px; }
 .v-sync .hero-caption::before { background: var(--v-gold); }
-.v-sync .workspace-tabs { display: flex; gap: 40px; padding: 0; background: none; border: 0; border-bottom: 1px solid var(--v-line); width: 100%; margin-bottom: 32px; }
-.v-sync .workspace-tab { padding: 14px 0 16px; background: none; border: 0; border-bottom: 2px solid transparent; margin-bottom: -1px; font-size: 14px; font-weight: 400; color: var(--v-muted); }
+.v-sync .workspace-tabs { display: flex; gap: 40px; padding: 0; background: none; border: 0; border-radius: 0; border-bottom: 1px solid var(--v-line); width: 100%; margin-bottom: 32px; }
+.v-sync .workspace-tab { padding: 14px 0 16px; background: none; border: 0; border-radius: 0; border-bottom: 2px solid transparent; margin-bottom: -1px; font-size: 14px; font-weight: 400; color: var(--v-muted); }
 .v-sync .workspace-tab[aria-current="page"] { background: none; color: var(--v-blue); font-weight: 500; border-bottom-color: var(--v-blue); }
-.v-sync .form-card { background: var(--v-white); border: 1px solid var(--v-line-card); }
+.v-sync .form-card { background: var(--v-white); border: 1px solid var(--v-line-card); border-radius: var(--v-radius); }
 .v-sync .card-heading h2 { font-size: 22px; font-weight: 500; letter-spacing: 0; color: var(--v-ink); }
 .v-sync .field label { font-size: 13px; font-weight: 500; color: var(--v-ink); }
 .v-sync .field label span { color: var(--v-danger); }
-.v-sync .field input, .v-sync .field select, .v-sync .field textarea { background-color: var(--v-white); border: 1px solid var(--v-line-input); color: var(--v-ink); font-size: 15px; }
+.v-sync .field input, .v-sync .field select, .v-sync .field textarea { background-color: var(--v-white); border: 1px solid var(--v-line-input); border-radius: var(--v-radius-sm); color: var(--v-ink); font-size: 15px; }
 .v-sync .field input, .v-sync .field select { min-height: 48px; }
 .v-sync .field input:focus, .v-sync .field select:focus, .v-sync .field textarea:focus { border-color: var(--v-blue); outline: 1px solid var(--v-blue); background-color: var(--v-white); }
 .v-sync fieldset:disabled input, .v-sync fieldset:disabled select, .v-sync fieldset:disabled textarea { background-color: var(--v-bg); color: var(--v-muted); }
@@ -143,7 +143,7 @@ body.auth-page.v-sync { background: var(--v-cream); }
 .v-sync .notice.error { background: var(--v-danger-bg); border-left-color: var(--v-danger); color: #8a2228; }
 .v-sync .notice.warning { background: #f6ecd6; border-left-color: var(--v-gold-ink); color: #5f4a22; }
 .v-sync .notice.success { background: var(--v-success-bg); border-left-color: var(--v-success); color: #24523c; }
-.v-sync .guide-card { background: var(--v-blue); border: 0; color: #d5e2e9; }
+.v-sync .guide-card { background: var(--v-blue); border: 0; border-radius: var(--v-radius); color: #d5e2e9; }
 .v-sync .guide-card::after { display: none; }
 .v-sync .guide-card h3 { font-family: inherit; font-size: 22px; font-weight: 500; color: var(--v-bg); }
 .v-sync .guide-card p, .v-sync .guide-card ol { color: #d5e2e9; }
