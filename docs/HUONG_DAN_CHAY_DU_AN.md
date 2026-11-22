@@ -56,6 +56,8 @@ SMTP là tùy chọn. Giữ SMTP_HOST trống để chạy chức năng tuyển 
 
 Tạo CV bằng AI cũng là tùy chọn. Để bật nút **Tạo bằng AI** trong trang tạo CV, đặt `ANTHROPIC_API_KEY` (khóa Claude API tạo tại https://console.anthropic.com) trong `.env`, có thể đổi model bằng `AI_CV_MODEL` (mặc định `claude-opus-5-5`), rồi khởi động lại backend. Để trống thì trình tạo CV, tải PDF và lưu CV vẫn chạy, chỉ nút AI báo chưa bật. Không commit khóa API lên GitHub.
 
+Cùng khóa này bật **bong bóng chat Trợ lý Vieco** ở góc dưới bên phải mọi trang (trừ trang quản trị). Model của chatbot đặt bằng `AI_CHAT_MODEL` (mặc định `claude-haiku-5-5`). Không có khóa thì bong bóng chat tự ẩn.
+
 ## 3. Tạo database, migration và seed
 
 Lệnh sau dùng đúng vị trí MySQL 8.0 đã tìm thấy trên máy. Nhập mật khẩu MySQL khi được hỏi:

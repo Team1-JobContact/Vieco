@@ -12,6 +12,7 @@ from src.routes.admin import router as admin_router
 from src.routes.auth import router as auth_router
 from src.routes.candidate import router as candidate_router
 from src.routes.catalog import router as catalog_router
+from src.routes.chat import router as chat_router
 from src.routes.company import admin_router as admin_company_router
 from src.routes.company import employer_router as employer_company_router
 from src.routes.company import media_router
@@ -37,6 +38,7 @@ app.include_router(admin_router)
 app.include_router(auth_router)
 app.include_router(candidate_router)
 app.include_router(catalog_router)
+app.include_router(chat_router)
 app.include_router(employer_company_router)
 app.include_router(admin_company_router)
 app.include_router(media_router)

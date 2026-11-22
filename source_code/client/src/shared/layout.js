@@ -65,6 +65,8 @@
         up: '<path d="m6 15 6-6 6 6"/>',
         down: '<path d="m6 9 6 6 6-6"/>',
         spark: '<path d="M12 3.500 13.900 9 19.500 11 13.900 13 12 18.500 10.100 13 4.500 11 10.100 9 12 3.500Z"/><path d="M18.500 3v3M17 4.500h3"/>',
+        chat: '<path d="M4 5h16v11H10l-6 4V5Z"/><path d="M8.500 10.500h.01M12 10.500h.01M15.500 10.500h.01"/>',
+        refresh: '<path d="M19 12a7 7 0 1 1-2.100-5M19 4.500V8h-3.500"/>',
         shield: '<path d="M12 3 4 6v6c0 5 3.500 8 8 9 4.500-1 8-4 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/>'
     };
     function icon(name, cls) {
@@ -793,10 +795,20 @@
                 h("div", { class: "v-footer-bottom" }, h("span", { text: "© 2026 Vieco. Chạm cơ hội, mở tương lai." }), h("span", { text: "Tiếng Việt" })))));
     }
 
+    /** Bong bóng chat Trợ lý Vieco: nạp riêng để không làm chậm trang; không hiện ở trang quản trị. */
+    function mountChat() {
+        if (/\/admin\.html$/.test(window.location.pathname) || document.getElementById("v-chat-script")) return;
+        document.head.appendChild(h("link", { rel: "stylesheet", href: url("src/assets/css/chat-widget.css") }));
+        var chat = h("script", { id: "v-chat-script", src: url("src/features/chat/chat-widget.js") });
+        chat.async = true;
+        document.body.appendChild(chat);
+    }
+
     function mount() {
         var header = document.getElementById("v-header"), footer = document.getElementById("v-footer");
         if (header) renderHeader(header);
         if (footer) renderFooter(footer);
+        if (footer) mountChat();
     }
 
     window.Vieco = {
