@@ -60,6 +60,19 @@ def get_current_user(
     return user
 
 
+def get_optional_user(
+    credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
+    db: Session = Depends(get_db),
+) -> User | None:
+    """Cho API công khai: trả về User nếu token hợp lệ, ngược lại coi là khách (None) thay vì báo 401."""
+    if credentials is None:
+        return None
+    try:
+        return get_current_user(get_token_payload(credentials, db), db)
+    except HTTPException:
+        return None
+
+
 def require_roles(*roles: str):
     """Phân quyền: chỉ cho phép các vai trò chỉ định truy cập, ví dụ require_roles("ADMIN")."""
     def checker(user: User = Depends(get_current_user)) -> User:

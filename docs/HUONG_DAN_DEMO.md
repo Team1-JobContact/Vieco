@@ -55,6 +55,7 @@ Giao diện dựng theo thiết kế Figma "Vieco • Desktop". Mọi trang dùn
 | 10 | Ứng viên | Thử tải tệp không phải PDF/DOC/DOCX hoặc lớn hơn 5 MB | Bị từ chối kèm thông báo lỗi |
 | 10a | Ứng viên | Ở Trang chủ, mục Top CV nổi bật, bấm Sử dụng mẫu; nhập thông tin, thêm ảnh, đổi mẫu, Tải PDF rồi Lưu vào CV của tôi | Bản xem trước cập nhật khi gõ và tự chia trang A4; tệp PDF tải về máy; CV hiện trong mục CV của tôi với nút Chỉnh sửa và chọn được khi ứng tuyển |
 | 10b | Ứng viên | Trong trang tạo CV bấm Tạo bằng AI, nhập thông tin tự do rồi bấm Tạo CV | Có `ANTHROPIC_API_KEY`: biểu mẫu và bản xem trước được điền sẵn để chỉnh lại. Chưa có khóa: báo tính năng AI chưa bật |
+| 10c | Khách | Bấm bong bóng chat ở góc dưới bên phải, hỏi "Có việc IT nào ở TP.HCM không?", bấm vào một tin trong câu trả lời | Trợ lý trả lời bằng tin đang tuyển thật kèm liên kết; sang trang chi tiết việc, khung chat vẫn mở và giữ lịch sử. Chưa có `ANTHROPIC_API_KEY` thì không hiện bong bóng chat |
 | 11 | Nhà tuyển dụng | Mở `pages/employer-jobs.html`, bấm Ứng viên, Xem hồ sơ, tải CV, Mời phỏng vấn | Đơn tự chuyển Đang xem xét khi mở; sau đó chuyển Mời phỏng vấn |
 | 12 | Ứng viên | Mở Hồ sơ của tôi | Chuông thông báo có số chưa đọc; đơn hiển thị trạng thái mới và lịch sử xử lý |
 | 13 | Ứng viên | Ứng tuyển một tin khác rồi rút đơn | Đơn chuyển Đã rút; đơn đã được mời phỏng vấn không còn nút rút |
@@ -89,6 +90,11 @@ Test giao diện chạy bằng Node.js và jsdom.
 - CV tạo trực tuyến được lưu thành PDF dạng ảnh (mỗi trang A4 là một ảnh nét gấp đôi), nên không bôi đen hay sao chép được chữ trong PDF. Nội dung gốc được lưu kèm để mở lại chỉnh sửa. Cập nhật một CV đã dùng để ứng tuyển sẽ tạo bản mới; đơn đã nộp vẫn giữ bản cũ.
 - Tạo CV bằng AI cần `ANTHROPIC_API_KEY` trong `server/.env` (tùy chọn `AI_CV_MODEL`, mặc định `claude-opus-5-5`). Mỗi tài khoản tối đa 10 lượt mỗi giờ. Nội dung người dùng nhập được gửi tới Claude của Anthropic. AI chỉ sắp xếp và diễn đạt lại thông tin được nhập, người dùng cần đọc lại trước khi lưu.
 - Trang tạo CV không có trong bản Figma; bố cục dùng chung màu, chữ và kiểu khối của các trang khác.
+- Bong bóng chat Trợ lý Vieco dùng `ANTHROPIC_API_KEY` (model `AI_CHAT_MODEL`, mặc định `claude-haiku-5-5`):
+  - Trợ lý chỉ đọc dữ liệu công khai: tin đang tuyển, công ty đã duyệt và các trang Giới thiệu, Điều khoản, FAQ. Trợ lý không ứng tuyển hay sửa dữ liệu thay người dùng.
+  - Lịch sử trò chuyện chỉ lưu trong trình duyệt, tối đa 7 ngày, tách theo tài khoản. Máy chủ không lưu tin nhắn.
+  - Giới hạn mỗi giờ: khách 20 câu theo địa chỉ IP, người đã đăng nhập 40 câu, toàn hệ thống 600 câu. Bộ đếm nằm trong bộ nhớ nên khởi động lại máy chủ thì đếm lại.
+  - Không hiện ở trang quản trị và không có trong bản Figma.
 - Form Liên hệ chưa có API tiếp nhận; trang mở ứng dụng email của người dùng với nội dung đã điền.
 - Hình ảnh công ty do nhà tuyển dụng tự tải lên (JPG, PNG, WEBP; logo tối đa 2 MB, ảnh bìa và ảnh không gian làm việc tối đa 5 MB, tối đa 6 ảnh). Công ty chưa tải ảnh thì hiển thị tên viết tắt, không dùng ảnh mặc định. Thay ảnh không yêu cầu Admin duyệt lại.
 - Liên kết website dài hơn 32 ký tự chỉ hiển thị chữ "Fanpage" (mạng xã hội) hoặc "Website", bấm vào mở liên kết ở thẻ mới.

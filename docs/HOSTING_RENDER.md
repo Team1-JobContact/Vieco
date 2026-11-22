@@ -83,7 +83,7 @@ Trong **Secret Files**, thêm file tên `ca.pem`, dán nguyên nội dung CA đ�
 
 Nếu cần email xác thực/quên mật khẩu/thông báo, thêm SMTP_HOST, SMTP_PORT, SMTP_USERNAME, SMTP_PASSWORD, SMTP_FROM, SMTP_STARTTLS và SMTP_SSL theo nhà cung cấp SMTP của nhóm, rồi thử gửi email thật. FRONTEND_URL phải trỏ tới link website chung để email mở đúng trang account.
 
-Nếu muốn bật **Tạo CV bằng AI**, thêm ANTHROPIC_API_KEY (khóa Claude API của nhóm) và có thể đặt AI_CV_MODEL (mặc định `claude-opus-5-5`). Không thêm thì trình tạo CV vẫn hoạt động, chỉ nút AI báo chưa bật.
+Nếu muốn bật **Tạo CV bằng AI**, thêm ANTHROPIC_API_KEY (khóa Claude API của nhóm) và có thể đặt AI_CV_MODEL (mặc định `claude-opus-5-5`). Không thêm thì trình tạo CV vẫn hoạt động, chỉ nút AI báo chưa bật. Cùng khóa này bật bong bóng chat Trợ lý Vieco (model AI_CHAT_MODEL, mặc định `claude-haiku-5-5`); không có khóa thì bong bóng chat tự ẩn.
 
 ## 6. Gắn ổ lưu trữ và triển khai
 

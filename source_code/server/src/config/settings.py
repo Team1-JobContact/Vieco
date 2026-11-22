@@ -29,6 +29,8 @@ class Settings(BaseSettings):
     # Tạo CV bằng AI (Claude). Để trống khóa thì chỉ tắt nút AI, trình tạo CV vẫn dùng bình thường.
     ANTHROPIC_API_KEY: str = ""
     AI_CV_MODEL: str = "claude-opus-5-5"
+    # Bong bóng chat hỏi đáp (dùng chung ANTHROPIC_API_KEY). Model nhanh, rẻ cho hội thoại.
+    AI_CHAT_MODEL: str = "claude-haiku-5-5"
 
     @field_validator("SECRET_KEY")
     @classmethod
