@@ -54,6 +54,8 @@ Dán kết quả vào SECRET_KEY, giữ ổn định giữa các lần chạy. A
 
 SMTP là tùy chọn. Giữ SMTP_HOST trống để chạy chức năng tuyển dụng cục bộ; khi đó đăng ký/đăng nhập vẫn dùng được, nhưng không gửi xác thực và API quên mật khẩu trả 503. Để bật email, điền các biến SMTP theo `.env.example` bằng cấu hình nhà cung cấp, rồi khởi động lại backend. Review này không xác minh SMTP thật.
 
+Tạo CV bằng AI cũng là tùy chọn. Để bật nút **Tạo bằng AI** trong trang tạo CV, đặt `ANTHROPIC_API_KEY` (khóa Claude API tạo tại https://console.anthropic.com) trong `.env`, có thể đổi model bằng `AI_CV_MODEL` (mặc định `claude-opus-5-5`), rồi khởi động lại backend. Để trống thì trình tạo CV, tải PDF và lưu CV vẫn chạy, chỉ nút AI báo chưa bật. Không commit khóa API lên GitHub.
+
 ## 3. Tạo database, migration và seed
 
 Lệnh sau dùng đúng vị trí MySQL 8.0 đã tìm thấy trên máy. Nhập mật khẩu MySQL khi được hỏi:
@@ -66,7 +68,7 @@ Set-Location 'C:\Users\nandz\OneDrive\Documents\ThucTap_Nhom1\Dự án\Vieco 2\V
 ..\..\.venv\Scripts\python.exe -m src.seeds.run
 ```
 
-Nếu DATABASE_URL dùng tên database khác, thay `job_contact_db` trong câu CREATE DATABASE cho khớp. Migration hiện tại là **0003**, gồm **29 bảng ứng dụng + alembic_version**. Không dùng `alembic downgrade base` để xử lý lỗi chạy.
+Nếu DATABASE_URL dùng tên database khác, thay `job_contact_db` trong câu CREATE DATABASE cho khớp. Migration hiện tại là **0004**, gồm **29 bảng ứng dụng + alembic_version**. Không dùng `alembic downgrade base` để xử lý lỗi chạy.
 
 Seed tạo roles, ngành nghề, tỉnh/thành, kỹ năng, cấu hình, trang nội dung và admin tùy chọn. **Không seed công ty/tin tuyển dụng hay tài khoản ứng viên/nhà tuyển dụng mẫu.** Trang chủ có thể rỗng khi chưa có tin được duyệt.
 

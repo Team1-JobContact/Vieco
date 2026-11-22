@@ -45,7 +45,7 @@ $env:VIECO_ENV_FILE='.env.shared'
 Remove-Item Env:VIECO_ENV_FILE
 ```
 
-Kết quả mong đợi: revision `0003`, dữ liệu tài khoản/công ty/tin của nhóm vẫn có. Admin dùng tài khoản trong database; không cần seed lại khi đã nhập snapshot.
+Kết quả mong đợi: revision mới nhất (`0004`), dữ liệu tài khoản/công ty/tin của nhóm vẫn có. Admin dùng tài khoản trong database; không cần seed lại khi đã nhập snapshot.
 
 ## 4. Tạo Web Service trên Render
 
@@ -82,6 +82,8 @@ Trong **Environment Variables**, nhập:
 Trong **Secret Files**, thêm file tên `ca.pem`, dán nguyên nội dung CA đã tải từ Aiven, gồm cả BEGIN CERTIFICATE và END CERTIFICATE. Render cung cấp file đó ở `/etc/secrets/ca.pem` khi chạy. Các mục này nằm trong cấu hình Advanced/Environment của dịch vụ; nếu đã tạo dịch vụ trước khi thêm CA, thêm file và triển khai lại. Xem [Environment Variables and Secrets](https://render.com/docs/configure-environment-variables).
 
 Nếu cần email xác thực/quên mật khẩu/thông báo, thêm SMTP_HOST, SMTP_PORT, SMTP_USERNAME, SMTP_PASSWORD, SMTP_FROM, SMTP_STARTTLS và SMTP_SSL theo nhà cung cấp SMTP của nhóm, rồi thử gửi email thật. FRONTEND_URL phải trỏ tới link website chung để email mở đúng trang account.
+
+Nếu muốn bật **Tạo CV bằng AI**, thêm ANTHROPIC_API_KEY (khóa Claude API của nhóm) và có thể đặt AI_CV_MODEL (mặc định `claude-opus-5-5`). Không thêm thì trình tạo CV vẫn hoạt động, chỉ nút AI báo chưa bật.
 
 ## 6. Gắn ổ lưu trữ và triển khai
 

@@ -62,6 +62,9 @@
         trend: '<path d="m3 17 6-6 4 4 8-8M15 7h6v6"/>',
         trash: '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>',
         download: '<path d="M12 4v11M7.500 10.500 12 15l4.500-4.500M4 20h16"/>',
+        up: '<path d="m6 15 6-6 6 6"/>',
+        down: '<path d="m6 9 6 6 6-6"/>',
+        spark: '<path d="M12 3.500 13.900 9 19.500 11 13.900 13 12 18.500 10.100 13 4.500 11 10.100 9 12 3.500Z"/><path d="M18.500 3v3M17 4.500h3"/>',
         shield: '<path d="M12 3 4 6v6c0 5 3.500 8 8 9 4.500-1 8-4 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/>'
     };
     function icon(name, cls) {
@@ -102,7 +105,7 @@
         }
         var response;
         var controller = typeof AbortController === "function" ? new AbortController() : null;
-        var timeout = controller ? setTimeout(function () { controller.abort(); }, 15000) : null;
+        var timeout = controller ? setTimeout(function () { controller.abort(); }, options.timeout || 15000) : null;
         try {
             response = await fetch(Auth.getApiBaseUrl() + path + query, { method: options.method || "GET", headers: headers, body: body, signal: controller ? controller.signal : undefined });
         } catch (error) {
@@ -591,7 +594,7 @@
         ["index.html", "Trang chủ", "Chạm cơ hội, mở tương lai"],
         ["pages/jobs.html", "Việc làm", "Khám phá các vị trí đang tuyển"],
         ["pages/companies.html", "Công ty", "Tìm hiểu môi trường làm việc"],
-        ["pages/cv-library.html", "Thư viện CV", "Mẫu CV thanh lịch, hiện đại, tối giản"],
+        ["pages/cv-library.html", "Thư viện CV", "Mẫu CV và trình tạo CV trực tuyến"],
         ["pages/for-employers.html", "Dành cho nhà tuyển dụng", "Đăng tin và tìm ứng viên phù hợp"],
         ["pages/contact.html", "Liên hệ", "Kết nối với đội ngũ Vieco"]
     ];
@@ -784,7 +787,7 @@
                 h("div", { class: "v-footer-cols" },
                     h("div", {}, h("h2", { text: "Về Vieco" }),
                         h("p", { text: "Nền tảng kết nối ứng viên với doanh nghiệp. Cùng bạn tìm kiếm cơ hội, phát triển sự nghiệp và kiến tạo những kết nối có ý nghĩa." })),
-                    col("Dành cho bạn", [["pages/jobs.html", "Khám phá việc làm"], ["pages/cv-library.html", "Tạo CV chuyên nghiệp"], ["pages/profile.html", "Hồ sơ tìm việc"], ["pages/for-employers.html", "Dành cho nhà tuyển dụng"]]),
+                    col("Dành cho bạn", [["pages/jobs.html", "Khám phá việc làm"], ["pages/cv-builder.html", "Tạo CV chuyên nghiệp"], ["pages/profile.html", "Hồ sơ tìm việc"], ["pages/for-employers.html", "Dành cho nhà tuyển dụng"]]),
                     col("Hỗ trợ & liên hệ", [["pages/contact.html", "Trung tâm trợ giúp"], ["pages/contact.html#faq", "Hướng dẫn ứng tuyển"], ["pages/contact.html", "Kết nối với Vieco ↗"], ["pages/contact.html", "Báo cáo tin tuyển dụng"]]),
                     col("Thông tin", [["pages/content.html?slug=gioi-thieu", "Giới thiệu Vieco"], ["pages/content.html?slug=dieu-khoan", "Điều khoản sử dụng"], ["pages/content.html?slug=faq", "Câu hỏi thường gặp"]])),
                 h("div", { class: "v-footer-bottom" }, h("span", { text: "© 2026 Vieco. Chạm cơ hội, mở tương lai." }), h("span", { text: "Tiếng Việt" })))));

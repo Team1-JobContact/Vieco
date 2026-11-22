@@ -119,6 +119,7 @@ class CVResponse(BaseModel):
     file_name: str
     file_size: int
     is_default: bool
+    has_builder_data: bool = False  # CV tạo bằng trình tạo CV, mở lại để chỉnh sửa được
     created_at: datetime | None = None
 
 
