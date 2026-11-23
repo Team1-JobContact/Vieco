@@ -103,3 +103,41 @@ Test giao diện chạy bằng Node.js và jsdom.
 - Riêng trang đăng nhập và đăng ký có phong cách bo tròn, điểm nhấn vàng trên nền xanh trong `src/assets/css/auth-modern.css`; các trang khác vẫn giữ góc vuông theo Figma.
 - Logo và favicon nằm trong `src/assets/images/brand/` (logo đầy đủ, biểu tượng chữ V, favicon 32/64px và icon cho iPhone).
 - Thiết kế Figma chỉ có bản desktop; bản di động do nhóm tự co giãn bố cục.
+
+## 7. Nghiệm thu demo cho T05C354 (23/11/2026)
+
+Các bước trong mục 3 là kết quả mong đợi, không phải bằng chứng đã chạy trên MySQL thật. Xem [kết quả tự động](T05C354_HANDOFF.md) và [checklist](TEST_CHECKLIST.md).
+
+### Chuẩn bị để tránh lỗi trong buổi demo
+
+Với shared, dùng website/API cùng server qua run_shared.py và .env.shared theo SHARED_SYSTEM.md; kiểm tra /api/v1/ready. Các bước cổng 5500 dành cho phát triển local.
+
+- Khi demo local hai tiến trình, dùng một origin thống nhất: http://localhost:5500. Không dùng Live Server tại gốc repository đồng thời với HTTP server tại client.
+- Xác nhận DATABASE_URL trỏ đúng DB test; localhost là máy chạy backend, không phải máy trưởng nhóm.
+- Một người phụ trách migration trên DB chung. Không seed lại dữ liệu nhóm để thử mật khẩu.
+- Chuẩn bị ba tài khoản test: Admin, Employer, Candidate. Admin được seed khi cấu hình ADMIN_EMAIL/ADMIN_PASSWORD; seed không thay mật khẩu tài khoản cũ.
+- Dùng các hồ sơ trình duyệt tách biệt. Các tab thường chung origin có thể dùng chung phiên đăng nhập.
+- Với SMTP chưa cấu hình, không trình diễn email là đã hoạt động. Test riêng trên SMTP test.
+- Dùng CV giả lập hợp lệ, không chứa thông tin cá nhân thật; chuẩn bị hai tin để demo rút đơn và xử lý đơn độc lập.
+- Nếu nhiều người demo qua các backend riêng cùng DB, file CV/ảnh vẫn ở từng máy. Chọn một backend demo chung hoặc thống nhất nơi lưu file trước.
+- Lệnh chạy/test đầy đủ bằng Python .venv nằm trong README, không phụ thuộc việc đã activate terminal.
+
+### Kịch bản rút gọn 8–10 phút
+
+| Thời gian | Vai trò | Thao tác | Chấp nhận khi |
+| --- | --- | --- | --- |
+| 0–1 phút | Khách | Mở trang chủ, tìm kiếm/lọc | Kết quả lấy từ API; không báo thành công giả |
+| 1–3 phút | Employer + Admin | Tạo công ty, Admin duyệt | Employer thấy trạng thái được duyệt sau tải lại |
+| 3–5 phút | Employer + Admin | Tạo tin nháp, gửi, duyệt | Chỉ tin đã duyệt hợp lệ xuất hiện công khai |
+| 5–7 phút | Candidate | Lưu/bỏ lưu, tải CV, ứng tuyển | Lưu phản ánh trong hồ sơ; đơn được tạo, không trùng |
+| 7–9 phút | Employer + Candidate | Xem CV, đổi trạng thái, xem thông báo/lịch sử | Đúng trạng thái và đúng người nhận |
+| 9–10 phút | Khác vai trò | Thử trang không thuộc quyền; đóng tin | Quyền bị chặn; tin đóng không còn công khai |
+
+Nếu một bước lỗi, ghi lại bước tái hiện và phản hồi API đã che thông tin bí mật, không đánh dấu pass. Tài khoản bị giới hạn sau nhiều lần sai cần chờ theo quy định, không thử liên tục.
+
+### Lưu minh chứng
+
+1. Ghi commit, ngày, trình duyệt, DB local/chung và phiên bản migration (không ghi URL chứa password).
+2. Đánh dấu từng mục ở TEST_CHECKLIST.md, đính kèm ảnh/video thao tác và kết quả.
+3. Ghi danh sách lỗi còn mở vào T05C354_HANDOFF.md, kèm mức độ, người nhận và kiểm tra lại.
+4. Nộp link PR với mã T05C354 và link minh chứng vào thẻ task. Chỉ chốt Done sau review và xác nhận PB-025/PB-026.

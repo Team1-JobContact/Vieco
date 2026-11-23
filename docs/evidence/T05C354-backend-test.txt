@@ -1,0 +1,14 @@
+ImportError while loading conftest '<checkout>\source_code\server\tests\conftest.py'.
+tests\conftest.py:7: in <module>
+    from src.app import app
+src\app.py:13: in <module>
+    from src.routes.candidate import router as candidate_router
+src\routes\candidate.py:4: in <module>
+    from src.controllers import candidate_controller as controller
+src\controllers\candidate_controller.py:13: in <module>
+    from src.services import avatar_service, candidate_service, cv_ai_service, cv_service
+src\services\avatar_service.py:2: in <module>
+    from src.services import company_media_service
+src\services\company_media_service.py:12: in <module>
+    from PIL import Image, UnidentifiedImageError
+E   ModuleNotFoundError: No module named 'PIL'

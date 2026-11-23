@@ -1,0 +1,50 @@
+
+> test
+> node --test tests/*.test.cjs
+
+✔ registration and login use the correct API from http://localhost:5500 (82.1808ms)
+✔ registration and login use the correct API from http://127.0.0.1:5500 (10.4515ms)
+✔ registration and login use the correct API from http://[::1]:5500 (9.1266ms)
+✔ registration and login use the correct API from https://vieco-frontend.onrender.com (12.4354ms)
+✔ explicit API configuration still overrides defaults and trims trailing slashes (8.3342ms)
+✔ network failure keeps session and allows current-user retry (104.6247ms)
+✔ modal traps focus, restores opener and closes once (52.1489ms)
+✔ save button prevents concurrent requests and unlocks after success (76.8303ms)
+✔ admin users render as text and lock through the API after confirmation (78.6352ms)
+✔ admin category editor sends existing identity and visibility (62.0233ms)
+✔ published content is rendered as text (30.7526ms)
+✔ company names and logo marks preserve the intended demo brands (121.4449ms)
+✔ home renders trending jobs and companies from the API as text (272.0941ms)
+✔ jobs page searches, filters and paginates through the API (90.495ms)
+✔ reset password validates before sending, strips URL secret and reports success only on success (76.7521ms)
+✔ company validation trims values, converts IDs and leaves optional text null (1.6188ms)
+✔ company validation rejects required fields, invalid IDs, size and website (0.6957ms)
+✔ draft only needs title; submit requires full fields and a real date (2.7316ms)
+✔ salary, positions, enum and date errors are reported at their fields (26.0775ms)
+✔ deadline accepts today and business date follows Vietnam at the UTC boundary (0.9144ms)
+✔ employer error parser does not turn all conflicts into duplicate email errors (1.3913ms)
+✔ client uses bearer token and expected methods without allowing body-controlled IDs (1.8299ms)
+✔ HTTP and network failures never report save success (1.7558ms)
+✔ only employers can open forms, role is verified by /auth/me (208.6417ms)
+✔ new company form saves actual API record and displays PENDING (69.3953ms)
+✔ company error fields and server failures keep unsaved input (43.4994ms)
+✔ rejected company shows reason and saves edits before resubmitting (44.6784ms)
+✔ company MEMBER cannot edit or resubmit (30.2448ms)
+✔ editing loads all old job values including zero salary and rejection reason (36.0027ms)
+✔ pending job and foreign company job cannot be edited (71.5423ms)
+✔ draft save only needs title, duplicate submissions are blocked while busy (32.9985ms)
+✔ submit validates required fields without issuing a write (32.0871ms)
+✔ retry after submit failure PATCHes saved ID instead of creating another job (43.7908ms)
+✔ missing PB-014 endpoint keeps input and does not claim successful save (27.9325ms)
+✔ closed jobs can extend with Vietnam date; removed jobs expose no reopen or extend (186.0977ms)
+✔ shared frontend sends API requests to the server users actually opened (98.2724ms)
+✔ local frontend development keeps the separate backend and explicit overrides (8.8814ms)
+ℹ tests 37
+ℹ suites 0
+ℹ pass 37
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3032.3724
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.

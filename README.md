@@ -1,48 +1,99 @@
 # Vieco — Nền tảng kết nối việc làm
 
-Vieco kết nối ứng viên và nhà tuyển dụng. Dự án dùng frontend HTML/CSS/JavaScript, backend FastAPI, MySQL qua SQLAlchemy và Alembic. Xác thực dùng JWT Bearer và bcrypt; CV được lưu cục bộ và kiểm tra quyền khi tải; email dùng SMTP.
+Frontend HTML/CSS/JavaScript, backend FastAPI, SQLAlchemy/Alembic và MySQL. Xác thực JWT, mật khẩu bcrypt, email SMTP, CV/ảnh lưu tại backend. Xem [đối chiếu thiết kế](docs/ARCHITECTURE_REVIEW.md).
 
-Kiến trúc được đối chiếu với tài liệu thiết kế JobContact ngày 15/11/2026. Đã bổ sung đủ 24 đường dẫn API cốt lõi trong tài liệu. Công nghệ được giữ theo mã nguồn đang phát triển, vì vậy dự án **chưa trùng hoàn toàn tech stack React/Vite/Tailwind + Express/Prisma trong bản Word**. Xem [bảng đối chiếu](docs/ARCHITECTURE_REVIEW.md) để biết phạm vi và giới hạn kiểm chứng.
+## Chạy trên Windows
 
-## Bàn giao cho nhóm
-
-Xem [báo cáo thay đổi trước merge main](docs/TEAM_CHANGE_REPORT.md) để biết phạm vi tích hợp, tác động đến từng phần việc và checklist kiểm tra. [Thông báo ngắn](docs/TEAM_ANNOUNCEMENT.md) có thể dùng để chia sẻ trong nhóm. Nhánh cập nhật hiện là `feat/architecture-api-alignment`; chưa merge vào main tại thời điểm lập báo cáo 15/11/2026.
-
-## Cấu trúc
-
-```text
-Vieco/
-├── docs/                  # Thiết kế, đối chiếu và hướng dẫn
-├── source_code/
-│   ├── client/            # pages; src/features, src/services, src/assets
-│   └── server/            # routes → controllers → services → models
-└── archive/               # Artefact lịch sử, không dùng để chạy
-```
-
-Xem [cấu trúc chi tiết](docs/PROJECT_STRUCTURE.md), [cài đặt](docs/SETUP.md) và [hướng dẫn Windows](docs/HUONG_DAN_CHAY_DU_AN.md).
-
-## Chạy dự án
-
-Sau khi cài dependency, cấu hình `.env`, chạy migration và seed theo SETUP, mở hai terminal từ gốc repository:
+Cần Python có pip và MySQL đang chạy; Node.js/npm để chạy test giao diện. Tại thư mục gốc, mở PowerShell:
 
 ```powershell
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r source_code/server/requirements.txt
 cd source_code/server
-python run.py
+if (-not (Test-Path .env)) { Copy-Item .env.example .env }
 ```
+
+Mở `source_code/server/.env`, đặt DATABASE_URL và SECRET_KEY riêng tối thiểu 32 ký tự. Không ghi đè cấu hình đang có. URL mẫu, phải thay bằng thông tin thật:
+
+```dotenv
+DATABASE_URL=mysql+pymysql://USER:PASSWORD@localhost:3306/job_contact_db
+```
+
+Mã hóa ký tự đặc biệt trong username/password của URL. Trong MySQL Workbench, tạo database local nếu chưa có:
+
+```sql
+CREATE DATABASE IF NOT EXISTS job_contact_db
+CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
+Sau khi xác nhận đúng database test, chạy tại server:
+
+```powershell
+..\..\.venv\Scripts\python.exe -m alembic upgrade head
+..\..\.venv\Scripts\python.exe -m src.seeds.run
+..\..\.venv\Scripts\python.exe run.py
+```
+
+Admin chỉ được seed khi đặt ADMIN_EMAIL và ADMIN_PASSWORD trong .env; seed không đổi mật khẩu tài khoản đã tồn tại. Không có mật khẩu Admin mặc định.
+
+Mở terminal thứ hai tại thư mục gốc:
 
 ```powershell
 cd source_code/client
-python -m http.server 5500
+..\..\.venv\Scripts\python.exe -m http.server 5500
 ```
 
-Frontend: http://localhost:5500. API/Swagger: http://127.0.0.1:8000/docs. Frontend không cần npm build. Thiết lập SMTP theo `.env.example` để gửi xác thực email, đặt lại mật khẩu và thông báo sự kiện. Các giá trị trong `.env` hiện có không bị thay đổi bởi đợt chỉnh sửa kiến trúc.
+Website: http://localhost:5500 — Swagger: http://127.0.0.1:8000/docs.
+Giữ cả hai terminal mở. Không cần npm build hoặc Live Server. API base URL mặc định: http://127.0.0.1:8000/api/v1.
+Endpoint /api/v1/health chỉ kiểm tra tiến trình; /api/v1/ready trả 200 khi kết nối DB thành công, 503 khi lỗi.
+Cấu hình SMTP và hướng dẫn chi tiết: [SETUP](docs/SETUP.md).
 
-## Giao diện và demo
+## Hệ thống dùng chung
 
-Giao diện dựng theo thiết kế Figma, dùng chung `src/assets/css/vieco.css` và `src/shared/layout.js`. Danh sách trang, kịch bản demo theo từng vai trò và các giới hạn hiện tại nằm trong [hướng dẫn demo](docs/HUONG_DAN_DEMO.md).
+Nhóm đã có một backend phục vụ website/API và file chung, kết nối MySQL Aiven bằng TLS. Xem [SHARED_SYSTEM](docs/SHARED_SYSTEM.md) và [HOSTING_RENDER](docs/HOSTING_RENDER.md). run_shared.py đọc .env.shared; run.py dùng .env. Dùng shared thì mở URL server thay vì frontend local cổng 5500.
 
-## Kiểm thử
+## Database nhóm
 
-Backend: chạy `python -m pytest tests -q` tại `source_code/server` bằng Python của môi trường ảo. Frontend: chạy `npm ci` rồi `npm test` tại `source_code/client`. Kiểm thử backend dùng SQLite cô lập, không chạy migration/seed lên MySQL thật.
+localhost là máy chạy backend. Chép .env có localhost từ trưởng nhóm không kết nối vào database trưởng nhóm. Git không đồng bộ dữ liệu MySQL.
 
-Không commit `.env`, mật khẩu hay dữ liệu uploads. Các báo cáo tuần 1 trong docs là lịch sử, không phản ánh trạng thái hiện hành.
+Muốn dùng chung: nhận host/port/database/tài khoản được cấp quyền, cấu hình DATABASE_URL rồi khởi động lại backend. Máy chủ phải cho phép máy thành viên kết nối qua mạng riêng/VPN hoặc danh sách IP; cấu hình TLS theo máy chủ. Một người phụ trách áp dụng migration; không tự seed/reset database chung.
+
+Workbench là công cụ quản lý, không cần mở để web chạy. CV và ảnh ở uploads của từng backend: dùng chung MySQL chưa đồng nghĩa dùng chung file. Demo nhóm nên dùng một backend hoặc thống nhất nơi lưu file.
+
+## Chẩn đoán lỗi
+
+| Lỗi | Kiểm tra |
+| --- | --- |
+| Không kết nối API | Backend cổng 8000 và API base URL |
+| Sai email/mật khẩu | Đúng DB và tài khoản chưa; seed không đổi mật khẩu cũ |
+| MySQL 1045 | Username/password và quyền kết nối từ máy backend |
+| MySQL 2003 | MySQL đang chạy, host/port, mạng và firewall |
+| Thiếu database/bảng | Tạo database local; người phụ trách chạy migration |
+| Đăng nhập bị giới hạn | Tạm khóa 15 phút sau 5 lần sai |
+| Swagger mở nhưng thao tác lỗi | Kiểm tra API đọc/ghi DB và terminal, không chỉ health |
+
+Frontend có thể ghi đè URL qua window.VIECO_API_BASE_URL hoặc khóa vieco_api_base_url trong localStorage của origin đang mở; giữ tiền tố /api/v1.
+
+## Kiểm thử và bàn giao
+
+Backend, tại source_code/server:
+
+```powershell
+..\..\.venv\Scripts\python.exe -m pytest tests -q -p no:cacheprovider
+```
+
+Frontend, tại source_code/client:
+
+```powershell
+npm ci
+npm test
+```
+
+Test dùng SQLite cô lập và jsdom, không thay thế nghiệm thu MySQL/SMTP/trình duyệt thật.
+
+- [Hướng dẫn demo](docs/HUONG_DAN_DEMO.md)
+- [Checklist nghiệm thu](docs/TEST_CHECKLIST.md)
+- [Báo cáo T05C354 và tổng kết phạm vi](docs/T05C354_HANDOFF.md)
+- [Cấu trúc dự án](docs/PROJECT_STRUCTURE.md)
+
+Không commit .env, mật khẩu, token hoặc uploads. Báo cáo cũ có ngày riêng là tài liệu lịch sử.
