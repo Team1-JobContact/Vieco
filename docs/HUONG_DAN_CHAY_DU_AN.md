@@ -58,6 +58,8 @@ Tạo CV bằng AI cũng là tùy chọn. Để bật nút **Tạo bằng AI** t
 
 Cùng khóa này bật **bong bóng chat Trợ lý Vieco** ở góc dưới bên phải mọi trang (trừ trang quản trị). Model của chatbot đặt bằng `AI_CHAT_MODEL` (mặc định `claude-haiku-5-5`). Không có khóa thì bong bóng chat tự ẩn.
 
+Cùng khóa này bật các tính năng AI theo tin tuyển dụng: **Phân tích độ phù hợp** và **Tối ưu CV cho vị trí này** ở trang chi tiết việc làm (dành cho ứng viên), **Viết bằng AI** ở form đăng tin (dành cho nhà tuyển dụng). Chấm điểm và viết tin dùng `AI_JOB_MODEL` (mặc định `claude-haiku-5-5`), tối ưu CV dùng `AI_CV_MODEL`. AI đọc được CV tạo trên Vieco và CV dạng PDF, chưa đọc được DOC/DOCX.
+
 ## 3. Tạo database, migration và seed
 
 Lệnh sau dùng đúng vị trí MySQL 8.0 đã tìm thấy trên máy. Nhập mật khẩu MySQL khi được hỏi:
@@ -70,7 +72,7 @@ Set-Location 'C:\Users\nandz\OneDrive\Documents\ThucTap_Nhom1\Dự án\Vieco 2\V
 ..\..\.venv\Scripts\python.exe -m src.seeds.run
 ```
 
-Nếu DATABASE_URL dùng tên database khác, thay `job_contact_db` trong câu CREATE DATABASE cho khớp. Migration hiện tại là **0004**, gồm **29 bảng ứng dụng + alembic_version**. Không dùng `alembic downgrade base` để xử lý lỗi chạy.
+Nếu DATABASE_URL dùng tên database khác, thay `job_contact_db` trong câu CREATE DATABASE cho khớp. Migration hiện tại là **0005** (thêm cột xác minh doanh nghiệp vào bảng `companies`), gồm **29 bảng ứng dụng + alembic_version**. Không dùng `alembic downgrade base` để xử lý lỗi chạy.
 
 Seed tạo roles, ngành nghề, tỉnh/thành, kỹ năng, cấu hình, trang nội dung và admin tùy chọn. **Không seed công ty/tin tuyển dụng hay tài khoản ứng viên/nhà tuyển dụng mẫu.** Trang chủ có thể rỗng khi chưa có tin được duyệt.
 

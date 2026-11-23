@@ -5,7 +5,7 @@ Tài liệu này dùng cho buổi demo và cho thành viên muốn tự kiểm t
 ## 1. Chuẩn bị
 
 1. Chạy backend ở cổng 8000 và frontend ở cổng 5500 theo README.
-2. Đã chạy `alembic upgrade head` và `python -m src.seeds.run`. Sau khi cập nhật mã nguồn có migration mới (ví dụ `0003` cho hình ảnh công ty, `0004` cho trình tạo CV), chạy lại `alembic upgrade head`. Tài khoản Admin lấy từ `ADMIN_EMAIL` và `ADMIN_PASSWORD` trong `.env`.
+2. Đã chạy `alembic upgrade head` và `python -m src.seeds.run`. Sau khi cập nhật mã nguồn có migration mới (ví dụ `0003` cho hình ảnh công ty, `0004` cho trình tạo CV, `0005` cho xác minh doanh nghiệp), chạy lại `alembic upgrade head`. Tài khoản Admin lấy từ `ADMIN_EMAIL` và `ADMIN_PASSWORD` trong `.env`.
 3. (Tùy chọn) Nạp dữ liệu demo: 10 doanh nghiệp và 43 tin tuyển dụng phủ đủ 21 ngành nghề, 5 hình thức làm việc và 5 mức kinh nghiệm. Chạy trong `source_code/server`:
    1. `python -m src.seeds.demo_companies`: tạo 10 tài khoản nhà tuyển dụng `tuyendung.<tên>@vieco.click` (mật khẩu `123345678A`, đổi bằng biến môi trường `DEMO_EMPLOYER_PASSWORD`) kèm hồ sơ công ty ở trạng thái Chờ duyệt, chưa có hình ảnh.
    2. Admin duyệt 10 công ty tại `pages/admin.html`.
@@ -49,13 +49,17 @@ Giao diện dựng theo thiết kế Figma "Vieco • Desktop". Mọi trang dùn
 | 5 | Admin | Bấm Duyệt công ty | Công ty Đã duyệt và xuất hiện ở trang Công ty |
 | 5a | Nhà tuyển dụng | Mở `pages/company-media.html`, tải logo, ảnh bìa và ảnh không gian làm việc | Ảnh hiển thị ở trang công ty, thẻ công ty và tin tuyển dụng; tệp không phải JPG/PNG/WEBP bị từ chối |
 | 6 | Nhà tuyển dụng | Tạo tin tại `pages/employer.html#job`, lưu nháp rồi gửi duyệt | Tin ở trạng thái Chờ duyệt, chưa hiển thị công khai |
+| 6a | Nhà tuyển dụng | Trong form đăng tin bấm Viết bằng AI, nhập vị trí và vài ý chính rồi bấm Viết nội dung | Tiêu đề, mô tả, yêu cầu, quyền lợi được điền sẵn để chỉnh lại trước khi lưu nháp hoặc gửi duyệt |
 | 7 | Admin | Mở tab Duyệt tin tuyển dụng, bấm Duyệt | Tin xuất hiện ở trang chủ và trang Việc làm |
+| 7a | Admin | Ở tab Duyệt công ty, lọc Đã duyệt, bấm Xác minh cho một công ty | Tick vàng lấp lánh hiện cạnh tên công ty trên thẻ việc làm, thẻ công ty, trang công ty và chi tiết tin; bấm Bỏ xác minh thì tick biến mất |
 | 8 | Khách | Tìm theo tên vị trí, tên công ty hoặc kỹ năng; lọc và sắp xếp | Số kết quả và danh sách thay đổi theo bộ lọc |
 | 9 | Ứng viên | Đăng ký, mở tin, bấm Ứng tuyển ngay, tải CV và gửi | Hiện "Ứng tuyển thành công!"; nút đổi thành "Đã ứng tuyển" |
 | 10 | Ứng viên | Thử tải tệp không phải PDF/DOC/DOCX hoặc lớn hơn 5 MB | Bị từ chối kèm thông báo lỗi |
 | 10a | Ứng viên | Ở Trang chủ, mục Top CV nổi bật, bấm Sử dụng mẫu; nhập thông tin, thêm ảnh, đổi mẫu, Tải PDF rồi Lưu vào CV của tôi | Bản xem trước cập nhật khi gõ và tự chia trang A4; tệp PDF tải về máy; CV hiện trong mục CV của tôi với nút Chỉnh sửa và chọn được khi ứng tuyển |
 | 10b | Ứng viên | Trong trang tạo CV bấm Tạo bằng AI, nhập thông tin tự do rồi bấm Tạo CV | Có `ANTHROPIC_API_KEY`: biểu mẫu và bản xem trước được điền sẵn để chỉnh lại. Chưa có khóa: báo tính năng AI chưa bật |
 | 10c | Khách | Bấm bong bóng chat ở góc dưới bên phải, hỏi "Có việc IT nào ở TP.HCM không?", bấm vào một tin trong câu trả lời | Trợ lý trả lời bằng tin đang tuyển thật kèm liên kết; sang trang chi tiết việc, khung chat vẫn mở và giữ lịch sử. Chưa có `ANTHROPIC_API_KEY` thì không hiện bong bóng chat |
+| 10d | Ứng viên | Mở một tin, ở khung Trợ lý AI bấm Phân tích độ phù hợp và chọn CV | Hiện điểm phù hợp (%), kỹ năng đáp ứng/còn thiếu, điểm mạnh, điểm cần bổ sung và gợi ý. CV dạng DOC/DOCX không chọn được |
+| 10e | Ứng viên | Bấm Tối ưu CV cho vị trí này, chọn CV | Trình tạo CV mở bản CV đã chỉnh theo tin kèm danh sách thay đổi; CV gốc giữ nguyên, bấm Lưu vào CV của tôi để lưu thành CV mới |
 | 11 | Nhà tuyển dụng | Mở `pages/employer-jobs.html`, bấm Ứng viên, Xem hồ sơ, tải CV, Mời phỏng vấn | Đơn tự chuyển Đang xem xét khi mở; sau đó chuyển Mời phỏng vấn |
 | 12 | Ứng viên | Mở Hồ sơ của tôi | Chuông thông báo có số chưa đọc; đơn hiển thị trạng thái mới và lịch sử xử lý |
 | 13 | Ứng viên | Ứng tuyển một tin khác rồi rút đơn | Đơn chuyển Đã rút; đơn đã được mời phỏng vấn không còn nút rút |
@@ -89,6 +93,12 @@ Test giao diện chạy bằng Node.js và jsdom.
 
 - CV tạo trực tuyến được lưu thành PDF dạng ảnh (mỗi trang A4 là một ảnh nét gấp đôi), nên không bôi đen hay sao chép được chữ trong PDF. Nội dung gốc được lưu kèm để mở lại chỉnh sửa. Cập nhật một CV đã dùng để ứng tuyển sẽ tạo bản mới; đơn đã nộp vẫn giữ bản cũ.
 - Tạo CV bằng AI cần `ANTHROPIC_API_KEY` trong `server/.env` (tùy chọn `AI_CV_MODEL`, mặc định `claude-opus-5-5`). Mỗi tài khoản tối đa 10 lượt mỗi giờ. Nội dung người dùng nhập được gửi tới Claude của Anthropic. AI chỉ sắp xếp và diễn đạt lại thông tin được nhập, người dùng cần đọc lại trước khi lưu.
+- AI theo tin tuyển dụng dùng `ANTHROPIC_API_KEY`:
+  - Chấm điểm phù hợp và viết tin dùng `AI_JOB_MODEL` (mặc định `claude-haiku-5-5`); tối ưu CV dùng `AI_CV_MODEL`.
+  - AI đọc được CV tạo trên Vieco và CV dạng PDF; DOC/DOCX chưa hỗ trợ. Nội dung CV và tin được gửi tới Claude của Anthropic.
+  - Giới hạn mỗi tài khoản mỗi giờ: 30 lượt chấm điểm, 10 lượt tối ưu CV, 20 lượt viết tin (đếm trong bộ nhớ máy chủ).
+  - Kết quả chấm điểm chỉ lưu tạm trong tab trình duyệt, nhà tuyển dụng không xem được. AI chỉ dùng thông tin có trong CV, người dùng cần đọc lại trước khi lưu hoặc đăng.
+- Dấu xác minh (tick vàng) do Admin bật cho từng công ty đã duyệt; công ty chưa xác minh hiện "Hồ sơ đã được Vieco duyệt" ở trang công ty.
 - Trang tạo CV không có trong bản Figma; bố cục dùng chung màu, chữ và kiểu khối của các trang khác.
 - Bong bóng chat Trợ lý Vieco dùng `ANTHROPIC_API_KEY` (model `AI_CHAT_MODEL`, mặc định `claude-haiku-5-5`):
   - Trợ lý chỉ đọc dữ liệu công khai: tin đang tuyển, công ty đã duyệt và các trang Giới thiệu, Điều khoản, FAQ. Trợ lý không ứng tuyển hay sửa dữ liệu thay người dùng.
