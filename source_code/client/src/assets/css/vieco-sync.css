@@ -157,3 +157,18 @@ body.auth-page.v-sync { background: var(--v-cream); }
     .v-sync .auth-stage { padding: 28px 16px 48px; }
     .v-sync .workspace-tabs { gap: 24px; }
 }
+
+/* Trợ lý AI viết tin tuyển dụng (form đăng tin của nhà tuyển dụng). */
+.ai-assist { display: grid; grid-template-columns: auto 1fr auto; gap: 14px 16px; align-items: center; margin-bottom: 22px;
+    padding: 16px 18px; border-radius: var(--v-radius); border: 1px solid #ece2c8;
+    background: linear-gradient(135deg, #fbf7ec 0%, #f4f7f6 100%); }
+.ai-assist-icon { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 12px;
+    background: var(--v-blue); color: var(--v-gold); font-size: 18px; }
+.ai-assist strong { display: block; font-size: 14px; font-weight: 600; color: var(--v-ink); }
+.ai-assist p { margin: 2px 0 0; font-size: 13px; color: var(--v-body); }
+.v-sync main .ai-assist-btn { background: var(--v-gold); color: var(--v-ink); border-color: var(--v-gold); white-space: nowrap; }
+.v-sync main .ai-assist-btn:hover:not(:disabled) { background: #d9ae5c; border-color: #d9ae5c; }
+@media (max-width: 600px) {
+    .ai-assist { grid-template-columns: auto 1fr; }
+    .v-sync main .ai-assist-btn { grid-column: 1 / -1; width: 100%; }
+}

@@ -61,6 +61,7 @@ def _fields(company: Company) -> dict:
         description=company.description, industry_id=company.industry_id, size=company.size,
         website=company.website, address=company.address, province_id=company.province_id,
         status=company.status, reject_reason=company.reject_reason, reviewed_at=company.reviewed_at,
+        is_verified=bool(company.is_verified), verified_at=company.verified_at,
         created_at=company.created_at, updated_at=company.updated_at,
     )
 
@@ -243,3 +244,19 @@ def approve_company(db: Session, admin: User, company_id: int) -> AdminCompanyRe
 
 def reject_company(db: Session, admin: User, company_id: int, reason: str) -> AdminCompanyResponse:
     return _review(db, admin, company_id, "REJECTED", reason)
+
+
+def set_verified(db: Session, admin: User, company_id: int, verified: bool) -> AdminCompanyResponse:
+    """Bật/tắt dấu "Doanh nghiệp đã xác minh". Chỉ công ty đã duyệt mới được xác minh;
+    bỏ xác minh thì làm được với mọi trạng thái."""
+    company, owner = _get_for_admin(db, company_id)
+    if verified and company.status != "APPROVED":
+        raise HTTPException(status.HTTP_409_CONFLICT, "Chỉ xác minh được công ty đã được duyệt")
+    if bool(company.is_verified) != verified:
+        old = {"is_verified": bool(company.is_verified)}
+        company.is_verified = verified
+        company.verified_at = _utcnow() if verified else None
+        _audit(db, admin, "COMPANY_VERIFY" if verified else "COMPANY_UNVERIFY", company, old, {"is_verified": verified})
+        db.commit()
+        db.refresh(company)
+    return _to_admin(company, owner)

@@ -435,6 +435,54 @@
         }, { label: "Tạo CV bằng AI", className: "cvb-ai-modal", onClose: function () { open = false; } });
     }
 
+    // ---------- Tối ưu CV theo tin tuyển dụng (mở từ trang chi tiết việc làm) ----------
+    /** AI viết lại CV đã chọn cho khớp với tin. Kết quả là CV mới chưa lưu; CV gốc giữ nguyên. */
+    async function runTailor(jobId, cvId) {
+        window.history.replaceState(null, "", window.location.pathname); // tải lại trang không gọi AI thêm lần nữa
+        var draft = readDraft();
+        var hasDraft = Boolean(draft && CV.hasContent(CV.normalize(draft.data)));
+        function restoreDraft() {
+            if (!hasDraft) return;
+            state.data = CV.normalize(draft.data);
+            buildForm();
+            renderPreview();
+        }
+        if (hasDraft && !(await V.confirm("Thay bản nháp đang làm dở?", "CV do AI tối ưu sẽ thay bản nháp CV chưa lưu trên trình duyệt này. CV đã lưu trong mục CV của tôi không bị ảnh hưởng.", "Tiếp tục tối ưu"))) {
+            restoreDraft();
+            showRestoredNote();
+            return;
+        }
+        setBusy(true);
+        ui.form.classList.add("cvb-busy");
+        ui.form.setAttribute("aria-busy", "true");
+        ui.form.inert = true;
+        V.clear(ui.status).appendChild(h("div", { class: "v-note cvb-working", role: "status" },
+            h("span", { class: "v-note-message" }, V.icon("spark", "v-icon-sm"), " AI đang đọc tin tuyển dụng và tối ưu CV của bạn, thường mất 20–60 giây. Vui lòng giữ trang này mở.")));
+        try {
+            var result = await V.api("/candidates/me/cvs/builder/tailor", { method: "POST", body: { job_id: Number(jobId), cv_id: Number(cvId) }, timeout: 200000 });
+            state.data = CV.normalize(Object.assign({}, result.data, { template: result.template, photo: result.photo }));
+            state.cvId = null;
+            state.dirty = true;
+            buildForm();
+            renderPreview();
+            saveDraft();
+            paintMode();
+            V.clear(ui.status).appendChild(h("div", { class: "v-note v-note-success cvb-tailor", role: "status" },
+                h("div", { class: "v-note-message" },
+                    h("strong", { text: "AI đã tối ưu CV cho vị trí “" + result.job_title + "”" + (result.company_name ? " tại " + result.company_name : "") + "." }),
+                    result.changes.length ? h("ul", {}, result.changes.map(function (change) { return h("li", { text: change }); })) : null,
+                    h("p", {}, "Đây là bản CV mới, CV gốc vẫn giữ nguyên. Hãy đọc lại, chỉnh cho đúng với thực tế rồi bấm “Lưu vào CV của tôi” để dùng khi ứng tuyển. ",
+                        h("a", { class: "v-link", href: V.jobUrl(result.job_id), text: "Quay lại tin tuyển dụng ↗" })))));
+        } catch (error) {
+            restoreDraft();
+            noteWithLink("error", (error.message || "Không tối ưu được CV, vui lòng thử lại.") + ".", V.jobUrl(jobId), "Quay lại tin tuyển dụng ↗");
+        }
+        ui.form.classList.remove("cvb-busy");
+        ui.form.removeAttribute("aria-busy");
+        ui.form.inert = false;
+        setBusy(false);
+    }
+
     // ---------- Khởi tạo ----------
     async function prefill() {
         try {
@@ -486,7 +534,11 @@
     }
     async function init() {
         var id = params.get("cv"), restored = false;
-        if (id) {
+        var tailorJob = params.get("tailor_job"), fromCv = params.get("from_cv");
+        var tailoring = !id && /^[1-9]\d*$/.test(tailorJob || "") && /^[1-9]\d*$/.test(fromCv || "");
+        if (tailoring) {
+            if (!(await V.requireRole(["CANDIDATE"], app))) return;
+        } else if (id) {
             if (!(await V.requireRole(["CANDIDATE"], app))) return;
             try {
                 var saved = await V.api("/candidates/me/cvs/" + encodeURIComponent(id) + "/builder");
@@ -511,7 +563,8 @@
         build();
         if (restored) showRestoredNote();
         if (document.fonts && document.fonts.ready) document.fonts.ready.then(renderPreview);
-        if (params.get("ai") === "1") openAi();
+        if (tailoring) runTailor(tailorJob, fromCv);
+        else if (params.get("ai") === "1") openAi();
         window.addEventListener("beforeunload", function (event) {
             if (state.cvId && state.dirty) { event.preventDefault(); event.returnValue = ""; }
         });

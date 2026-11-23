@@ -96,6 +96,10 @@ class RejectRequest(BaseModel):
         return v
 
 
+class VerificationRequest(BaseModel):
+    verified: bool
+
+
 class CompanyResponse(BaseModel):
     id: int
     name: str
@@ -111,6 +115,8 @@ class CompanyResponse(BaseModel):
     status: str
     reject_reason: str | None = None
     reviewed_at: datetime | None = None
+    is_verified: bool = False
+    verified_at: datetime | None = None
     created_at: datetime | None = None
     updated_at: datetime | None = None
 

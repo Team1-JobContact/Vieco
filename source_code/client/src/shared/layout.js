@@ -462,6 +462,15 @@
         return button;
     }
 
+    // ---------- Dấu "Doanh nghiệp đã xác minh" (tick vàng lấp lánh) ----------
+    /** Trả về dấu tick khi công ty đã được Admin xác minh, ngược lại null. size "lg" cho tiêu đề lớn. */
+    function verified(isVerified, size) {
+        if (!isVerified) return null;
+        var label = "Doanh nghiệp đã được Vieco xác minh";
+        return h("span", { class: "v-verified" + (size === "lg" ? " v-verified-lg" : ""), role: "img", "aria-label": label, title: label },
+            h("i", { "aria-hidden": "true" }));
+    }
+
     // ---------- Thẻ việc làm ----------
     function jobUrl(id) { return url("pages/job.html") + "?id=" + encodeURIComponent(id); }
     function companyUrl(id) { return url("pages/company.html") + "?id=" + encodeURIComponent(id); }
@@ -473,7 +482,7 @@
         brandNode.style.color = brandColor(job.company_name);
         return h("article", { class: "v-job-card" },
             brandNode,
-            h("p", { class: "v-job-company", text: job.company_name || "" }),
+            h("p", { class: "v-job-company" }, job.company_name || "", verified(job.company_verified)),
             saveButton(job),
             h("h3", { class: "v-job-title" }, h("a", { href: jobUrl(job.id), text: job.title })),
             h("p", { class: "v-job-salary", text: salary(job) }),
@@ -489,7 +498,7 @@
             logo(job.company_name, "v-logo-md", job.company_logo_url),
             h("div", {},
                 h("h3", {}, h("a", { href: jobUrl(job.id), text: job.title })),
-                h("p", { class: "company", text: job.company_name || "" }),
+                h("p", { class: "company" }, job.company_name || "", verified(job.company_verified)),
                 h("div", { class: "v-meta" },
                     job.province_name && h("span", {}, icon("pin", "v-icon-sm"), job.province_name),
                     EXPERIENCE[job.experience_level] && h("span", {}, icon("brief", "v-icon-sm"), EXPERIENCE[job.experience_level]),
@@ -508,7 +517,7 @@
             coverImage(company),
             h("div", { class: "body" },
                 h("div", { class: "top" }, name, h("a", { class: "v-link v-small", href: companyUrl(company.id), "aria-label": "Xem công ty " + company.name, text: "Xem công ty ↗" })),
-                h("p", { class: "industry", text: company.name }),
+                h("p", { class: "industry" }, company.name, verified(company.is_verified)),
                 h("p", { class: "place", text: [company.industry_name, company.province_name].filter(Boolean).join(" · ") || "Đang cập nhật" }),
                 h("div", { class: "foot" }, h("span", {}, icon("brief", "v-icon-sm"), (company.open_jobs || 0) + " vị trí đang tuyển"))));
     }
@@ -815,7 +824,7 @@
         url: url, h: h, clear: clear, icon: icon, api: api, download: download, goLogin: goLogin, currentUser: currentUser, requireRole: requireRole,
         categories: categories, fillSelect: fillSelect, salary: salary, date: date, ago: ago, initials: initials, shortName: shortName,
         brand: brand, brandName: brandName, brandMark: brandMark, brandColor: brandColor, logo: logo, media: media, coverImage: coverImage, linkInfo: linkInfo, externalLink: externalLink, prose: prose, lines: lines, roleLabel: roleLabel,
-        badge: badge, toast: toast, note: note, loading: loading, empty: empty, saveButton: saveButton, jobCard: jobCard, jobRow: jobRow, companyCard: companyCard,
+        badge: badge, toast: toast, note: note, loading: loading, empty: empty, saveButton: saveButton, jobCard: jobCard, jobRow: jobRow, companyCard: companyCard, verified: verified,
         jobUrl: jobUrl, companyUrl: companyUrl, pagination: pagination, modal: modal, confirm: confirmDialog, searchForm: searchForm,
         openSearch: openSearch, logout: logout, refreshUnread: function () { refreshUnread(); },
         EXPERIENCE: EXPERIENCE, EMPLOYMENT: EMPLOYMENT, APP_STATUS: APP_STATUS, JOB_STATUS: JOB_STATUS, COMPANY_STATUS: COMPANY_STATUS

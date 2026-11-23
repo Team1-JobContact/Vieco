@@ -243,7 +243,7 @@
             h("div", { class: "v-title-row" },
                 company ? V.logo(company.name, "", company.logo_url) : null,
                 h("div", { class: "grow" }, h("p", { class: "v-eyebrow", text: "Nhà tuyển dụng" }),
-                    h("h1", { text: company ? company.name : "Quản lý tuyển dụng" }),
+                    h("h1", {}, company ? company.name : "Quản lý tuyển dụng", company && V.verified(company.is_verified, "lg")),
                     company && h("div", { class: "v-meta" }, V.badge(V.COMPANY_STATUS, company.status), h("span", { text: company.member_role === "OWNER" ? "Chủ sở hữu" : "Thành viên" }))),
                 h("div", { class: "v-title-actions" },
                     h("a", { class: "v-btn v-btn-outline", href: V.url("pages/employer.html") }, "Hồ sơ công ty", V.icon("edit")),

@@ -70,8 +70,9 @@
             V.modal(function (close) {
                 var pending = company.status === "PENDING";
                 return [
-                    h("p", { class: "v-eyebrow", text: "Hồ sơ công ty" }), h("h2", { text: company.name }),
-                    h("p", { class: "v-modal-sub" }, V.badge(V.COMPANY_STATUS, company.status)),
+                    h("p", { class: "v-eyebrow", text: "Hồ sơ công ty" }), h("h2", {}, company.name, V.verified(company.is_verified, "lg")),
+                    h("p", { class: "v-modal-sub" }, V.badge(V.COMPANY_STATUS, company.status),
+                        company.is_verified && h("span", { class: "v-small v-muted", style: "margin-left:10px", text: "Đã xác minh ngày " + V.date(company.verified_at) })),
                     company.status === "REJECTED" && h("div", { class: "v-note v-note-error", text: "Lý do từ chối: " + (company.reject_reason || "") }),
                     h("dl", { class: "v-summary", style: "margin-top:0" },
                         kv("Chủ sở hữu", company.owner_name), kv("Email", company.owner_email), kv("Quy mô", company.size),
@@ -82,12 +83,25 @@
                     h("div", { class: "v-form-foot v-mt-3" }, h("span", {}), h("div", { class: "actions" },
                         pending && h("button", { type: "button", class: "v-btn v-btn-danger v-btn-sm", text: "Từ chối", onclick: function () { close(); reject(company); } }),
                         pending && h("button", { type: "button", class: "v-btn v-btn-primary v-btn-sm", text: "Duyệt công ty", onclick: function () { close(); approve(company); } }),
-                        !pending && h("button", { type: "button", class: "v-btn v-btn-outline v-btn-sm", text: "Đóng", onclick: close })))
+                        !pending && h("button", { type: "button", class: "v-btn v-btn-outline v-btn-sm", text: "Đóng", onclick: close }),
+                        verifyButton(company, "v-btn-sm", close)))
                 ];
             }, { label: "Hồ sơ công ty " + company.name });
         }
         function approve(company) {
             run(function () { return V.api("/admin/companies/" + company.id + "/approve", { method: "POST" }); }, "Đã duyệt công ty “" + company.name + "”.", load);
+        }
+        /** Xác minh (tick vàng) cho công ty đã duyệt; công ty đã xác minh thì có nút bỏ xác minh. */
+        function verifyButton(company, size, before) {
+            if (company.status !== "APPROVED" && !company.is_verified) return null;
+            var on = !company.is_verified;
+            return h("button", { type: "button", class: "v-btn " + size + (on ? " v-btn-gold" : " v-btn-outline"),
+                "aria-label": (on ? "Xác minh " : "Bỏ xác minh ") + company.name, onclick: async function () {
+                    if (before) before();
+                    if (!on && !(await V.confirm("Bỏ xác minh doanh nghiệp?", "Dấu tick vàng cạnh tên “" + company.name + "” sẽ không còn hiển thị trên website.", "Bỏ xác minh", true))) return;
+                    run(function () { return V.api("/admin/companies/" + company.id + "/verification", { method: "PUT", body: { verified: on } }); },
+                        on ? "Đã xác minh doanh nghiệp “" + company.name + "”. Tick vàng sẽ hiện cạnh tên công ty." : "Đã bỏ xác minh “" + company.name + "”.", load);
+                } }, on ? "Xác minh" : "Bỏ xác minh");
         }
         async function reject(company) {
             var reason = await reasonDialog("Từ chối hồ sơ công ty", company.name, "Từ chối hồ sơ");
@@ -104,7 +118,7 @@
                     h("tbody", {}, data.items.map(function (company) {
                         var pending = company.status === "PENDING";
                         return h("tr", {},
-                            h("td", {}, h("strong", { text: company.name }), h("small", { text: [company.size && company.size + " nhân viên", company.address].filter(Boolean).join(" · ") })),
+                            h("td", {}, h("strong", {}, company.name, V.verified(company.is_verified)), h("small", { text: [company.size && company.size + " nhân viên", company.address].filter(Boolean).join(" · ") })),
                             h("td", {}, h("strong", { text: company.owner_name || "—" }), h("small", { text: company.owner_email || "" })),
                             h("td", { class: "v-nowrap", text: V.date(company.created_at) }),
                             h("td", {}, V.badge(V.COMPANY_STATUS, company.status),
@@ -112,7 +126,8 @@
                             h("td", {}, h("div", { class: "v-row-actions" },
                                 h("button", { type: "button", class: "v-btn v-btn-outline v-btn-xs", text: "Xem", "aria-label": "Xem hồ sơ " + company.name, onclick: function () { detail(company); } }),
                                 pending && h("button", { type: "button", class: "v-btn v-btn-primary v-btn-xs", text: "Duyệt", "aria-label": "Duyệt " + company.name, onclick: function () { approve(company); } }),
-                                pending && h("button", { type: "button", class: "v-btn v-btn-danger v-btn-xs", text: "Từ chối", "aria-label": "Từ chối " + company.name, onclick: function () { reject(company); } }))));
+                                pending && h("button", { type: "button", class: "v-btn v-btn-danger v-btn-xs", text: "Từ chối", "aria-label": "Từ chối " + company.name, onclick: function () { reject(company); } }),
+                                verifyButton(company, "v-btn-xs"))));
                     })))));
                 V.pagination(pager, data.page, Math.ceil(data.total / data.page_size), function (next) { state.page = next; load(); });
             } catch (error) { V.clear(pager); V.note(table, error.message, "error"); }

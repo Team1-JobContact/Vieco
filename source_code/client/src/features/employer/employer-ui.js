@@ -231,6 +231,65 @@
         }
     }
 
+    // ---------- Trợ lý AI viết tin tuyển dụng ----------
+    // AI chỉ điền tiêu đề, mô tả, yêu cầu, quyền lợi vào form; nhà tuyển dụng đọc lại rồi tự lưu nháp hoặc gửi duyệt.
+    const AI_TEXT_FIELDS = ["description", "requirements", "benefits"];
+    function openAiDraft() {
+        const V = window.Vieco, h = V.h;
+        if (state.jobBusy || $("job-fields").disabled) return;
+        const field = function (name) { return jobForm.elements.namedItem(name); };
+        const filled = AI_TEXT_FIELDS.some(function (name) { return field(name).value.trim(); });
+        let open = true;
+        V.modal(function (close) {
+            const title = h("input", { type: "text", maxlength: 200, value: field("title").value.trim(), placeholder: "Ví dụ: Lập trình viên Backend Python" });
+            const notes = h("textarea", { rows: 6, maxlength: 3000, placeholder: "Ví dụ: team 6 người làm sản phẩm thương mại điện tử; cần Python/Django, biết Docker là lợi thế; làm hybrid 3 ngày/tuần; thưởng theo dự án, có MacBook..." });
+            const message = h("div", { "aria-live": "polite" });
+            const submit = h("button", { type: "submit", class: "v-btn v-btn-gold v-btn-sm" }, V.icon("spark"), "Viết nội dung");
+            const form = h("form", { novalidate: true },
+                h("p", { class: "v-eyebrow", text: "Trợ lý AI" }),
+                h("h2", { text: "Viết tin tuyển dụng bằng AI" }),
+                h("p", { class: "v-modal-sub", text: "AI dùng vị trí, ý chính của bạn và các thông tin đã chọn trên form (ngành, địa điểm, hình thức, kinh nghiệm, mức lương) để viết mô tả, yêu cầu và quyền lợi." }),
+                h("label", { class: "v-field" }, h("span", { text: "Vị trí tuyển dụng" }), title),
+                h("label", { class: "v-field" }, h("span", { text: "Ý chính (không bắt buộc)" }), notes),
+                filled ? h("div", { class: "v-note v-note-warn" }, h("span", { class: "v-note-message", text: "Nội dung mô tả, yêu cầu và quyền lợi đang có trên form sẽ được thay bằng nội dung AI viết." })) : null,
+                message,
+                h("div", { class: "v-form-foot" }, h("p", { class: "v-small v-muted", style: "max-width:320px", text: "Nội dung được gửi tới dịch vụ AI (Claude của Anthropic). Hãy kiểm tra lại trước khi đăng tin." }),
+                    h("div", { class: "actions" },
+                        h("button", { type: "button", class: "v-btn v-btn-outline v-btn-sm", text: "Hủy", onclick: close }), submit)));
+            form.addEventListener("submit", async function (event) {
+                event.preventDefault();
+                const position = title.value.trim();
+                if (position.length < 5) { V.note(message, "Hãy nhập vị trí tuyển dụng từ 5 ký tự trở lên.", "error"); title.focus(); return; }
+                const number = function (name) { const value = field(name).value.trim(); return value ? Number(value) : null; };
+                const choice = function (name) { return field(name).value || null; };
+                submit.disabled = title.disabled = notes.disabled = true;
+                V.note(message, "AI đang viết nội dung tin, thường mất 5–20 giây…");
+                try {
+                    const result = await V.api("/employer/jobs/ai-draft", { method: "POST", timeout: 120000, body: {
+                        title: position, notes: notes.value.trim() || null,
+                        industry_id: number("industry_id"), province_id: number("province_id"),
+                        employment_type: choice("employment_type"), experience_level: choice("experience_level"),
+                        salary_min: number("salary_min"), salary_max: number("salary_max"), positions: number("positions") } });
+                    if (!open) return;  // đã đóng hộp thoại: không tự thay nội dung form
+                    const values = { title: result.title, description: result.description, requirements: result.requirements, benefits: result.benefits };
+                    Object.keys(values).forEach(function (name) {
+                        if (name === "benefits" && !values.benefits && field("benefits").value.trim()) return; // AI để trống thì giữ quyền lợi đang có
+                        field(name).value = values[name];
+                        field(name).dispatchEvent(new Event("input", { bubbles: true }));
+                    });
+                    close();
+                    notice("job-message", "AI đã viết nội dung tin. Hãy đọc lại và chỉnh cho đúng thực tế công ty trước khi lưu nháp hoặc gửi duyệt.", "success");
+                    field("description").focus();
+                } catch (error) {
+                    if (!open) return;
+                    V.note(message, error.message, "error");
+                    submit.disabled = title.disabled = notes.disabled = false;
+                }
+            });
+            return form;
+        }, { label: "Viết tin tuyển dụng bằng AI", onClose: function () { open = false; } });
+    }
+
     async function boot() {
         $("page-recovery").hidden = true;
         notice("page-message", "Đang tải thông tin tài khoản và công ty…");
@@ -291,6 +350,7 @@
     });
     $("retry-load").addEventListener("click", boot);
     $("retry-job").addEventListener("click", loadJob);
+    $("ai-draft").addEventListener("click", openAiDraft);
     $("logout").addEventListener("click", async function () {
         if ((state.companyDirty || state.jobDirty) && !await window.Vieco.confirm("Đăng xuất?", "Bạn còn thay đổi chưa lưu. Các thay đổi này sẽ bị mất khi đăng xuất.", "Đăng xuất", true)) return;
         if (state.companyBusy || state.jobBusy) return;

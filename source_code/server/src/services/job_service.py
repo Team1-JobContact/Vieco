@@ -152,6 +152,7 @@ def to_job_response(db: Session, job: Job) -> JobResponse:
         company_id=job.company_id,
         company_name=company.name if company else None,
         company_logo_url=company.logo_url if company else None,
+        company_verified=bool(company.is_verified) if company else False,
         created_by=job.created_by,
         title=job.title,
         industry_id=job.industry_id,

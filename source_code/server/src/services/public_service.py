@@ -53,6 +53,7 @@ COMPANY_KEYS = ("id","name","slug","logo_url","cover_url","description","industr
 def company_fields(db, row, open_jobs=None):
     from src.models.catalog import Industry, Province
     data = {key: getattr(row,key) for key in COMPANY_KEYS}
+    data["is_verified"] = bool(row.is_verified)
     industry = db.get(Industry, row.industry_id) if row.industry_id else None
     province = db.get(Province, row.province_id) if row.province_id else None
     data["industry_name"] = industry.name if industry else None

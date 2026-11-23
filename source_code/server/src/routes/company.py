@@ -22,3 +22,4 @@ admin_router.add_api_route("", controller.list_companies, methods=["GET"], respo
 admin_router.add_api_route("/{company_id}", controller.get_company, methods=["GET"], response_model=AdminCompanyResponse)
 admin_router.add_api_route("/{company_id}/approve", controller.approve_company, methods=["POST"], response_model=AdminCompanyResponse)
 admin_router.add_api_route("/{company_id}/reject", controller.reject_company, methods=["POST"], response_model=AdminCompanyResponse)
+admin_router.add_api_route("/{company_id}/verification", controller.verify_company, methods=["PUT"], response_model=AdminCompanyResponse)
