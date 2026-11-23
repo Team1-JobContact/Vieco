@@ -9,7 +9,8 @@ from src.schemas.job import (
     JobCreate, JobExtendRequest, JobListResponse, JobRejectRequest,
     JobRemoveRequest, JobResponse, JobStatus, JobUpdate,
 )
-from src.services import job_service
+from src.schemas.job_ai import JobDraftRequest
+from src.services import job_ai_service, job_service
 
 # ---------- Nhà tuyển dụng: Quản lý tin tuyển dụng (FR-M2-01..05, BR-02, BR-04) ----------
 
@@ -36,6 +37,11 @@ def create_job(
     """Tạo tin tuyển dụng: có thể lưu nháp (action='draft') hoặc gửi duyệt ngay (action='submit').
     Yêu cầu công ty đã được Admin duyệt (BR-02, BR-12)."""
     return job_service.create_job(db, user, data)
+
+
+def draft_job_with_ai(data: JobDraftRequest, user: User = Depends(employer_only), db: Session = Depends(get_db)):
+    """AI viết tiêu đề, mô tả, yêu cầu và quyền lợi. Không lưu: nhà tuyển dụng sửa lại trên form rồi mới lưu."""
+    return job_ai_service.draft_job(db, user, data)
 
 
 def get_my_job(

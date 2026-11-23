@@ -31,6 +31,9 @@ class Settings(BaseSettings):
     AI_CV_MODEL: str = "claude-opus-5-5"
     # Bong bóng chat hỏi đáp (dùng chung ANTHROPIC_API_KEY). Model nhanh, rẻ cho hội thoại.
     AI_CHAT_MODEL: str = "claude-haiku-5-5"
+    # Chấm điểm CV phù hợp với tin và viết tin tuyển dụng bằng AI (model nhanh, rẻ).
+    # Tối ưu CV theo tin tuyển dụng dùng AI_CV_MODEL như tạo CV bằng AI.
+    AI_JOB_MODEL: str = "claude-haiku-5-5"
 
     @field_validator("SECRET_KEY")
     @classmethod

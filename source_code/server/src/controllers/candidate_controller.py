@@ -10,7 +10,8 @@ from src.schemas.candidate import (
     CVListResponse, CVResponse, ProfileCreate, ProfileResponse, ProfileUpdate,
 )
 from src.schemas.cv_builder import CVAIRequest, CVAIResponse, CVBuilderData, CVBuilderResponse
-from src.services import avatar_service, candidate_service, cv_ai_service, cv_service
+from src.schemas.job_ai import JobCVRequest
+from src.services import avatar_service, candidate_service, cv_ai_service, cv_service, job_ai_service
 
 candidate_only = require_roles("CANDIDATE")
 
@@ -104,6 +105,16 @@ def update_builder_cv(cv_id: int, file: UploadFile = File(...), data: str = Form
 
 def generate_cv_with_ai(data: CVAIRequest, user: User = Depends(candidate_only)):
     return CVAIResponse(data=cv_ai_service.generate(user, data.text, data.target))
+
+
+def match_job(data: JobCVRequest, user: User = Depends(candidate_only), db: Session = Depends(get_db)):
+    """AI chấm điểm mức độ phù hợp giữa một CV của ứng viên và một tin đang hiển thị."""
+    return job_ai_service.match(db, user, data.job_id, data.cv_id)
+
+
+def tailor_cv(data: JobCVRequest, user: User = Depends(candidate_only), db: Session = Depends(get_db)):
+    """AI viết lại CV cho khớp với tin. Không lưu: kết quả mở trong trình tạo CV để ứng viên xem lại."""
+    return job_ai_service.tailor(db, user, data.job_id, data.cv_id)
 
 
 def upload_avatar(file: UploadFile = File(...), user: User = Depends(candidate_only), db: Session = Depends(get_db)):

@@ -1,6 +1,6 @@
 """Module M1: Công ty và thành viên công ty."""
 from sqlalchemy import Column, DateTime, String, Text
-from src.models.base import BaseModel, fk, in_check
+from src.models.base import BaseModel, fk, flag, in_check
 from src.models.enums import COMPANY_STATUSES, MEMBER_ROLES
 
 
@@ -22,6 +22,9 @@ class Company(BaseModel):
     reject_reason = Column(String(500))
     reviewed_by = fk("users.id", nullable=True)
     reviewed_at = Column(DateTime)
+    # Doanh nghiệp đã xác minh (tick vàng): Admin bật/tắt riêng cho công ty đã duyệt.
+    is_verified = flag(False)
+    verified_at = Column(DateTime)
 
 
 class CompanyMember(BaseModel):

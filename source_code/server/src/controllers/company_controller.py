@@ -7,7 +7,7 @@ from src.middlewares.auth import require_roles
 from src.models.user import User
 from src.schemas.company import (
     AdminCompanyListResponse, AdminCompanyResponse, CompanyCreate, CompanyStatus,
-    CompanyUpdate, MyCompanyResponse, RejectRequest,
+    CompanyUpdate, MyCompanyResponse, RejectRequest, VerificationRequest,
 )
 from src.services import company_media_service, company_service
 
@@ -62,6 +62,12 @@ def approve_company(company_id: int, admin: User = Depends(admin_only), db: Sess
 def reject_company(company_id: int, data: RejectRequest, admin: User = Depends(admin_only),
                    db: Session = Depends(get_db)):
     return company_service.reject_company(db, admin, company_id, data.reason)
+
+
+def verify_company(company_id: int, data: VerificationRequest, admin: User = Depends(admin_only),
+                   db: Session = Depends(get_db)):
+    """Bật/tắt dấu tick vàng "Doanh nghiệp đã xác minh"."""
+    return company_service.set_verified(db, admin, company_id, data.verified)
 
 
 # ---------- Hình ảnh công ty: logo, ảnh bìa, ảnh không gian làm việc ----------

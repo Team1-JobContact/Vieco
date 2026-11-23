@@ -165,3 +165,10 @@
 .cv-minimal .cv-entry-sub { color: #5b6470; }
 .cv-minimal .cv-bullets, .cv-minimal .cv-section > .cv-text, .cv-minimal .cv-section > .cv-list { margin-left: 132px; }
 .cv-minimal .cv-bullets li::before, .cv-minimal .cv-list li::before { background: #876b40; }
+
+/* Tối ưu CV theo tin tuyển dụng: khóa form trong lúc AI làm việc và ghi chú các thay đổi. */
+.cvb-busy { opacity: .45; pointer-events: none; filter: saturate(.6); transition: opacity .2s; }
+.cvb-working .v-note-message { display: inline-flex; align-items: center; gap: 6px; }
+.cvb-tailor .v-note-message { display: grid; gap: 8px; }
+.cvb-tailor ul { list-style: disc; padding-left: 20px; display: grid; gap: 4px; }
+.cvb-tailor li::marker { color: var(--v-gold-ink); }
