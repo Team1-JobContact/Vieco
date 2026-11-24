@@ -401,3 +401,19 @@ body.auth-page.v-sync {
     .auth-page.v-sync .form__button,
     .auth-page.v-sync .switch__button { transition: none; }
 }
+
+/* Điều khoản sử dụng: liên kết trong ô đồng ý và hộp thoại đọc toàn văn. */
+.terms-link { display: inline; padding: 0; border: 0; background: none; font: inherit; color: var(--v-blue); font-weight: 600;
+    text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+.terms-link:hover { color: var(--v-blue-hover); }
+.terms-modal { max-width: 720px; }
+.terms-box { margin-top: 16px; max-height: min(52vh, 460px); overflow-y: auto; padding: 18px 20px; border: 1px solid var(--v-line);
+    border-radius: var(--v-radius-sm); background: var(--v-bg); display: grid; gap: 18px; font-size: 14px; line-height: 1.65; color: var(--v-ink); }
+.terms-box:focus-visible { outline: 2px solid var(--v-blue); outline-offset: 2px; }
+.terms-box h3 { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+.terms-box ul { list-style: disc; padding-left: 20px; display: grid; gap: 6px; color: var(--v-body); }
+.terms-box li::marker { color: var(--v-gold-ink); }
+.terms-end { font-size: 13px; color: var(--v-muted); font-style: italic; }
+.terms-hint { margin-top: 10px; font-size: 13px; color: var(--v-muted); }
+.terms-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 16px; flex-wrap: wrap; }
+@media (max-width: 640px) { .terms-actions .v-btn { flex: 1; } }
